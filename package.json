@@ -1,0 +1,39 @@
+{
+  "name": "stride-sync",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "npm@10",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "dev:api": "nodemon apps/api/src/index.ts",
+    "dev:mobile": "cd apps/mobile && expo start",
+    "dev:desktop": "cd apps/desktop && electron .",
+    "build": "turbo run build",
+    "sync:local": "node packages/db/scripts/syncOffline.js",
+    "test": "jest",
+    "test:unit": "jest packages/",
+    "test:integration": "jest tests/",
+    "lint": "eslint . --ext .ts,.tsx,.js"
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.0.9",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.4.0",
+    "ts-jest": "^29.1.1",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}
