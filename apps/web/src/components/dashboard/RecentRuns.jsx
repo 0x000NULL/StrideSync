@@ -1,6 +1,6 @@
-const React = require('react');
-const { Link } = require('react-router-dom');
-const { format, parseISO } = require('date-fns');
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
 
 const RecentRuns = ({ runs = [] }) => {
   if (!runs.length) {
@@ -142,4 +142,4 @@ const formatDuration = (seconds) => {
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
-module.exports = RecentRuns;
+export default RecentRuns;

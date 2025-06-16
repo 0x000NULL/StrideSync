@@ -1,17 +1,17 @@
-const React = require('react');
-const { useNavigate } = require('react-router-dom');
-const axios = require('axios');
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const AuthContext = React.createContext(null);
+const AuthContext = createContext(null);
 
-const AuthProvider = ({ children }) => {
-  const [user, setUser] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   // Check if user is authenticated on initial load
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -112,15 +112,12 @@ const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-const useAuth = () => {
-  const context = React.useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-module.exports = {
-  AuthProvider,
-  useAuth,
-};
+export default AuthContext;

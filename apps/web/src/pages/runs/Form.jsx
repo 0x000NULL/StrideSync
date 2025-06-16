@@ -1,12 +1,11 @@
-const React = require('react');
-const { useState, useEffect } = require('react');
-const { useNavigate, useParams, Link } = require('react-router-dom');
-const axios = require('axios');
-const { format, parseISO } = require('date-fns');
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { format, parseISO } from 'date-fns';
 
 // Components
-const LoadingSpinner = require('@/components/ui/LoadingSpinner');
-const ErrorMessage = require('@/components/ui/ErrorMessage');
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorMessage from '@/components/ui/ErrorMessage';
 
 // Format duration from seconds to HH:MM:SS
 const formatDurationFromSeconds = (totalSeconds) => {
@@ -673,7 +672,6 @@ const RunFormPage = () => {
           </div>
         </div>
 
-
         {/* Weather Section */}
         <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
           <div className="md:grid md:grid-cols-3 md:gap-6">
@@ -795,214 +793,5 @@ const RunFormPage = () => {
     </div>
   );
 };
-              >
-                {showAdvanced ? 'Hide' : 'Show'} advanced stats
-              </button>
-            </div>
-            
-            {showAdvanced && (
-              <div className="mt-5 md:mt-0 md:col-span-2">
-                <div className="grid grid-cols-6 gap-6">
-                  {/* Advanced stats fields */}
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="calories" className="block text-sm font-medium text-gray-700">
-                      Calories (kcal)
-                    </label>
-                    <input
-                      type="number"
-                      name="calories"
-                      id="calories"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.calories}
-                      onChange={handleChange}
-                    />
-                  </div>
 
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="elevationGain" className="block text-sm font-medium text-gray-700">
-                      Elevation Gain (m)
-                    </label>
-                    <input
-                      type="number"
-                      name="elevationGain"
-                      id="elevationGain"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.elevationGain}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="elevationLoss" className="block text-sm font-medium text-gray-700">
-                      Elevation Loss (m)
-                    </label>
-                    <input
-                      type="number"
-                      name="elevationLoss"
-                      id="elevationLoss"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.elevationLoss}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="avgHeartRate" className="block text-sm font-medium text-gray-700">
-                      Avg Heart Rate (bpm)
-                    </label>
-                    <input
-                      type="number"
-                      name="avgHeartRate"
-                      id="avgHeartRate"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.avgHeartRate}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="maxHeartRate" className="block text-sm font-medium text-gray-700">
-                      Max Heart Rate (bpm)
-                    </label>
-                    <input
-                      type="number"
-                      name="maxHeartRate"
-                      id="maxHeartRate"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.maxHeartRate}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="avgCadence" className="block text-sm font-medium text-gray-700">
-                      Avg Cadence (spm)
-                    </label>
-                    <input
-                      type="number"
-                      name="avgCadence"
-                      id="avgCadence"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.avgCadence}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Weather Section */}
-        <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-          <div className="md:grid md:grid-cols-3 md:gap-6">
-            <div className="md:col-span-1">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Weather</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Weather conditions during your run.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowWeather(!showWeather)}
-                className="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                {showWeather ? 'Hide' : 'Show'} weather
-              </button>
-            </div>
-            
-            {showWeather && (
-              <div className="mt-5 md:mt-0 md:col-span-2">
-                <div className="grid grid-cols-6 gap-6">
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="weather.temperature" className="block text-sm font-medium text-gray-700">
-                      Temperature (°C)
-                    </label>
-                    <input
-                      type="number"
-                      name="weather.temperature"
-                      id="weather.temperature"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.weather.temperature}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="weather.conditions" className="block text-sm font-medium text-gray-700">
-                      Conditions
-                    </label>
-                    <input
-                      type="text"
-                      name="weather.conditions"
-                      id="weather.conditions"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.weather.conditions}
-                      onChange={handleChange}
-                      placeholder="Sunny, Rainy, etc."
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="weather.humidity" className="block text-sm font-medium text-gray-700">
-                      Humidity (%)
-                    </label>
-                    <input
-                      type="number"
-                      name="weather.humidity"
-                      id="weather.humidity"
-                      min="0"
-                      max="100"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.weather.humidity}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                    <label htmlFor="weather.windSpeed" className="block text-sm font-medium text-gray-700">
-                      Wind Speed (km/h)
-                    </label>
-                    <input
-                      type="number"
-                      name="weather.windSpeed"
-                      id="weather.windSpeed"
-                      min="0"
-                      className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                      value={formData.weather.windSpeed}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex justify-end">
-          <Link
-            to="/runs"
-            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : isEditMode ? 'Update Run' : 'Save Run'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-module.exports = RunFormPage;
+export default RunFormPage;

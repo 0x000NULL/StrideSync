@@ -1,8 +1,8 @@
-const React = require('react');
-const ReactDOM = require('react-dom/client');
-const { QueryClient, QueryClientProvider } = require('react-query');
-const { BrowserRouter } = require('react-router-dom';
-const App = require('./App');
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -16,7 +16,9 @@ const queryClient = new QueryClient({
 });
 
 // Render the app
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const container = document.getElementById('root');
+const root = createRoot(container);
+
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

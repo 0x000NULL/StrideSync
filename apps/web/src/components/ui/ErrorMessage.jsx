@@ -1,4 +1,4 @@
-const React = require('react');
+import React from 'react';
 
 const ErrorMessage = ({ 
   message = 'An error occurred', 
@@ -32,4 +32,4 @@ const ErrorMessage = ({
   );
 };
 
-module.exports = ErrorMessage;
+export default ErrorMessage;

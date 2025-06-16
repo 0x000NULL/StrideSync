@@ -1,4 +1,4 @@
-const React = require('react');
+import React from 'react';
 
 const LoadingSpinner = ({ size = 'md', className = '' }) => {
   const sizeClasses = {
@@ -16,4 +16,4 @@ const LoadingSpinner = ({ size = 'md', className = '' }) => {
   );
 };
 
-module.exports = LoadingSpinner;
+export default LoadingSpinner;

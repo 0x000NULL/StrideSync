@@ -1,12 +1,11 @@
-const React = require('react');
-const { useState, useEffect } = require('react');
-const { useParams, Link, useNavigate } = require('react-router-dom');
-const axios = require('axios');
-const { format, parseISO } = require('date-fns');
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { format, parseISO } from 'date-fns';
 
 // Components
-const LoadingSpinner = require('@/components/ui/LoadingSpinner');
-const ErrorMessage = require('@/components/ui/ErrorMessage');
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorMessage from '@/components/ui/ErrorMessage';
 
 const RunDetailPage = () => {
   const { id } = useParams();
@@ -395,4 +394,4 @@ const RunDetailPage = () => {
   );
 };
 
-module.exports = RunDetailPage;
+export default RunDetailPage;
