@@ -1,37 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import React, { useState } from 'react';
+import { Outlet, Link } from 'react-router-dom';
+import Navigation from './Navigation';
 
 const MainLayout = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Navigation items
-  const navItems = [
-    { to: '/dashboard', label: 'Dashboard' },
-    { to: '/runs', label: 'Runs' },
-  ];
-
-  const userMenu = [
-    { to: '/profile', label: 'Profile' },
-    { to: '/settings', label: 'Settings' },
-  ];
+  const closeMobileMenu = () => {
+    setIsMobileMenu(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -43,21 +23,9 @@ const MainLayout = () => {
               <Link to="/dashboard" className="flex-shrink-0 flex items-center">
                 <span className="text-xl font-bold text-indigo-600">StrideSync</span>
               </Link>
-              {/* Desktop Navigation */}
-              <nav className="hidden md:ml-10 md:flex md:space-x-8">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`${
-                      location.pathname === item.to
-                        ? 'border-indigo-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+              {/* Navigation */}
+              <nav className="hidden md:ml-10 md:flex">
+                <Navigation onClose={closeMobileMenu} />
               </nav>
             </div>
             
@@ -98,17 +66,23 @@ const MainLayout = () => {
             <div className="hidden md:ml-4 md:flex-shrink-0 md:flex md:items-center">
               <div className="ml-3 relative">
                 <div className="flex items-center space-x-4">
-                  {userMenu.map((item) => (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+                  <Link
+                    to="/profile"
+                    className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
+                  >
+                    Settings
+                  </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      logout();
+                      navigate('/login');
+                    }}
                     className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
                   >
                     Logout
@@ -119,43 +93,8 @@ const MainLayout = () => {
           </div>
         </div>
 
-        {/* Mobile menu */}
-        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-          <div className="pt-2 pb-3 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={`mobile-${item.to}`}
-                to={item.to}
-                className={`${
-                  location.pathname === item.to
-                    ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="space-y-1">
-              {userMenu.map((item) => (
-                <Link
-                  key={`mobile-user-${item.to}`}
-                  to={item.to}
-                  className="block px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Mobile Navigation */}
+        <Navigation isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
       </header>
 
       {/* Main Content */}
@@ -166,11 +105,23 @@ const MainLayout = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-8">
+      <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} StrideSync. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-center md:text-left text-gray-500 text-sm">
+              &copy; {new Date().getFullYear()} StrideSync. All rights reserved.
+            </p>
+            <div className="mt-4 md:mt-0 flex space-x-6">
+              <a href="#" className="text-gray-400 hover:text-gray-500">
+                <span className="sr-only">Privacy</span>
+                <span className="text-sm">Privacy Policy</span>
+              </a>
+              <a href="#" className="text-gray-400 hover:text-gray-500">
+                <span className="sr-only">Terms</span>
+                <span className="text-sm">Terms of Service</span>
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
