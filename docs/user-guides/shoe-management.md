@@ -40,20 +40,63 @@ StrideSync automatically tracks:
 2. Update any information
 3. Tap "Save" to apply changes
 
-### Retiring Shoes
-When a pair reaches the end of its life:
-1. Open the shoe details
-2. Tap "Retire"
-3. Confirm retirement
+## Retiring and Managing Shoes
 
-Retired shoes:
-- Are moved to the "Retired" section
-- Can still be viewed but not selected for new runs
-- Contribute to your historical statistics
+### Manual Retirement
+When you want to retire a pair of shoes:
+1. Open the shoe details screen
+2. Tap "Retire Shoe"
+3. Enter a reason for retirement (e.g., "Reached maximum mileage", "Worn out")
+4. Confirm to retire the shoes
 
-## Shoe Rotation
+### Automatic Retirement
+Shoes are automatically retired when they reach their maximum distance. The app will:
+- Mark the shoe as retired
+- Set the retirement reason to "Automatically retired: Reached maximum distance"
+- Move the shoe to the Retired section
 
-StrideSync helps you manage multiple pairs:
+### Reactivating Shoes
+If you want to continue using a retired pair:
+1. Find the shoe in the "Retired" section
+2. Open the shoe details
+3. Tap "Reactivate Shoe"
+4. The shoe will be available for runs again
+
+### Retired Shoes Features
+- **Visual Indicators**: Retired shoes are clearly marked in your list
+- **Quick Reactivation**: Reactivate directly from the shoe list with one tap
+- **Retirement Details**: View when and why each pair was retired
+- **Comprehensive Reporting**: See lifetime statistics for all your retired shoes
+
+## Retired Shoes Report
+Access detailed insights about your retired shoes:
+1. Go to the "Shoes" tab
+2. Tap the chart icon in the top-right corner
+3. View:
+   - Total number of retired shoes
+   - Total distance run across all retired shoes
+   - Average lifespan of your shoes
+   - List of all retired shoes with key metrics
+
+## Filtering and Sorting
+Easily manage your shoe collection with powerful filtering:
+- **Active Shoes**: Currently in use
+- **Retired Shoes**: No longer in use
+- **Needs Replacement**: Active shoes approaching maximum distance
+- **All Shoes**: View your complete collection
+
+Sort by:
+- Recently Updated
+- Name (A-Z)
+- Brand
+- Total Distance
+- Last Used
+- Purchase Date
+- Status
+
+## Shoe Rotation and Replacement Planning
+
+StrideSync helps you manage multiple pairs and plan replacements:
 
 1. **Rotation Suggestions**: The app suggests which shoes to use next based on:
    - Mileage balance across your collection

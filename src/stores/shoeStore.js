@@ -110,8 +110,8 @@ export const createShoeStore = (set, get) => ({
     
     // Auto-retire shoe if over max distance
     const currentMileage = updatedUsage[shoe.id]?.total || 0;
-    if (shoe.maxDistance > 0 && currentMileage >= shoe.maxDistance) {
-      get().updateShoe(shoe.id, { isActive: false });
+    if (shoe.isActive && shoe.maxDistance > 0 && currentMileage >= shoe.maxDistance) {
+      get().retireShoe(shoe.id, 'Automatically retired: Reached maximum distance');
     }
   },
   
@@ -312,6 +312,45 @@ export const createShoeStore = (set, get) => ({
       bestPace,
       averageHeartRate,
     };
+  },
+  
+  // Get shoes that need replacement soon
+  getShoesNeedingReplacement: () => {
+    const { shoes } = get();
+    return shoes.filter(shoe => {
+      if (!shoe.isActive) return false;
+      const stats = get().getShoeStats(shoe.id);
+      if (!stats || !shoe.maxDistance) return false;
+      const usagePercentage = (stats.totalDistance / shoe.maxDistance) * 100;
+      return usagePercentage >= 80; // 80% or more of max distance
+    });
+  },
+  
+  // Get recently retired shoes (last 30 days)
+  getRecentlyRetiredShoes: (days = 30) => {
+    const { shoes } = get();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    return shoes.filter(shoe => 
+      !shoe.isActive && 
+      shoe.retirementDate && 
+      new Date(shoe.retirementDate) >= cutoffDate
+    );
+  },
+  
+  // Get shoes by activity status
+  getShoesByStatus: (status) => {
+    const { shoes } = get();
+    switch (status) {
+      case 'active':
+        return shoes.filter(shoe => shoe.isActive);
+      case 'retired':
+        return shoes.filter(shoe => !shoe.isActive);
+      case 'all':
+      default:
+        return [...shoes];
+    }
   },
   
   // Get shoes with enhanced statistics

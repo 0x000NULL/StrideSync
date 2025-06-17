@@ -41,11 +41,11 @@
   - [x] Search functionality
   - [x] Sorting options
   - [x] Date range filtering
-- [ ] Implement shoe management state
+- [x] Implement shoe management state
   - [x] Shoe list and details
   - [x] Shoe usage tracking
   - [x] Mileage calculations
-  - [ ] Shoe retirement tracking
+  - [x] Shoe retirement tracking
 
 ## 🧭 Navigation & Screens
 - [x] Run Log Screen
@@ -62,10 +62,11 @@
   - [ ] Run statistics
   - [ ] Map view with route
   - [ ] Edit/delete run
-- [ ] Shoe management
-  - [x] Shoe list
-  - [ ] Add/edit shoe
-  - [ ] Shoe details and statistics
+- [x] Shoe management
+  - [x] Shoe list with retirement status
+  - [x] Add/edit shoe with retirement options
+  - [x] Shoe details and statistics
+  - [x] Retired shoes report
 
 ## 💾 Data Management (In Progress)
 - [x] Set up AsyncStorage persistence

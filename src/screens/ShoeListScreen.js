@@ -33,15 +33,33 @@ const ShoeListScreen = ({ navigation }) => {
   const getShoesByActivity = useStore(state => state.getShoesByActivity);
   
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState('all'); // 'all', 'active', 'retired', 'needsReplacement'
+  const [filter, setFilter] = useState('active'); // 'all', 'active', 'retired', 'needsReplacement'
   const [sortBy, setSortBy] = useState('recent');
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   // Load shoes on focus
+  // Set up header right button
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('RetiredShoesReport')}
+          style={{ marginRight: 16 }}
+        >
+          <MaterialIcons 
+            name="history" 
+            size={24} 
+            color={theme.colors.primary} 
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, theme]);
+
   useFocusEffect(
     useCallback(() => {
       loadShoes();
-    }, [])
+    }, [loadShoes])
   );
 
   const handleRefresh = async () => {
@@ -54,20 +72,23 @@ const ShoeListScreen = ({ navigation }) => {
   };
 
   const filteredShoes = React.useMemo(() => {
-    let result = [];
+    // Get shoes with their stats
+    const shoesWithStats = getShoesWithStats();
     
+    // Apply filters
+    let result = [];
     switch (filter) {
       case 'active':
-        result = getShoesWithStats().filter(shoe => shoe.isActive);
+        result = shoesWithStats.filter(shoe => shoe.isActive);
         break;
       case 'retired':
-        result = getShoesWithStats().filter(shoe => !shoe.isActive);
+        result = shoesWithStats.filter(shoe => !shoe.isActive);
         break;
       case 'needsReplacement':
         result = getShoesNeedingReplacement();
         break;
       default:
-        result = getShoesWithStats();
+        result = [...shoesWithStats];
     }
     
     // Apply sorting
@@ -75,12 +96,23 @@ const ShoeListScreen = ({ navigation }) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
+        case 'brand':
+          return (a.brand || '').localeCompare(b.brand || '');
         case 'distance':
           return (b.stats?.totalDistance || 0) - (a.stats?.totalDistance || 0);
-        case 'recent':
-          return new Date(b.stats?.lastRun || 0) - new Date(a.stats?.lastRun || 0);
-        default:
+        case 'lastUsed':
+          return (b.stats?.lastRun || 0) - (a.stats?.lastRun || 0);
+        case 'purchaseDate':
+          return new Date(a.purchaseDate || 0) - new Date(b.purchaseDate || 0);
+        case 'status':
+          // Active shoes first, then inactive
+          if (a.isActive !== b.isActive) {
+            return a.isActive ? -1 : 1;
+          }
           return 0;
+        case 'recent':
+        default:
+          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
       }
     });
   }, [filter, sortBy, shoes, loading]);
@@ -102,12 +134,13 @@ const ShoeListScreen = ({ navigation }) => {
     };
   }, [shoes]);
 
-  const renderShoeItem = ({ item }) => (
+  const renderShoeItem = useCallback(({ item }) => (
     <ShoeListItem 
       shoe={item} 
       onPress={() => navigation.navigate('ShoeDetail', { shoeId: item.id })}
+      showDivider={true}
     />
-  );
+  ), [navigation]);
 
   const renderEmptyState = () => {
     if (loading) {
@@ -123,17 +156,57 @@ const ShoeListScreen = ({ navigation }) => {
       );
     }
     
+    // Check if we have shoes but they're all filtered out
+    const hasShoes = shoes.length > 0;
+    const hasActiveShoes = hasShoes && shoes.some(s => s.isActive);
+    const hasRetiredShoes = hasShoes && shoes.some(s => !s.isActive);
+    
+    let title = 'No shoes found';
+    let message = 'Add your first pair of running shoes to get started';
+    let showAction = true;
+    let actionLabel = 'Add Shoe';
+    let actionOnPress = () => navigation.navigate('AddShoe');
+    
+    if (filter === 'retired') {
+      title = 'No retired shoes';
+      if (hasShoes && !hasRetiredShoes) {
+        message = 'You have no retired shoes yet';
+        showAction = false;
+      } else if (hasShoes) {
+        message = 'No shoes match your current filters';
+      } else {
+        message = 'Your retired shoes will appear here';
+      }
+    } else if (filter === 'needsReplacement') {
+      title = 'No shoes need replacement';
+      message = hasActiveShoes 
+        ? 'All your active shoes are in good condition' 
+        : 'No active shoes to monitor';
+      showAction = !hasActiveShoes;
+    } else if (filter === 'active') {
+      if (hasShoes && !hasActiveShoes) {
+        title = 'No active shoes';
+        message = 'All your shoes are currently retired';
+        showAction = true;
+      } else if (!hasShoes) {
+        title = 'No shoes added yet';
+        message = 'Track your running shoes to monitor their usage and condition';
+      }
+    }
+    
     return (
-      <EmptyState 
-        icon="directions-run" 
-        title="No Shoes Found"
-        message={filter === 'all' 
-          ? "You haven't added any shoes yet." 
-          : "No shoes match the current filter."}
-        action={filter !== 'all' ? {
-          label: 'Show All',
-          onPress: () => setFilter('all')
-        } : null}
+      <EmptyState
+        icon={
+          filter === 'retired' ? 'history' : 
+          filter === 'needsReplacement' ? 'warning' : 
+          'directions-walk'
+        }
+        title={title}
+        message={message}
+        action={showAction && {
+          label: actionLabel,
+          onPress: actionOnPress,
+        }}
       />
     );
   };
@@ -208,18 +281,36 @@ const ShoeListScreen = ({ navigation }) => {
     },
   });
 
-  const filterOptions = [
-    { id: 'all', label: 'All Shoes' },
-    { id: 'active', label: 'Active' },
-    { id: 'retired', label: 'Retired' },
-    { id: 'needsReplacement', label: 'Needs Replacement' },
-  ];
-
-  const sortOptions = [
-    { id: 'recent', label: 'Recently Used' },
-    { id: 'name', label: 'Name' },
-    { id: 'distance', label: 'Distance' },
-  ];
+  const renderFilterModal = () => (
+    <FilterModal
+      visible={showFilterModal}
+      onClose={() => setShowFilterModal(false)}
+      filters={{
+        status: filter,
+        sortBy,
+      }}
+      filterOptions={[
+        { value: 'active', label: 'Active Shoes' },
+        { value: 'retired', label: 'Retired Shoes' },
+        { value: 'needsReplacement', label: 'Needs Replacement' },
+        { value: 'all', label: 'All Shoes' },
+      ]}
+      sortOptions={[
+        { value: 'recent', label: 'Recently Updated' },
+        { value: 'name', label: 'Name (A-Z)' },
+        { value: 'brand', label: 'Brand' },
+        { value: 'distance', label: 'Total Distance' },
+        { value: 'lastUsed', label: 'Last Used' },
+        { value: 'purchaseDate', label: 'Purchase Date' },
+        { value: 'status', label: 'Status' },
+      ]}
+      onApplyFilters={(filters) => {
+        setFilter(filters.status);
+        setSortBy(filters.sortBy);
+        setShowFilterModal(false);
+      }}
+    />
+  );
 
   return (
     <View style={styles.container}>
@@ -293,22 +384,25 @@ const ShoeListScreen = ({ navigation }) => {
           style={styles.filterChips}
           contentContainerStyle={{ paddingRight: theme.spacing.md }}
         >
-          {filterOptions.map(option => (
+          {['all', 'active', 'retired', 'needsReplacement'].map(option => (
             <TouchableOpacity
-              key={option.id}
+              key={option}
               style={[
                 styles.filterChip,
-                filter === option.id && styles.filterChipActive
+                filter === option && styles.filterChipActive
               ]}
-              onPress={() => setFilter(option.id)}
+              onPress={() => setFilter(option)}
             >
               <Text style={[
                 styles.filterChipText,
-                filter === option.id && styles.filterChipTextActive
+                filter === option && styles.filterChipTextActive
               ]}>
-                {option.label}
+                {option === 'all' ? 'All Shoes' : 
+                 option === 'active' ? 'Active' : 
+                 option === 'retired' ? 'Retired' : 
+                 'Needs Replacement'}
               </Text>
-              {filter === option.id && (
+              {filter === option && (
                 <MaterialIcons 
                   name="close" 
                   size={16} 
@@ -338,15 +432,7 @@ const ShoeListScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Filter Modal */}
-      <FilterModal
-        visible={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        title="Filter & Sort"
-        options={sortOptions}
-        selected={sortBy}
-        onSelect={setSortBy}
-      />
+      {renderFilterModal()}
     </View>
   );
 };

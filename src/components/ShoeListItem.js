@@ -27,11 +27,30 @@ const ShoeListItem = ({
 
   // Calculate status color based on usage percentage
   const statusColor = useMemo(() => {
-    if (!isActive) return theme.colors.text.secondary;
+    if (!isActive) return theme.colors.secondary;
     if (progress >= 90) return theme.colors.error;
     if (progress >= 70) return theme.colors.warning;
     return theme.colors.success;
   }, [progress, isActive, theme]);
+  
+  const statusText = useMemo(() => {
+    if (!isActive) return 'Retired';
+    if (progress >= 90) return 'Replace Soon';
+    if (progress >= 70) return 'Monitor';
+    return 'Good';
+  }, [progress, isActive]);
+  
+  const statusDescription = useMemo(() => {
+    if (!isActive) {
+      if (shoe.retirementDate) {
+        return `Retired on ${new Date(shoe.retirementDate).toLocaleDateString()}`;
+      }
+      return 'Retired';
+    }
+    if (progress >= 90) return 'Consider replacing soon';
+    if (progress >= 70) return 'Monitor usage';
+    return 'In good condition';
+  }, [progress, isActive, shoe.retirementDate]);
 
   // Format dates
   const formattedPurchaseDate = useMemo(() => {
@@ -195,7 +214,31 @@ const ShoeListItem = ({
       marginTop: theme.spacing.xs,
       fontStyle: 'italic',
     },
+    reactivateButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 8,
+      borderRadius: 4,
+      marginTop: theme.spacing.sm,
+      marginHorizontal: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+    },
+    reactivateIcon: {
+      marginRight: 6,
+    },
+    reactivateText: {
+      fontSize: 14,
+      fontWeight: '500',
+    },
   });
+
+  const handleQuickReactivate = (e) => {
+    e.stopPropagation(); // Prevent triggering the parent onPress
+    // Assuming we have access to the store's reactivateShoe function
+    const { reactivateShoe } = useStore.getState();
+    reactivateShoe(id);
+  };
 
   return (
     <Card style={styles.container}>
@@ -223,6 +266,34 @@ const ShoeListItem = ({
           
           <View style={styles.details}>
             <View style={styles.header}>
+              <View style={styles.headerContent}>
+                <View>
+                  <Text style={[styles.name, { color: theme.colors.text }]}>{name}</Text>
+                  <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>{brand}</Text>
+                </View>
+                {!isActive && (
+                  <TouchableOpacity 
+                    style={[
+                      styles.reactivateButton,
+                      { backgroundColor: `${theme.colors.primary}15` }
+                    ]}
+                    onPress={handleQuickReactivate}
+                    activeOpacity={0.7}
+                  >
+                    <MaterialIcons 
+                      name="refresh" 
+                      size={16} 
+                      color={theme.colors.primary} 
+                    />
+                    <Text style={[styles.reactivateText, { color: theme.colors.primary }]}>
+                      Reactivate
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+            
+            <View style={styles.header}>
               <View style={styles.nameContainer}>
                 <Text style={styles.name} numberOfLines={1}>
                   {name || 'Unnamed Shoe'}
@@ -234,9 +305,14 @@ const ShoeListItem = ({
               
               <View style={styles.statusBadge}>
                 <View style={styles.statusDot} />
-                <Text style={styles.statusText}>
-                  {isActive ? 'Active' : 'Retired'}
-                </Text>
+                <View>
+                  <Text style={styles.statusText}>
+                    {statusText}
+                  </Text>
+                  <Text style={styles.statusDescription}>
+                    {statusDescription}
+                  </Text>
+                </View>
               </View>
             </View>
             
