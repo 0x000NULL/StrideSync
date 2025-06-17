@@ -4,20 +4,41 @@ A mobile running tracker built with React Native (Expo) that works entirely offl
 
 ## 📱 Features
 
-- 🏃 Real-time run tracking with GPS
-- 📊 Detailed run statistics and history
-- 👟 Shoe mileage tracking
-- 🌙 Dark mode support
-- 📍 Background location tracking
-- 🔋 Optimized for battery life
-- 💾 Local data storage (no cloud required)
+- 🏃 **Run Tracking**
+  - Real-time GPS tracking
+  - Distance, pace, and duration metrics
+  - Route mapping
+  - Run history with detailed statistics
+
+- 👟 **Shoe Management**
+  - Track mileage for multiple pairs of shoes
+  - Shoe rotation suggestions
+  - Mileage-based replacement alerts
+
+- 📊 **Statistics**
+  - Weekly/Monthly distance totals
+  - Pace trends
+  - Run frequency analysis
+  - Personal records tracking
+
+- 🎨 **User Experience**
+  - Dark/Light theme support
+  - Intuitive interface
+  - Quick actions for common tasks
+  - Data export options
+
+- 🛠 **Technical**
+  - Offline-first architecture
+  - Local data persistence
+  - Battery efficient
+  - Built with modern React Native & Expo
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or later)
-- npm or yarn
+- Node.js (v18 or later)
+- npm (v9+) or yarn (v1.22+)
 - Expo CLI (`npm install -g expo-cli`)
 - iOS Simulator / Android Emulator or a physical device with the Expo Go app
 
@@ -46,6 +67,44 @@ A mobile running tracker built with React Native (Expo) that works entirely offl
 4. Run on your device:
    - Scan the QR code with the Expo Go app (iOS) or the Camera app (Android)
    - Or press 'i' for iOS Simulator or 'a' for Android Emulator
+
+## 📚 Documentation
+
+### User Guides
+- [Getting Started](./docs/user-guides/getting-started.md)
+- [Run Tracking](./docs/user-guides/run-tracking.md)
+- [Shoe Management](./docs/user-guides/shoe-management.md)
+
+### Developer Guides
+- [Setup](./docs/developer-guides/setup.md)
+- [State Management](./docs/developer-guides/state-management.md)
+
+## 🏗 Project Structure
+
+```
+src/
+├── assets/           # Images, fonts, and other static files
+├── components/       # Reusable UI components
+│   ├── ui/          # Basic UI components (buttons, inputs, etc.)
+│   └── ...
+├── navigation/      # Navigation configuration
+├── screens/         # Screen components
+├── stores/          # State management with Zustand
+│   ├── runStore.js
+│   ├── shoeStore.js
+│   ├── settingsStore.js
+│   └── index.js
+├── theme/           # Theming and styling
+└── utils/           # Utility functions
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🏗 Project Structure
 

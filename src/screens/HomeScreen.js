@@ -1,26 +1,80 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView 
+} from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { MaterialCommunityIcons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { 
+  MaterialCommunityIcons, 
+  MaterialIcons, 
+  FontAwesome5 
+} from '@expo/vector-icons';
+import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import StatsCard from '../components/StatsCard';
 import QuickAction from '../components/QuickAction';
 import Card from '../components/ui/Card';
+import { useStore } from '../stores';
 
 const HomeScreen = ({ navigation }) => {
   const theme = useTheme();
   
-  // Mock data - will be replaced with real data later
-  const stats = {
-    weeklyDistance: 24.5, // km
-    monthlyDistance: 98.2, // km
-    totalRuns: 18,
-    activeShoes: 2,
-  };
-
-  const recentRuns = [
-    { id: '1', date: 'Today', distance: '5.2 km', duration: '28:45', pace: '5:32/km' },
-    { id: '2', date: 'Yesterday', distance: '3.8 km', duration: '22:30', pace: '5:55/km' },
-  ];
+  // Get data from Zustand store
+  const { runs, shoes, getRunStats } = useStore();
+  
+  // Calculate statistics
+  const weeklyStats = getRunStats('week');
+  const monthlyStats = getRunStats('month');
+  
+  // Format recent runs for display
+  const recentRuns = [...runs]
+    .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+    .slice(0, 3)
+    .map(run => {
+      const runDate = new Date(run.startTime);
+      let dateText;
+      
+      if (isToday(runDate)) {
+        dateText = 'Today';
+      } else if (isYesterday(runDate)) {
+        dateText = 'Yesterday';
+      } else {
+        dateText = format(runDate, 'MMM d');
+      }
+      
+      // Format duration (seconds) to MM:SS
+      const formatDuration = (seconds) => {
+        if (!seconds) return '--:--';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      };
+      
+      // Format pace (m/s to min/km)
+      const formatPace = (pace) => {
+        if (!pace || !pace.minutes) return '--:--/km';
+        return `${pace.minutes}:${pace.seconds.toString().padStart(2, '0')}/km`;
+      };
+      
+      return {
+        ...run,
+        date: dateText,
+        formattedDistance: `${run.distance ? run.distance.toFixed(1) : '0.0'} km`,
+        formattedDuration: formatDuration(run.duration),
+        formattedPace: formatPace(run.pace)
+      };
+    });
+    
+  // Get active shoes count
+  const activeShoes = shoes.filter(shoe => shoe.isActive).length;
+  
+  // Get last run time
+  const lastRunTime = runs.length > 0 
+    ? `Last run ${formatDistanceToNow(new Date(runs[0].startTime), { addSuffix: true })}`
+    : 'No runs yet';
 
   const styles = StyleSheet.create({
     container: {
@@ -54,14 +108,9 @@ const HomeScreen = ({ navigation }) => {
       justifyContent: 'space-between',
       marginBottom: theme.spacing.lg,
     },
-    sectionTitle: {
-      ...theme.typography.h3,
-      color: theme.colors.text.primary,
-      marginBottom: theme.spacing.md,
-    },
     quickActions: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
+      justifyContent: 'space-between',
       marginBottom: theme.spacing.lg,
     },
     startButton: {
@@ -104,19 +153,68 @@ const HomeScreen = ({ navigation }) => {
     runPace: {
       ...theme.typography.caption,
       color: theme.colors.text.secondary,
+      marginBottom: 2,
+    },
+    runDuration: {
+      ...theme.typography.caption,
+      color: theme.colors.text.secondary,
+      opacity: 0.8,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+    },
+    seeAll: {
+      ...theme.typography.button,
+      color: theme.colors.primary,
+    },
+    runsCard: {
+      marginBottom: theme.spacing.lg,
+    },
+    noRuns: {
+      padding: theme.spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    noRunsIcon: {
+      marginBottom: theme.spacing.md,
+      opacity: 0.5,
+    },
+    noRunsText: {
+      ...theme.typography.body,
+      color: theme.colors.text.secondary,
+      marginBottom: theme.spacing.md,
+      textAlign: 'center',
+    },
+    startRunButton: {
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.lg,
+      borderRadius: theme.borderRadius.md,
+      backgroundColor: theme.colors.primary,
+    },
+    startRunButtonText: {
+      ...theme.typography.button,
+      color: theme.colors.text.light,
     },
   });
 
   const renderRunItem = (run) => (
-    <View key={run.id} style={styles.runItem}>
+    <TouchableOpacity 
+      key={run.id} 
+      style={styles.runItem}
+      onPress={() => navigation.navigate('RunDetails', { runId: run.id })}
+    >
       <View>
         <Text style={styles.runDate}>{run.date}</Text>
+        <Text style={styles.runDistance}>{run.formattedDistance}</Text>
       </View>
       <View style={styles.runDetails}>
-        <Text style={styles.runDistance}>{run.distance}</Text>
-        <Text style={styles.runPace}>{run.pace} /km</Text>
+        <Text style={styles.runPace}>{run.formattedPace}</Text>
+        <Text style={styles.runDuration}>{run.formattedDuration}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -125,7 +223,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={styles.title}>Welcome Back!</Text>
-            <Text style={styles.subtitle}>Let's hit the road</Text>
+            <Text style={styles.subtitle}>{lastRunTime}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
             <MaterialIcons 
@@ -139,17 +237,19 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statsRow}>
           <StatsCard 
             title="This Week" 
-            value={stats.weeklyDistance} 
+            value={weeklyStats.totalDistance.toFixed(1)} 
             unit="km"
             icon={<MaterialCommunityIcons name="run" />}
             color="#4CAF50"
+            subtitle={`${weeklyStats.totalRuns} runs`}
           />
           <StatsCard 
             title="This Month" 
-            value={stats.monthlyDistance} 
+            value={monthlyStats.totalDistance.toFixed(1)} 
             unit="km"
             icon={<MaterialCommunityIcons name="calendar-month" />}
             color="#2196F3"
+            subtitle={`${monthlyStats.totalRuns} runs`}
           />
         </View>
 
@@ -169,7 +269,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.quickActions}>
           <QuickAction 
             icon={<MaterialCommunityIcons name="shoe-print" />}
-            label="Shoes"
+            label={`Shoes (${activeShoes})`}
             onPress={() => navigation.navigate('ShoeList')}
             color="#FF5722"
           />
@@ -181,7 +281,7 @@ const HomeScreen = ({ navigation }) => {
           />
           <QuickAction 
             icon={<MaterialIcons name="history" />}
-            label="History"
+            label={`Runs (${runs.length})`}
             onPress={() => navigation.navigate('RunLog')}
             color="#FFC107"
           />
@@ -193,24 +293,36 @@ const HomeScreen = ({ navigation }) => {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Recent Runs</Text>
-        <Card>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Runs</Text>
+          {runs.length > 0 && (
+            <TouchableOpacity onPress={() => navigation.navigate('RunLog')}>
+              <Text style={[styles.seeAll, { color: theme.colors.primary }]}>
+                See All
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        <Card style={styles.runsCard}>
           {recentRuns.length > 0 ? (
             recentRuns.map(run => renderRunItem(run))
           ) : (
-            <Text style={[styles.subtitle, { textAlign: 'center', padding: theme.spacing.md }]}>
-              No recent runs. Start your first run!
-            </Text>
-          )}
-          {recentRuns.length > 0 && (
-            <TouchableOpacity 
-              style={{ padding: theme.spacing.sm, alignItems: 'center' }}
-              onPress={() => navigation.navigate('RunLog')}
-            >
-              <Text style={{ color: theme.colors.primary, fontWeight: '500' }}>
-                View All Runs
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.noRuns}>
+              <MaterialCommunityIcons 
+                name="run" 
+                size={48} 
+                color={theme.colors.text.secondary} 
+                style={styles.noRunsIcon}
+              />
+              <Text style={styles.noRunsText}>No runs recorded yet</Text>
+              <TouchableOpacity 
+                style={styles.startRunButton}
+                onPress={() => navigation.navigate('RunTracker')}
+              >
+                <Text style={styles.startRunButtonText}>Start Your First Run</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </Card>
       </ScrollView>

@@ -22,27 +22,52 @@
   - [x] RunListItem component
   - [x] ShoeListItem component with progress tracking
   - [x] LoadingIndicator component
-- [ ] State Management (Next Up)
-  - [ ] Choose and implement state solution
-    - [ ] Evaluate Context API vs Zustand
-    - [ ] Set up selected state management
-    - [ ] Create store structure
-  - [ ] Implement run tracking state
-    - [ ] Run list state
-    - [ ] Current run state
-    - [ ] Run statistics
-  - [ ] Implement shoe management state
-    - [ ] Shoe list state
-    - [ ] Shoe details state
-    - [ ] Shoe usage tracking
-- [ ] Navigation & Screens
-  - [ ] Run tracking flow
-    - [ ] Run tracking screen
-    - [ ] Run summary screen
-    - [ ] Save run screen
-  - [ ] Run details view
-    - [ ] Run statistics
-    - [ ] Map view
+
+## 🧠 State Management (In Progress)
+- [x] Choose and implement state solution (Zustand)
+  - [x] Set up Zustand stores (run, shoe, settings)
+  - [x] Configure persistence with AsyncStorage
+  - [x] Create store structure and utilities
+- [x] Integrate Zustand with HomeScreen
+  - [x] Display real run statistics
+  - [x] Show recent runs
+  - [x] Update quick actions with live data
+- [ ] Implement run tracking state
+  - [ ] Run list state and filtering
+  - [ ] Current run state management
+  - [ ] Run statistics calculation
+- [ ] Implement shoe management state
+  - [ ] Shoe list and details
+  - [ ] Shoe usage tracking
+  - [ ] Mileage calculations
+
+## 🧭 Navigation & Screens (Next Up)
+- [ ] Run tracking flow
+  - [ ] Run tracking screen
+  - [ ] Run summary screen
+  - [ ] Save run screen
+- [ ] Run details view
+  - [ ] Run statistics
+  - [ ] Map view with route
+  - [ ] Edit/delete run
+- [ ] Shoe management
+  - [ ] Shoe list
+  - [ ] Add/edit shoe
+  - [ ] Shoe details and statistics
+
+## 📚 Documentation
+- [x] User guides (Getting Started, Run Tracking, Shoe Management)
+- [x] Developer guides (Setup, State Management)
+- [ ] API reference
+- [ ] Testing guidelines
+- [ ] Deployment guide
+
+## 🔄 Next Steps
+1. Integrate Zustand with RunLog screen
+2. Implement run tracking functionality
+3. Add shoe management screens
+4. Write tests for stores and components
+5. Prepare for initial release
     - [ ] Edit run details
   - [ ] Shoe management
     - [ ] Shoe list screen
