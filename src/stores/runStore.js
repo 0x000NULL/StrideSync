@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, parseISO } from 'date-fns';
+import { STORAGE_KEYS, saveData, loadData } from '../services/storage';
 
 // Helper function to calculate pace in min/km
 export const calculatePace = (distance, duration) => {
@@ -9,14 +11,126 @@ export const calculatePace = (distance, duration) => {
   return { minutes, seconds };
 };
 
+// Helper function to calculate time period statistics
+const calculatePeriodStats = (runs, startDate, endDate) => {
+  const periodRuns = runs.filter(run => {
+    const runDate = new Date(run.startTime);
+    return isWithinInterval(runDate, { start: startDate, end: endDate });
+  });
+
+  const totalDistance = periodRuns.reduce((sum, run) => sum + (run.distance || 0), 0);
+  const totalDuration = periodRuns.reduce((sum, run) => sum + (run.duration || 0), 0);
+  const totalRuns = periodRuns.length;
+  
+  return {
+    totalDistance,
+    totalDuration,
+    averagePace: calculatePace(totalDistance, totalDuration),
+    totalRuns,
+  };
+};
+
+const PERSIST_DEBOUNCE_MS = 500;
+let persistTimeout = null;
+
+const persistRuns = (runs) => {
+  // Cancel any pending persist operations
+  if (persistTimeout) {
+    clearTimeout(persistTimeout);
+  }
+  
+  // Debounce the save operation
+  persistTimeout = setTimeout(() => {
+    saveData(STORAGE_KEYS.RUNS, runs).catch(console.error);
+    persistTimeout = null;
+  }, PERSIST_DEBOUNCE_MS);
+};
+
 export const createRunStore = (set, get) => ({
   // State
   runs: [],
   currentRun: null,
   isLoading: false,
   error: null,
+  filters: {
+    dateRange: 'all', // 'week', 'month', 'year', 'custom'
+    startDate: null,
+    endDate: null,
+    minDistance: null,
+    maxDistance: null,
+    shoeId: null,
+  },
+  sortBy: 'date',
+  sortOrder: 'desc',
 
   // Actions
+  setFilters: (filters) => set({ filters: { ...get().filters, ...filters } }),
+  
+  setSort: (sortBy, sortOrder = 'desc') => set({ sortBy, sortOrder }),
+  
+  addRun: (runData) => {
+    const run = {
+      ...runData,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    set((state) => {
+      const newRuns = [run, ...state.runs];
+      persistRuns(newRuns);
+      return { runs: newRuns };
+    });
+    
+    return run.id;
+  },
+  
+  updateRun: (id, updates) => {
+    set((state) => {
+      const updatedRuns = state.runs.map((run) =>
+        run.id === id
+          ? { ...run, ...updates, updatedAt: new Date().toISOString() }
+          : run
+      );
+      persistRuns(updatedRuns);
+      return { runs: updatedRuns };
+    });
+  },
+  
+  deleteRun: (id) => {
+    set((state) => {
+      const updatedRuns = state.runs.filter((run) => run.id !== id);
+      persistRuns(updatedRuns);
+      return { runs: updatedRuns };
+    });
+  },
+  
+  // Load runs from storage
+  loadRuns: async () => {
+    try {
+      set({ isLoading: true });
+      const runs = await loadData(STORAGE_KEYS.RUNS, []);
+      set({ runs, isLoading: false });
+      return runs;
+    } catch (error) {
+      console.error('Error loading runs:', error);
+      set({ error: 'Failed to load runs', isLoading: false });
+      return [];
+    }
+  },
+  
+  // Clear all runs (for testing/development)
+  clearAllRuns: async () => {
+    try {
+      await saveData(STORAGE_KEYS.RUNS, []);
+      set({ runs: [] });
+      return true;
+    } catch (error) {
+      console.error('Error clearing runs:', error);
+      return false;
+    }
+  },
+  
   startRun: (initialData = {}) => {
     const newRun = {
       id: uuidv4(),
@@ -130,6 +244,13 @@ export const createRunStore = (set, get) => ({
     // Calculate final pace
     if (runToSave.distance && runToSave.duration) {
       runToSave.pace = calculatePace(runToSave.distance, runToSave.duration);
+    }
+
+    // Update shoe mileage if a shoe is associated with this run
+    if (runToSave.shoeId && runToSave.distance > 0) {
+      const { default: useShoeStore } = await import('./shoeStore');
+      const shoeStore = useShoeStore.getState();
+      shoeStore.updateShoeMileage(runToSave);
     }
 
     // Add to runs array
