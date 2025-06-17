@@ -1,12 +1,37 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { useStoreContext } from '../providers/StoreProvider';
 
 const SettingsScreen = () => {
   const theme = useTheme();
-  const [darkMode, setDarkMode] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(true);
-  const [locationTracking, setLocationTracking] = React.useState(true);
+  // Use the store context
+  const store = useStoreContext();
+  
+  if (!store) {
+    return null; // or a loading indicator
+  }
+  
+  const { settings, updateSettings } = store;
+  
+  // Destructure with defaults
+  const { 
+    theme: themePreference = 'system', 
+    notifyRunReminder = true, 
+    useHighAccuracyGPS = false,
+    temperatureUnit = 'celsius',
+    distanceUnit = 'km'
+  } = settings || {};
+  
+  // Map theme preference to switch state
+  const darkMode = themePreference === 'dark';
+  
+  // Handle theme toggle
+  const handleThemeToggle = (value) => {
+    updateSettings({ 
+      theme: value ? 'dark' : 'light' 
+    });
+  };
   
   const styles = StyleSheet.create({
     container: {
@@ -70,9 +95,28 @@ const SettingsScreen = () => {
             <Text style={styles.settingText}>Dark Mode</Text>
             <Switch
               value={darkMode}
-              onValueChange={setDarkMode}
+              onValueChange={handleThemeToggle}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
             />
+            <View style={styles.settingItem}>
+              <Text style={styles.settingText}>Use Miles</Text>
+              <Switch
+                value={distanceUnit === 'mi'}
+                onValueChange={(value) => updateSettings({ distanceUnit: value ? 'mi' : 'km' })}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+            <View style={styles.settingItem}>
+              <Text style={styles.settingText}>Use Fahrenheit</Text>
+              <Switch
+                value={temperatureUnit === 'fahrenheit'}
+                onValueChange={(value) => updateSettings({ temperatureUnit: value ? 'fahrenheit' : 'celsius' })}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
           </View>
         </View>
         
@@ -81,9 +125,10 @@ const SettingsScreen = () => {
           <View style={styles.settingItem}>
             <Text style={styles.settingText}>Enable Notifications</Text>
             <Switch
-              value={notifications}
-              onValueChange={setNotifications}
+              value={notifyRunReminder}
+              onValueChange={(value) => updateSettings({ notifyRunReminder: value })}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
             />
           </View>
         </View>
@@ -93,9 +138,19 @@ const SettingsScreen = () => {
           <View style={styles.settingItem}>
             <Text style={styles.settingText}>Background Location Tracking</Text>
             <Switch
-              value={locationTracking}
-              onValueChange={setLocationTracking}
+              value={useHighAccuracyGPS}
+              onValueChange={(value) => updateSettings({ useHighAccuracyGPS: value })}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
+            />
+          </View>
+          <View style={styles.settingItem}>
+            <Text style={styles.settingText}>Use High Accuracy GPS</Text>
+            <Switch
+              value={useHighAccuracyGPS}
+              onValueChange={(value) => updateSettings({ useHighAccuracyGPS: value })}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
             />
           </View>
         </View>
