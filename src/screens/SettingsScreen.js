@@ -1,7 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Switch, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStoreContext } from '../providers/StoreProvider';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+
+const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
+  const theme = useTheme();
+  return (
+    <SegmentedControl
+      values={options}
+      selectedIndex={options.indexOf(selectedValue)}
+      onChange={(event) => {
+        onValueChange(options[event.nativeEvent.selectedSegmentIndex]);
+      }}
+      appearance={theme.dark ? 'dark' : 'light'}
+      style={[styles.segmentedControl, style]}
+      tintColor={theme.colors.primary}
+      fontStyle={{ color: theme.colors.text.primary }}
+      activeFontStyle={{ color: '#fff' }}
+    />
+  );
+};
 
 const SettingsScreen = () => {
   const theme = useTheme();
@@ -80,7 +99,37 @@ const SettingsScreen = () => {
       textAlign: 'center',
       marginTop: theme.spacing.xl,
     },
+    segmentedControl: {
+      height: 30,
+      width: '100%',
+      backgroundColor: theme.colors.background,
+    },
+    unitLabel: {
+      ...theme.typography.body,
+      color: theme.colors.text.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    unitContainer: {
+      flex: 1,
+    },
   });
+
+  const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
+    return (
+      <SegmentedControl
+        values={options}
+        selectedIndex={options.indexOf(selectedValue)}
+        onChange={(event) => {
+          onValueChange(options[event.nativeEvent.selectedSegmentIndex]);
+        }}
+        appearance={theme.dark ? 'dark' : 'light'}
+        style={[styles.segmentedControl, style]}
+        tintColor={theme.colors.primary}
+        fontStyle={{ color: theme.colors.text.primary }}
+        activeFontStyle={{ color: '#fff' }}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -99,22 +148,34 @@ const SettingsScreen = () => {
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
               thumbColor={theme.colors.background}
             />
-            <View style={styles.settingItem}>
-              <Text style={styles.settingText}>Use Miles</Text>
-              <Switch
-                value={distanceUnit === 'mi'}
-                onValueChange={(value) => updateSettings({ distanceUnit: value ? 'mi' : 'km' })}
-                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-                thumbColor={theme.colors.background}
+          </View>
+          <View style={styles.settingItem}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.unitLabel}>Distance Units</Text>
+              <UnitSelector
+                options={['Kilometers', 'Miles']}
+                selectedValue={distanceUnit === 'km' ? 'Kilometers' : 'Miles'}
+                onValueChange={(value) => {
+                  updateSettings({ 
+                    distanceUnit: value === 'Kilometers' ? 'km' : 'mi' 
+                  });
+                }}
+                style={styles.unitContainer}
               />
             </View>
-            <View style={styles.settingItem}>
-              <Text style={styles.settingText}>Use Fahrenheit</Text>
-              <Switch
-                value={temperatureUnit === 'fahrenheit'}
-                onValueChange={(value) => updateSettings({ temperatureUnit: value ? 'fahrenheit' : 'celsius' })}
-                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-                thumbColor={theme.colors.background}
+          </View>
+          <View style={styles.settingItem}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.unitLabel}>Temperature Units</Text>
+              <UnitSelector
+                options={['Celsius', 'Fahrenheit']}
+                selectedValue={temperatureUnit === 'celsius' ? 'Celsius' : 'Fahrenheit'}
+                onValueChange={(value) => {
+                  updateSettings({ 
+                    temperatureUnit: value === 'Celsius' ? 'celsius' : 'fahrenheit' 
+                  });
+                }}
+                style={styles.unitContainer}
               />
             </View>
           </View>

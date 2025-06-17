@@ -6,7 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import StatsCard from '../components/StatsCard';
-import Button from '../components/Button';
+import Button from "../components/ui/Button";
 
 const ShoeDetailScreen = ({ route, navigation }) => {
   const { shoeId } = route.params;

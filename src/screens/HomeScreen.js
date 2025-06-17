@@ -18,9 +18,11 @@ import StatsCard from '../components/StatsCard';
 import QuickAction from '../components/QuickAction';
 import Card from '../components/ui/Card';
 import { useStore } from '../stores';
+import { useUnits } from '../hooks/useUnits';
 
 const HomeScreen = ({ navigation }) => {
   const theme = useTheme();
+  const { formatDistance } = useUnits();
   
   // Get data from Zustand store
   const { runs, shoes, getRunStats } = useStore();
@@ -29,7 +31,15 @@ const HomeScreen = ({ navigation }) => {
   const weeklyStats = getRunStats('week');
   const monthlyStats = getRunStats('month');
   
-  // Format recent runs for display
+  // Format duration (seconds) to MM:SS
+  const formatDuration = (seconds) => {
+    if (!seconds) return '--:--';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Get recent runs with basic formatting (we'll handle display in renderRunItem)
   const recentRuns = [...runs]
     .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
     .slice(0, 3)
@@ -45,26 +55,10 @@ const HomeScreen = ({ navigation }) => {
         dateText = format(runDate, 'MMM d');
       }
       
-      // Format duration (seconds) to MM:SS
-      const formatDuration = (seconds) => {
-        if (!seconds) return '--:--';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-      };
-      
-      // Format pace (m/s to min/km)
-      const formatPace = (pace) => {
-        if (!pace || !pace.minutes) return '--:--/km';
-        return `${pace.minutes}:${pace.seconds.toString().padStart(2, '0')}/km`;
-      };
-      
       return {
         ...run,
         date: dateText,
-        formattedDistance: `${run.distance ? run.distance.toFixed(1) : '0.0'} km`,
-        formattedDuration: formatDuration(run.duration),
-        formattedPace: formatPace(run.pace)
+        // We'll format these values in renderRunItem to ensure they're always up-to-date
       };
     });
     
@@ -200,22 +194,33 @@ const HomeScreen = ({ navigation }) => {
     },
   });
 
-  const renderRunItem = (run) => (
-    <TouchableOpacity 
-      key={run.id} 
-      style={styles.runItem}
-      onPress={() => navigation.navigate('RunDetails', { runId: run.id })}
-    >
-      <View>
-        <Text style={styles.runDate}>{run.date}</Text>
-        <Text style={styles.runDistance}>{run.formattedDistance}</Text>
-      </View>
-      <View style={styles.runDetails}>
-        <Text style={styles.runPace}>{run.formattedPace}</Text>
-        <Text style={styles.runDuration}>{run.formattedDuration}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderRunItem = (run) => {
+    const formattedDistance = formatDistance(run.distance || 0);
+    const formattedPace = run.pace && run.distance 
+      ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')}/${formattedDistance.unit}`
+      : '--:--';
+    
+    return (
+      <TouchableOpacity 
+        key={run.id} 
+        style={styles.runItem}
+        onPress={() => navigation.navigate('RunDetails', { runId: run.id })}
+      >
+        <View>
+          <Text style={styles.runDate}>{run.date}</Text>
+          <Text style={styles.runDistance}>
+            {run.distance !== undefined ? formattedDistance.formatted : '0.0'}
+          </Text>
+        </View>
+        <View style={styles.runDetails}>
+          <Text style={styles.runPace}>{formattedPace}</Text>
+          <Text style={styles.runDuration}>
+            {run.duration ? formatDuration(run.duration) : '--:--'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -237,16 +242,16 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statsRow}>
           <StatsCard 
             title="This Week" 
-            value={weeklyStats.totalDistance.toFixed(1)} 
-            unit="km"
+            value={formatDistance(weeklyStats.totalDistance).value.toFixed(1)}
+            unit={formatDistance(weeklyStats.totalDistance).unit}
             icon={<MaterialCommunityIcons name="run" />}
             color="#4CAF50"
             subtitle={`${weeklyStats.totalRuns} runs`}
           />
           <StatsCard 
             title="This Month" 
-            value={monthlyStats.totalDistance.toFixed(1)} 
-            unit="km"
+            value={formatDistance(monthlyStats.totalDistance).value.toFixed(1)}
+            unit={formatDistance(monthlyStats.totalDistance).unit}
             icon={<MaterialCommunityIcons name="calendar-month" />}
             color="#2196F3"
             subtitle={`${monthlyStats.totalRuns} runs`}
