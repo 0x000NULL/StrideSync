@@ -1,6 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
-import { STORAGE_KEYS, saveData, loadData } from '../services/storage';
+import { saveData, loadData } from '../services/storage';
+
+// Storage keys
+const STORAGE_KEYS = {
+  RUNS: '@StrideSync:runs',
+  SHOES: '@StrideSync:shoes',
+  SHOE_USAGE: '@StrideSync:shoeUsage',
+  SETTINGS: '@StrideSync:settings',
+  VERSION: '@StrideSync:version',
+};
 
 // Cache for memoized selectors
 const statsCache = new Map();

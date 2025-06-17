@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
-import { useShoeStore } from '../stores/shoeStore';
+import { useStore } from '../stores/useStore';
 import { format } from 'date-fns';
 import StatsCard from '../components/StatsCard';
 import ShoeListItem from '../components/ShoeListItem';
@@ -24,15 +24,13 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 
 const ShoeListScreen = ({ navigation }) => {
   const theme = useTheme();
-  const {
-    shoes,
-    loading,
-    error,
-    loadShoes,
-    getShoesWithStats,
-    getShoesNeedingReplacement,
-    getShoesByActivity
-  } = useShoeStore();
+  const shoes = useStore(state => state.shoes);
+  const loading = useStore(state => state.isLoading);
+  const error = useStore(state => state.error);
+  const loadShoes = useStore(state => state.loadShoes);
+  const getShoesWithStats = useStore(state => state.getShoesWithStats);
+  const getShoesNeedingReplacement = useStore(state => state.getShoesNeedingReplacement);
+  const getShoesByActivity = useStore(state => state.getShoesByActivity);
   
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all', 'active', 'retired', 'needsReplacement'
@@ -269,20 +267,20 @@ const ShoeListScreen = ({ navigation }) => {
           <StatsCard 
             title="Total Runs"
             value={stats.totalRuns.toString()}
-            icon="repeat"
+            icon="replay"
             color={theme.colors.secondary}
           />
           <StatsCard 
             title="Shoes Active"
             value={stats.totalShoes.toString()}
-            icon="check-circle"
+            icon="check-circle-outline"
             color={theme.colors.success}
           />
           {stats.shoesNeedingReplacement > 0 && (
             <StatsCard 
               title="Needs Replacement"
               value={stats.shoesNeedingReplacement.toString()}
-              icon="warning"
+              icon="warning-amber"
               color={theme.colors.warning}
             />
           )}
