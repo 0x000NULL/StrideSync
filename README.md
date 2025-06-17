@@ -1,39 +1,41 @@
-# 🏃‍♂️ StrideSync – Offline Running Tracker
+# 🏃‍♂️ StrideSync – Run Tracking & Shoe Management
 
-A mobile running tracker built with React Native (Expo) that works entirely offline. Track your runs, monitor your shoe mileage, and analyze your running statistics without needing an internet connection.
+A modern running tracker and shoe management app built with React Native (Expo). Track your runs, monitor shoe mileage, and analyze your running statistics with a clean, intuitive interface.
 
-## 📱 Features
+## 🚀 Features (Implemented)
 
-- 🏃 **Run Tracking**
-  - Real-time GPS tracking
-  - Distance, pace, and duration metrics
-  - Route mapping
-  - Run history with detailed statistics
+### 🏃 Run Tracking
+- [x] Record and save run details
+- [x] Track distance, duration, and pace
+- [x] Run history with filtering and sorting
+- [x] Search runs by notes, location, or shoe
 
-- 👟 **Shoe Management**
-  - Track mileage for multiple pairs of shoes
-  - Shoe rotation suggestions
-  - Mileage-based replacement alerts
+### 👟 Shoe Management
+- [x] Track multiple pairs of shoes
+- [x] Automatic mileage tracking
+- [x] Shoe usage statistics
+- [x] Active/retired status
 
-- 📊 **Statistics**
-  - Weekly/Monthly distance totals
-  - Pace trends
-  - Run frequency analysis
-  - Personal records tracking
+### 🔍 Advanced Features
+- [x] Powerful search functionality
+- [x] Custom date range filters
+- [x] Multiple sorting options
+- [x] Pull-to-refresh
 
-- 🎨 **User Experience**
-  - Dark/Light theme support
-  - Intuitive interface
-  - Quick actions for common tasks
-  - Data export options
+### 🎨 User Experience
+- [x] Dark/Light theme support
+- [x] Skeleton loading states
+- [x] Error handling with retry options
+- [x] Smooth animations and transitions
 
-- 🛠 **Technical**
-  - Offline-first architecture
-  - Local data persistence
-  - Battery efficient
-  - Built with modern React Native & Expo
+### 🛠 Technical Stack
+- React Native (Expo)
+- Zustand for state management
+- AsyncStorage for data persistence
+- React Navigation
+- date-fns for date handling
 
-## 🚀 Getting Started
+## 🛠 Development Setup
 
 ### Prerequisites
 
@@ -46,8 +48,8 @@ A mobile running tracker built with React Native (Expo) that works entirely offl
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/stride-sync-app.git
-   cd stride-sync-app
+   git clone https://github.com/0x000NULL/StrideSync.git
+   cd StrideSync
    ```
 
 2. Install dependencies:
@@ -64,20 +66,67 @@ A mobile running tracker built with React Native (Expo) that works entirely offl
    yarn start
    ```
 
-4. Run on your device:
-   - Scan the QR code with the Expo Go app (iOS) or the Camera app (Android)
-   - Or press 'i' for iOS Simulator or 'a' for Android Emulator
+4. Run the app:
+   - Scan the QR code with the Expo Go app (iOS/Android)
+   - Press 'i' for iOS Simulator
+   - Press 'a' for Android Emulator
+   - Press 'w' for web browser
 
-## 📚 Documentation
+### Development Scripts
 
-### User Guides
-- [Getting Started](./docs/user-guides/getting-started.md)
-- [Run Tracking](./docs/user-guides/run-tracking.md)
-- [Shoe Management](./docs/user-guides/shoe-management.md)
+- `yarn start` - Start the development server
+- `yarn android` - Run on Android device/emulator
+- `yarn ios` - Run on iOS simulator
+- `yarn web` - Run in web browser
+- `yarn lint` - Run ESLint
+- `yarn format` - Format code with Prettier
 
-### Developer Guides
-- [Setup](./docs/developer-guides/setup.md)
-- [State Management](./docs/developer-guides/state-management.md)
+## 📚 Project Structure
+
+```
+src/
+├── assets/           # Images, fonts, and other static files
+├── components/       # Reusable UI components
+│   ├── common/      # Common UI elements
+│   └── runs/        # Run-specific components
+├── constants/        # App constants and configurations
+├── hooks/            # Custom React hooks
+├── navigation/       # Navigation configuration
+├── screens/          # App screens
+│   ├── RunLogScreen/
+│   ├── RunDetailsScreen/
+│   └── ShoeListScreen/
+├── services/         # Data services
+│   └── storage.js    # AsyncStorage wrapper
+├── stores/           # Zustand stores
+│   ├── runStore.js   # Run state management
+│   ├── shoeStore.js  # Shoe state management
+│   └── index.js      # Store exports
+├── theme/            # Theming and styling
+│   ├── colors.js     # Color palette
+│   ├── spacing.js    # Spacing system
+│   └── typography.js # Typography system
+└── utils/            # Utility functions
+    ├── date.js       # Date helpers
+    └── formatters.js # Data formatting
+```
+
+### State Management
+
+The app uses [Zustand](https://github.com/pmndrs/zustand) for state management with the following stores:
+
+- `runStore`: Manages run data and statistics
+- `shoeStore`: Handles shoe data and mileage tracking
+
+### Theming
+
+The app supports light and dark themes with a consistent design system:
+
+- Colors
+- Typography
+- Spacing
+- Border radiuses
+- Shadows
 
 ## 🏗 Project Structure
 
@@ -106,34 +155,24 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🏗 Project Structure
-
-```
-src/
-  ├── assets/          # Images, fonts, and other static files
-  ├── components/       # Reusable UI components
-  ├── constants/        # App constants and configurations
-  ├── context/          # React context providers
-  ├── hooks/            # Custom React hooks
-  ├── navigation/       # Navigation configuration
-  ├── screens/          # App screens
-  ├── services/         # API and service integrations
-  ├── theme/            # Theme and styling
-  └── utils/            # Utility functions
-```
-
 ## 🛠 Built With
 
-- [React Native](https://reactnative.dev/) - Build native mobile apps using JavaScript and React
-- [Expo](https://expo.dev/) - Open-source platform for making universal native apps
-- [React Navigation](https://reactnavigation.org/) - Routing and navigation for React Native apps
-- [Expo Location](https://docs.expo.dev/versions/latest/sdk/location/) - Access device location
-- [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) - Local SQLite database
-- [Victory Native](https://formidable.com/open-source/victory/) - Data visualization
+- [React Native](https://reactnative.dev/) - Native mobile apps with JavaScript
+- [Expo](https://expo.dev/) - Universal native apps platform
+- [Zustand](https://github.com/pmndrs/zustand) - State management
+- [React Navigation](https://reactnavigation.org/) - Routing and navigation
+- [date-fns](https://date-fns.org/) - Modern date utility library
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/) - Smooth animations
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
@@ -141,5 +180,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Inspired by runners who want to track their progress without being tied to the cloud
 - Built with the amazing React Native and Expo ecosystems
+- Inspired by the running community's need for simple, effective tracking tools

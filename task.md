@@ -22,6 +22,8 @@
   - [x] RunListItem component
   - [x] ShoeListItem component with progress tracking
   - [x] LoadingIndicator component
+  - [x] Skeleton loaders
+  - [x] Search bar component
 
 ## 🧠 State Management (In Progress)
 - [x] Choose and implement state solution (Zustand)
@@ -32,16 +34,26 @@
   - [x] Display real run statistics
   - [x] Show recent runs
   - [x] Update quick actions with live data
-- [ ] Implement run tracking state
-  - [ ] Run list state and filtering
-  - [ ] Current run state management
-  - [ ] Run statistics calculation
+- [x] Implement run tracking state
+  - [x] Run list state and filtering
+  - [x] Current run state management
+  - [x] Run statistics calculation
+  - [x] Search functionality
+  - [x] Sorting options
+  - [x] Date range filtering
 - [ ] Implement shoe management state
-  - [ ] Shoe list and details
-  - [ ] Shoe usage tracking
-  - [ ] Mileage calculations
+  - [x] Shoe list and details
+  - [x] Shoe usage tracking
+  - [x] Mileage calculations
+  - [ ] Shoe retirement tracking
 
-## 🧭 Navigation & Screens (Next Up)
+## 🧭 Navigation & Screens
+- [x] Run Log Screen
+  - [x] Run list with filtering
+  - [x] Search functionality
+  - [x] Sorting options
+  - [x] Loading and error states
+  - [x] Pull-to-refresh
 - [ ] Run tracking flow
   - [ ] Run tracking screen
   - [ ] Run summary screen
@@ -51,74 +63,43 @@
   - [ ] Map view with route
   - [ ] Edit/delete run
 - [ ] Shoe management
-  - [ ] Shoe list
+  - [x] Shoe list
   - [ ] Add/edit shoe
   - [ ] Shoe details and statistics
 
-## 📚 Documentation
-- [x] User guides (Getting Started, Run Tracking, Shoe Management)
-- [x] Developer guides (Setup, State Management)
-- [ ] API reference
-- [ ] Testing guidelines
-- [ ] Deployment guide
-
-## 🔄 Next Steps
-1. Integrate Zustand with RunLog screen
-2. Implement run tracking functionality
-3. Add shoe management screens
-4. Write tests for stores and components
-5. Prepare for initial release
-    - [ ] Edit run details
-  - [ ] Shoe management
-    - [ ] Shoe list screen
-    - [ ] Add/edit shoe form
-    - [ ] Shoe details view
-- [ ] Forms & Validation
-  - [ ] Run details form
-    - [ ] Date/time picker
-    - [ ] Distance input
-    - [ ] Duration input
-    - [ ] Notes field
-  - [ ] Shoe creation/editing form
-    - [ ] Basic info (name, brand, model)
-    - [ ] Purchase date picker
-    - [ ] Max distance setting
-    - [ ] Shoe image upload
-  - [ ] Settings forms
-    - [ ] Unit preferences
-    - [ ] Notification settings
-    - [ ] Data management
-
-## 💾 Data Management
-- [ ] Set up SQLite database with ElectricSQL
+## 💾 Data Management (In Progress)
+- [x] Set up AsyncStorage persistence
+  - [x] Run data storage
+  - [x] Shoe data storage
+  - [x] Usage statistics
+- [ ] Future: SQLite with ElectricSQL
   - [ ] Initialize database schema
   - [ ] Create data access layer
-  - [ ] Implement run data storage
-  - [ ] Implement shoe data storage
+  - [ ] Implement sync functionality
 - [ ] Handle offline scenarios
   - [ ] Queue sync operations
   - [ ] Handle data conflicts
   - [ ] Add offline status indicator
 
-## 🧪 Testing
+## 🧪 Testing (Next Up)
 - [ ] Set up testing framework
   - [ ] Configure Jest + React Testing Library
   - [ ] Add test utilities
 - [ ] Write unit tests
   - [ ] Test utility functions
   - [ ] Test presentational components
+  - [ ] Test store actions and selectors
 - [ ] Write integration tests
   - [ ] Test navigation flows
   - [ ] Test user interactions
-- [ ] Set up E2E testing
-  - [ ] Configure Detox
-  - [ ] Add critical path tests
 
 ## ✨ Polish & Optimization
-- [ ] Improve UX
-  - [ ] Add loading states
-  - [ ] Implement error boundaries
-  - [ ] Add success/error toasts
+- [x] Improve UX
+  - [x] Add loading states
+  - [x] Implement error boundaries
+  - [x] Add success/error toasts
+  - [x] Pull-to-refresh
+  - [x] Search functionality
 - [ ] Accessibility
   - [ ] Add proper labels
   - [ ] Ensure color contrast
@@ -159,3 +140,10 @@
   - [ ] Write contribution guidelines
   - [ ] Add PR template
   - [ ] Document development workflow
+
+## 🔄 Next Steps
+1. Implement run tracking functionality
+2. Complete shoe management screens
+3. Add tests for stores and components
+4. Set up CI/CD pipeline
+5. Prepare for initial release

@@ -1,50 +1,60 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
+import { formatDistance, formatPace } from '../utils/formatters';
 
 const ShoeListItem = ({ 
-  id,
-  name,
-  brand,
-  model,
-  distance,
-  maxDistance = 800, // Default max distance in km
-  purchaseDate,
-  isActive = true,
+  shoe,
   onPress,
   showDivider = true,
-  imageUrl = null
 }) => {
   const theme = useTheme();
+  const { 
+    id,
+    name,
+    brand,
+    model,
+    maxDistance = 800, // in km
+    purchaseDate,
+    isActive = true,
+    imageUrl = null,
+    stats = {},
+    progress = 0,
+    remainingDistance = null
+  } = shoe;
 
-  const calculateUsagePercentage = () => {
-    if (!distance || !maxDistance) return 0;
-    return Math.min((distance / maxDistance) * 100, 100);
-  };
-
-  const getStatusColor = () => {
-    const percentage = calculateUsagePercentage();
-    if (percentage > 90) return theme.colors.error;
-    if (percentage > 70) return theme.colors.warning;
+  // Calculate status color based on usage percentage
+  const statusColor = useMemo(() => {
+    if (!isActive) return theme.colors.text.secondary;
+    if (progress >= 90) return theme.colors.error;
+    if (progress >= 70) return theme.colors.warning;
     return theme.colors.success;
-  };
+  }, [progress, isActive, theme]);
 
-  const formatDistance = (km) => {
-    if (!km && km !== 0) return '--';
-    return `${km.toFixed(1)} km`;
-  };
-
-  const formatPurchaseDate = (dateString) => {
-    if (!dateString) return '--';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+  // Format dates
+  const formattedPurchaseDate = useMemo(() => {
+    if (!purchaseDate) return '--';
+    return new Date(purchaseDate).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'short',
       day: 'numeric'
     });
-  };
+  }, [purchaseDate]);
+
+  const lastRunDate = useMemo(() => {
+    if (!stats.lastRun) return 'Never used';
+    const date = new Date(stats.lastRun);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }, [stats.lastRun]);
 
   const styles = StyleSheet.create({
     container: {
@@ -56,13 +66,13 @@ const ShoeListItem = ({
     },
     content: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
     },
     imageContainer: {
-      width: 70,
-      height: 70,
-      borderRadius: theme.borderRadius.sm,
-      backgroundColor: theme.colors.surface,
+      width: 80,
+      height: 80,
+      borderRadius: theme.borderRadius.md,
+      backgroundColor: theme.colors.surfaceVariant,
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: theme.spacing.md,
@@ -81,51 +91,78 @@ const ShoeListItem = ({
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       marginBottom: theme.spacing.xxs,
     },
+    nameContainer: {
+      flex: 1,
+      marginRight: theme.spacing.sm,
+    },
     name: {
-      ...theme.typography.body,
+      ...theme.typography.subtitle1,
       fontWeight: '600',
       color: theme.colors.text.primary,
-      flex: 1,
+      marginBottom: 2,
+    },
+    brandModel: {
+      ...theme.typography.caption,
+      color: theme.colors.text.secondary,
+      marginBottom: theme.spacing.xs,
     },
     statusBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.sm,
       paddingVertical: 2,
-      borderRadius: 10,
+      borderRadius: 12,
       backgroundColor: isActive 
-        ? `${theme.colors.primary}20` 
+        ? `${statusColor}20` 
         : `${theme.colors.text.secondary}20`,
+      minWidth: 80,
+      justifyContent: 'center',
     },
     statusDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: isActive ? getStatusColor() : theme.colors.text.secondary,
+      backgroundColor: isActive ? statusColor : theme.colors.text.secondary,
       marginRight: 4,
     },
     statusText: {
       ...theme.typography.caption,
-      color: isActive ? theme.colors.text.primary : theme.colors.text.secondary,
+      color: isActive ? statusColor : theme.colors.text.secondary,
       fontSize: 10,
       fontWeight: '600',
       textTransform: 'uppercase',
     },
-    model: {
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: theme.spacing.sm,
+    },
+    statItem: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    statValue: {
+      ...theme.typography.subtitle2,
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
       ...theme.typography.caption,
       color: theme.colors.text.secondary,
-      marginBottom: theme.spacing.xs,
+      fontSize: 10,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     progressContainer: {
-      marginTop: theme.spacing.xs,
+      marginTop: theme.spacing.sm,
     },
     progressHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 2,
+      marginBottom: 4,
     },
     distance: {
       ...theme.typography.caption,
@@ -133,23 +170,30 @@ const ShoeListItem = ({
       fontWeight: '500',
     },
     progressBar: {
-      height: 4,
-      borderRadius: 2,
+      height: 6,
+      borderRadius: 3,
       backgroundColor: theme.colors.border,
       overflow: 'hidden',
     },
     progressFill: {
       height: '100%',
-      width: `${calculateUsagePercentage()}%`,
-      backgroundColor: getStatusColor(),
+      width: `${progress}%`,
+      backgroundColor: statusColor,
     },
     rightIcon: {
-      marginLeft: theme.spacing.md,
+      marginLeft: theme.spacing.sm,
+      alignSelf: 'center',
     },
     divider: {
       height: 1,
       backgroundColor: theme.colors.border,
       marginLeft: theme.spacing.md,
+    },
+    lastRun: {
+      ...theme.typography.caption,
+      color: theme.colors.text.secondary,
+      marginTop: theme.spacing.xs,
+      fontStyle: 'italic',
     },
   });
 
@@ -169,9 +213,9 @@ const ShoeListItem = ({
                 resizeMode="contain"
               />
             ) : (
-              <MaterialIcons 
-                name="directions-run" 
-                size={32} 
+              <MaterialCommunityIcons 
+                name="shoe-sneaker" 
+                size={40} 
                 style={styles.placeholderIcon} 
               />
             )}
@@ -179,9 +223,15 @@ const ShoeListItem = ({
           
           <View style={styles.details}>
             <View style={styles.header}>
-              <Text style={styles.name} numberOfLines={1}>
-                {name || 'Unnamed Shoe'}
-              </Text>
+              <View style={styles.nameContainer}>
+                <Text style={styles.name} numberOfLines={1}>
+                  {name || 'Unnamed Shoe'}
+                </Text>
+                <Text style={styles.brandModel} numberOfLines={1}>
+                  {brand} {model && `• ${model}`}
+                </Text>
+              </View>
+              
               <View style={styles.statusBadge}>
                 <View style={styles.statusDot} />
                 <Text style={styles.statusText}>
@@ -190,34 +240,59 @@ const ShoeListItem = ({
               </View>
             </View>
             
-            <Text style={styles.model} numberOfLines={1}>
-              {brand} {model}
-            </Text>
+            {/* Stats Row */}
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {stats.totalRuns || '0'}
+                </Text>
+                <Text style={styles.statLabel}>Runs</Text>
+              </View>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {stats.totalDistance ? formatDistance(stats.totalDistance) : '--'}
+                </Text>
+                <Text style={styles.statLabel}>Total</Text>
+              </View>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {stats.averagePace ? formatPace(stats.averagePace) : '--'}
+                </Text>
+                <Text style={styles.statLabel}>Avg. Pace</Text>
+              </View>
+            </View>
             
+            {/* Progress Bar */}
             <View style={styles.progressContainer}>
               <View style={styles.progressHeader}>
                 <Text style={styles.distance}>
-                  {formatDistance(distance)} of {maxDistance} km
+                  {formatDistance(stats.totalDistance || 0)} of {maxDistance ? `${maxDistance} km` : '∞'}
                 </Text>
-                <Text style={styles.distance}>
-                  {Math.round(calculateUsagePercentage())}%
+                <Text style={[styles.distance, { color: statusColor }]}>
+                  {Math.round(progress)}%
                 </Text>
               </View>
               <View style={styles.progressBar}>
                 <View style={styles.progressFill} />
               </View>
+              
+              <Text style={styles.lastRun}>
+                Last run: {lastRunDate}
+              </Text>
             </View>
           </View>
           
-          <View style={styles.rightIcon}>
-            <MaterialIcons 
-              name="chevron-right" 
-              size={24} 
-              color={theme.colors.text.secondary} 
-            />
-          </View>
+          <MaterialIcons 
+            name="chevron-right" 
+            size={24} 
+            color={theme.colors.text.secondary}
+            style={styles.rightIcon}
+          />
         </View>
       </TouchableOpacity>
+      
       {showDivider && <View style={styles.divider} />}
     </Card>
   );
