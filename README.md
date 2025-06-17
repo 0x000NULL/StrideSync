@@ -1,93 +1,86 @@
-# 🏃‍♂️ StrideSync
+# 🏃‍♂️ StrideSync – Offline Running Tracker
 
-A multi-platform running tracker with cloud synchronization and offline support.
+A mobile running tracker built with React Native (Expo) that works entirely offline. Track your runs, monitor your shoe mileage, and analyze your running statistics without needing an internet connection.
 
-## Features
+## 📱 Features
 
-- **Multi-platform Support**: Web, Mobile (iOS/Android), and Desktop (Windows/macOS/Linux)
-- **Cloud Sync**: MongoDB for cloud storage
-- **Offline First**: SQLite for local storage with sync capabilities
-- **Comprehensive Run Tracking**: Distance, pace, duration, heart rate, and more
-- **Data Visualization**: Charts and graphs for performance analysis
+- 🏃 Real-time run tracking with GPS
+- 📊 Detailed run statistics and history
+- 👟 Shoe mileage tracking
+- 🌙 Dark mode support
+- 📍 Background location tracking
+- 🔋 Optimized for battery life
+- 💾 Local data storage (no cloud required)
 
-## Tech Stack
-
-- **Backend**: Node.js, Express, MongoDB, JWT Auth
-- **Web**: React, React Query, Vanilla CSS
-- **Mobile**: React Native, Expo, SQLite
-- **Desktop**: Electron, SQLite
-- **Build Tools**: npm workspaces, CommonJS
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
-- npm (v7 or later)
-- MongoDB (for local development)
+- Node.js (v16 or later)
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
+- iOS Simulator / Android Emulator or a physical device with the Expo Go app
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/stride-sync.git
-   cd stride-sync
+   git clone https://github.com/yourusername/stride-sync-app.git
+   cd stride-sync-app
    ```
 
 2. Install dependencies:
    ```bash
    npm install
+   # or
+   yarn
    ```
 
-3. Set up environment variables:
+3. Start the development server:
    ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
+   npm start
+   # or
+   yarn start
    ```
 
-### Development
+4. Run on your device:
+   - Scan the QR code with the Expo Go app (iOS) or the Camera app (Android)
+   - Or press 'i' for iOS Simulator or 'a' for Android Emulator
 
-Start the development servers:
-
-```bash
-# Start API server
-npm run start:api
-
-# Start web app
-npm run start:web
-
-# Start mobile app (in a new terminal)
-# npm run start:mobile
-
-# Start desktop app (in a new terminal)
-# npm run start:desktop
-```
-
-## Project Structure
+## 🏗 Project Structure
 
 ```
-stride-sync/
-├── apps/
-│   ├── api/            # Express + MongoDB
-│   ├── web/            # React web app
-│   ├── mobile/         # React Native app
-│   └── desktop/        # Electron app
-├── shared/             # Shared code between platforms
-├── db/                 # Database models and migrations
-├── tests/              # Test files
-└── docs/               # Documentation
+src/
+  ├── assets/          # Images, fonts, and other static files
+  ├── components/       # Reusable UI components
+  ├── constants/        # App constants and configurations
+  ├── context/          # React context providers
+  ├── hooks/            # Custom React hooks
+  ├── navigation/       # Navigation configuration
+  ├── screens/          # App screens
+  ├── services/         # API and service integrations
+  ├── theme/            # Theme and styling
+  └── utils/            # Utility functions
 ```
 
-## Scripts
+## 🛠 Built With
 
-- `npm run start:api` - Start the API server
-- `npm run start:web` - Start the web app
-- `npm run start:mobile` - Start the mobile app
-- `npm run start:desktop` - Start the desktop app
-- `npm test` - Run tests
-- `npm run lint` - Lint code
-- `npm run format` - Format code with Prettier
+- [React Native](https://reactnative.dev/) - Build native mobile apps using JavaScript and React
+- [Expo](https://expo.dev/) - Open-source platform for making universal native apps
+- [React Navigation](https://reactnavigation.org/) - Routing and navigation for React Native apps
+- [Expo Location](https://docs.expo.dev/versions/latest/sdk/location/) - Access device location
+- [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) - Local SQLite database
+- [Victory Native](https://formidable.com/open-source/victory/) - Data visualization
 
-## License
+## 🤝 Contributing
 
-MIT
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by runners who want to track their progress without being tied to the cloud
+- Built with the amazing React Native and Expo ecosystems
