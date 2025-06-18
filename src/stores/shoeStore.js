@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { saveData, loadData } from '../services/storage';
 
+const EMPTY_SHOE_USAGE = Object.freeze({ total: 0, monthly: {} });
+
 // Storage keys
 const STORAGE_KEYS = {
   RUNS: '@StrideSync:runs',
@@ -116,10 +118,9 @@ export const createShoeStore = (set, get) => ({
   },
   
   // Get shoe usage statistics
-  getShoeUsage: (shoeId) => {
-    const { shoeUsage } = get();
-    return shoeUsage[shoeId] || { total: 0, monthly: {} };
-  },
+  getShoeUsage: memoized('getShoeUsage', (shoeId) => {
+    return get().shoeUsage[shoeId] || EMPTY_SHOE_USAGE;
+  }),
   
   // Get comprehensive shoe statistics
   // CHANGED: Applied memoized decorator
@@ -680,7 +681,7 @@ export const createShoeStore = (set, get) => ({
   },
 
   // Selectors
-  getShoeById: (id) => {
+  getShoeById: memoized('getShoeById', (id) => {
     const shoe = get().shoes.find((shoe) => shoe.id === id);
     if (!shoe) return null;
     

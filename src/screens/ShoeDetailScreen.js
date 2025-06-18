@@ -163,27 +163,27 @@ const ShoeDetailScreen = ({ route, navigation }) => {
 
       {/* Logic using shoeWithDetails.isActive */}
       {!showRetirementForm && shoeWithDetails.isActive && (
-      {/* Edit Button */}
-      {!showRetirementForm && (
-        <Button
-          title="Edit Shoe Details"
-          onPress={() => navigation.navigate('EditShoe', { shoeId: shoe.id })}
-          variant="outline" // Or choose another appropriate variant
-          icon="edit" // Using MaterialIcons name
-          style={styles.actionButton}
-        />
-      )}
-
-      {!showRetirementForm && shoe.isActive && (
-        <Button
-          title="Retire Shoes"
-          onPress={() => setShowRetirementForm(true)}
-          variant="danger"
-          icon="flag"
-          style={styles.actionButton}
-        />
+        <>
+          {/* Edit Button */}
+          <Button
+            title="Edit Shoe Details"
+            onPress={() => navigation.navigate('EditShoe', { shoeId: shoeWithDetails.id })}
+            variant="outline" // Or choose another appropriate variant
+            icon="edit" // Using MaterialIcons name
+            style={styles.actionButton}
+          />
+          {/* Retire Button */}
+          <Button
+            title="Retire Shoes"
+            onPress={() => setShowRetirementForm(true)}
+            variant="danger"
+            icon="flag"
+            style={styles.actionButton}
+          />
+        </>
       )}
       
+      {/* This is the reactivate button, should be outside the isActive block */}
       {!showRetirementForm && !shoeWithDetails.isActive && (
         <Button
           title="Reactivate Shoes"
