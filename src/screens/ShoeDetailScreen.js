@@ -15,15 +15,13 @@ const ShoeDetailScreen = ({ route, navigation }) => {
   const [showRetirementForm, setShowRetirementForm] = useState(false);
   
   // Get shoe data and actions from store
-  const shoe = useStore(useCallback(
-    (state) => state.shoes.find((s) => s.id === shoeId),
+  // CHANGED: Use getShoeById, which should include shoe data and stats
+  const shoeWithDetails = useStore(useCallback(
+    (state) => state.getShoeById(shoeId),
     [shoeId]
   ));
   
-  const stats = useStore(useCallback(
-    (state) => state.getShoeStats(shoeId),
-    [shoeId]
-  ));
+  // REMOVED: stats are now part of shoeWithDetails
   
   const retireShoe = useStore((state) => state.retireShoe);
   const reactivateShoe = useStore((state) => state.reactivateShoe);
@@ -32,15 +30,16 @@ const ShoeDetailScreen = ({ route, navigation }) => {
   // Load fresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      loadShoes();
+      loadShoes(); // This ensures the store has the latest shoes, from which getShoeById will select
     }, [loadShoes])
   );
 
-  if (!shoe) {
+  // CHANGED: Check shoeWithDetails instead of shoe
+  if (!shoeWithDetails) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.errorText, { color: theme.colors.text }]}>
-          Shoe not found
+          Shoe not found or still loading...
         </Text>
       </View>
     );
@@ -51,13 +50,14 @@ const ShoeDetailScreen = ({ route, navigation }) => {
       Alert.alert('Reason Required', 'Please provide a reason for retiring these shoes.');
       return;
     }
-    
+    // shoeId from route.params is fine
     retireShoe(shoeId, retirementReason);
     setShowRetirementForm(false);
     setRetirementReason('');
   };
 
   const handleReactivate = () => {
+    // shoeId from route.params is fine
     reactivateShoe(shoeId);
   };
 
@@ -92,7 +92,7 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         <Button
           title="Confirm Retirement"
           onPress={handleRetire}
-          variant="primary"
+          variant="primary" // Assuming 'primary' is the main action color, 'danger' might be better
           style={styles.button}
         />
       </View>
@@ -105,60 +105,64 @@ const ShoeDetailScreen = ({ route, navigation }) => {
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
-        <Text style={[styles.name, { color: theme.colors.text }]}>{shoe.name}</Text>
-        <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>{shoe.brand}</Text>
+        {/* CHANGED: Use shoeWithDetails */}
+        <Text style={[styles.name, { color: theme.colors.text }]}>{shoeWithDetails.name}</Text>
+        <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>{shoeWithDetails.brand}</Text>
         
         <View style={styles.statusBadge}>
           <View 
             style={[
               styles.statusDot, 
               { 
-                backgroundColor: shoe.isActive 
+                backgroundColor: shoeWithDetails.isActive
                   ? theme.colors.success 
                   : theme.colors.secondary 
               }
             ]} 
           />
           <Text style={[styles.statusText, { color: theme.colors.text }]}>
-            {shoe.isActive ? 'Active' : 'Retired'}
-            {shoe.retirementDate && ` on ${format(parseISO(shoe.retirementDate), 'MMM d, yyyy')}`}
+            {shoeWithDetails.isActive ? 'Active' : 'Retired'}
+            {shoeWithDetails.retirementDate && ` on ${format(parseISO(shoeWithDetails.retirementDate), 'MMM d, yyyy')}`}
           </Text>
         </View>
         
-        {shoe.retirementReason && (
+        {shoeWithDetails.retirementReason && (
           <View style={styles.retirementReason}>
             <Text style={[styles.reasonLabel, { color: theme.colors.textSecondary }]}>
               Reason:
             </Text>
             <Text style={[styles.reasonText, { color: theme.colors.text }]}>
-              {shoe.retirementReason}
+              {shoeWithDetails.retirementReason}
             </Text>
           </View>
         )}
       </View>
 
       <View style={styles.statsContainer}>
+        {/* CHANGED: Access stats properties directly from shoeWithDetails */}
         <StatsCard 
           title="Total Distance"
-          value={`${(stats?.totalDistance || 0).toFixed(1)} km`}
+          value={`${(shoeWithDetails.totalDistance || 0).toFixed(1)} km`}
           icon="directions-run"
         />
         <StatsCard 
           title="Runs"
-          value={stats?.totalRuns || 0}
+          value={shoeWithDetails.totalRuns || 0}
           icon="repeat"
         />
-        {shoe.maxDistance > 0 && (
+        {/* Ensure maxDistance is on shoeWithDetails */}
+        {shoeWithDetails.maxDistance > 0 && (
           <StatsCard 
             title="Remaining"
-            value={`${Math.max(0, (shoe.maxDistance - (stats?.totalDistance || 0))).toFixed(1)} km`}
-            subtitle={`of ${shoe.maxDistance} km`}
+            value={`${Math.max(0, (shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0))).toFixed(1)} km`}
+            subtitle={`of ${shoeWithDetails.maxDistance} km`}
             icon="timeline"
           />
         )}
       </View>
 
-      {!showRetirementForm && shoe.isActive && (
+      {/* Logic using shoeWithDetails.isActive */}
+      {!showRetirementForm && shoeWithDetails.isActive && (
         <Button
           title="Retire Shoes"
           onPress={() => setShowRetirementForm(true)}
@@ -168,7 +172,7 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         />
       )}
       
-      {!showRetirementForm && !shoe.isActive && (
+      {!showRetirementForm && !shoeWithDetails.isActive && (
         <Button
           title="Reactivate Shoes"
           onPress={handleReactivate}
@@ -180,7 +184,6 @@ const ShoeDetailScreen = ({ route, navigation }) => {
       
       {showRetirementForm && renderRetirementForm()}
       
-      {/* Add more shoe details and stats here */}
       <View style={styles.detailsSection}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
           Shoe Details
@@ -190,16 +193,28 @@ const ShoeDetailScreen = ({ route, navigation }) => {
             Purchase Date:
           </Text>
           <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-            {shoe.purchaseDate ? format(parseISO(shoe.purchaseDate), 'MMM d, yyyy') : 'Not set'}
+            {shoeWithDetails.purchaseDate ? format(parseISO(shoeWithDetails.purchaseDate), 'MMM d, yyyy') : 'Not set'}
           </Text>
         </View>
-        {shoe.maxDistance > 0 && (
+        {shoeWithDetails.maxDistance > 0 && (
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
               Max Distance:
             </Text>
             <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-              {shoe.maxDistance} km
+              {shoeWithDetails.maxDistance} km
+            </Text>
+          </View>
+        )}
+        {/* You can add more details here if they are part of shoeWithDetails */}
+        {/* For example, model if it's a separate field */}
+        {shoeWithDetails.model && (
+           <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+              Model:
+            </Text>
+            <Text style={[styles.detailValue, { color: theme.colors.text }]}>
+              {shoeWithDetails.model}
             </Text>
           </View>
         )}
@@ -236,7 +251,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.1)', // Consider theme.colors.surface or similar
     marginBottom: 12,
   },
   statusDot: {
@@ -253,20 +268,22 @@ const styles = StyleSheet.create({
     marginTop: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.05)', // Consider theme.colors.surface or similar
     width: '100%',
   },
   reasonLabel: {
     fontSize: 12,
+    // color: theme.colors.textSecondary, // Already applied inline
     marginBottom: 4,
   },
   reasonText: {
     fontSize: 14,
     fontStyle: 'italic',
+    // color: theme.colors.text, // Already applied inline
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around', // Changed from space-between for better spacing with 3 cards
     marginBottom: 24,
     flexWrap: 'wrap',
   },
@@ -275,54 +292,68 @@ const styles = StyleSheet.create({
   },
   retirementForm: {
     marginBottom: 24,
+    padding: 16, // Added padding
+    borderRadius: 8, // Added borderRadius
+    // backgroundColor: theme.colors.card, // Consider adding a background
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
+    // color: theme.colors.text, // Applied inline
   },
   input: {
     borderWidth: 1,
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    paddingHorizontal: 12, // Fine-tuned padding
+    paddingVertical: 10,  // Fine-tuned padding
+    marginBottom: 16, // Increased margin
     fontSize: 16,
     textAlignVertical: 'top',
+    // borderColor, color, backgroundColor applied inline
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around', // Changed from space-between
   },
   button: {
-    flex: 1,
-    marginHorizontal: 4,
+    flex: 1, // Each button takes equal space
+    marginHorizontal: 8, // Added horizontal margin between buttons
   },
   detailsSection: {
     marginTop: 16,
+    padding: 16, // Added padding
+    borderRadius: 8, // Added borderRadius
+    // backgroundColor: theme.colors.card, // Consider adding a background
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20, // Increased size
     fontWeight: 'bold',
-    marginBottom: 12,
-    paddingBottom: 8,
+    marginBottom: 16, // Increased margin
+    paddingBottom: 10, // Increased padding
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    // borderBottomColor: theme.colors.border, // Use theme border color
+    // color: theme.colors.text, // Applied inline
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 10, // Increased margin
+    paddingVertical: 4, // Added vertical padding for spacing
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: 15, // Increased size
+    // color: theme.colors.textSecondary, // Applied inline
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 15, // Increased size
     fontWeight: '500',
+    // color: theme.colors.text, // Applied inline
   },
   errorText: {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
+    // color: theme.colors.text, // Applied inline
   },
 });
 
