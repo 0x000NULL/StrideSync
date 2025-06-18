@@ -122,8 +122,9 @@ export const createShoeStore = (set, get) => ({
   },
   
   // Get comprehensive shoe statistics
-  getShoeStats: (shoeId) => {
-    const { runs, shoes } = get();
+  // CHANGED: Applied memoized decorator
+  getShoeStats: memoized('getShoeStats', (shoeId) => {
+    const { runs, shoes } = get(); // 'get' should be accessible here from createShoeStore closure
     const shoe = shoes.find(s => s.id === shoeId);
     if (!shoe) return null;
     
@@ -312,14 +313,14 @@ export const createShoeStore = (set, get) => ({
       bestPace,
       averageHeartRate,
     };
-  },
+  }), // END OF MEMOIZED WRAPPER
   
   // Get shoes that need replacement soon
   getShoesNeedingReplacement: () => {
     const { shoes } = get();
     return shoes.filter(shoe => {
       if (!shoe.isActive) return false;
-      const stats = get().getShoeStats(shoe.id);
+      const stats = get().getShoeStats(shoe.id); // This will now call the memoized version
       if (!stats || !shoe.maxDistance) return false;
       const usagePercentage = (stats.totalDistance / shoe.maxDistance) * 100;
       return usagePercentage >= 80; // 80% or more of max distance
