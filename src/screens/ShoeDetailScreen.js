@@ -163,6 +163,18 @@ const ShoeDetailScreen = ({ route, navigation }) => {
 
       {/* Logic using shoeWithDetails.isActive */}
       {!showRetirementForm && shoeWithDetails.isActive && (
+      {/* Edit Button */}
+      {!showRetirementForm && (
+        <Button
+          title="Edit Shoe Details"
+          onPress={() => navigation.navigate('EditShoe', { shoeId: shoe.id })}
+          variant="outline" // Or choose another appropriate variant
+          icon="edit" // Using MaterialIcons name
+          style={styles.actionButton}
+        />
+      )}
+
+      {!showRetirementForm && shoe.isActive && (
         <Button
           title="Retire Shoes"
           onPress={() => setShowRetirementForm(true)}
