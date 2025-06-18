@@ -9,6 +9,7 @@ import ShoeListScreen from '../screens/ShoeListScreen';
 import ShoeDetailScreen from '../screens/ShoeDetailScreen';
 import RetiredShoesReportScreen from '../screens/RetiredShoesReportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import AddShoeScreen from '../screens/AddShoeScreen'; // Added import
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +51,11 @@ const AppNavigator = () => {
         name="ShoeDetail" 
         component={ShoeDetailScreen} 
         options={{ title: 'Shoe Details' }} 
+      />
+      <Stack.Screen
+        name="AddShoe" // Added Screen
+        component={AddShoeScreen}
+        options={{ title: 'Add New Shoe' }}
       />
       <Stack.Screen 
         name="RetiredShoesReport" 
