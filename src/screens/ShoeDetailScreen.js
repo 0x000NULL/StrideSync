@@ -158,6 +158,17 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         )}
       </View>
 
+      {/* Edit Button */}
+      {!showRetirementForm && (
+        <Button
+          title="Edit Shoe Details"
+          onPress={() => navigation.navigate('EditShoe', { shoeId: shoe.id })}
+          variant="outline" // Or choose another appropriate variant
+          icon="edit" // Using MaterialIcons name
+          style={styles.actionButton}
+        />
+      )}
+
       {!showRetirementForm && shoe.isActive && (
         <Button
           title="Retire Shoes"
