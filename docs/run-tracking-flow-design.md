@@ -18,52 +18,41 @@ RunFlowNavigator (Stack Navigator)
 ### 2.2 State Management
 
 #### 2.2.1 Store Structure
-```typescript
-interface RunState {
-  // Run Status
-  runStatus: 'idle' | 'preRun' | 'active' | 'paused' | 'saving' | 'complete';
-  
-  // Current Run Data
-  currentRun: Run | null;
-  
-  // Run History
-  runs: Run[];
-  
-  // UI State
-  selectedRunId: string | null;
-  isSaving: boolean;
-  lastError: Error | null;
-  
-  // Actions
-  startNewRun: (params: StartRunParams) => void;
-  pauseRun: () => void;
-  resumeRun: () => void;
-  stopRun: () => Promise<Run>;
-  saveRun: (run: Run) => Promise<void>;
-  discardRun: () => void;
-  loadRuns: () => Promise<void>;
-  deleteRun: (runId: string) => Promise<void>;
-  updateRun: (runId: string, updates: Partial<Run>) => Promise<void>;
-  
-  // Background Tracking
-  isTracking: boolean;
-  backgroundTaskRegistered: boolean;
-  locationUpdatesEnabled: boolean;
-  
-  // Settings
-  unitPreference: 'metric' | 'imperial';
-  theme: 'light' | 'dark' | 'system';
-  audioCues: {
-    enabled: boolean;
-    distanceInterval: number; // in meters
-    timeInterval: number; // in minutes
-  };
-  
-  // Error Handling
-  setError: (error: Error | null) => void;
-  clearError: () => void;
-}
-```
+```javascript
+/**
+ * @typedef {'idle'|'preRun'|'active'|'paused'|'saving'|'complete'} RunStatus
+ * @typedef {'metric'|'imperial'} UnitPreference
+ * @typedef {'light'|'dark'|'system'} ThemePreference
+ * @typedef {Object} AudioCues
+ * @property {boolean} enabled
+ * @property {number} distanceInterval - in meters
+ * @property {number} timeInterval - in minutes
+ * 
+ * @typedef {Object} RunState
+ * @property {RunStatus} runStatus
+ * @property {Object|null} currentRun
+ * @property {Array} runs
+ * @property {string|null} selectedRunId
+ * @property {boolean} isSaving
+ * @property {Error|null} lastError
+ * @property {Function} startNewRun - (params: Object) => void
+ * @property {Function} pauseRun - () => void
+ * @property {Function} resumeRun - () => void
+ * @property {Function} stopRun - () => Promise<Object>
+ * @property {Function} saveRun - (run: Object) => Promise<void>
+ * @property {Function} discardRun - () => void
+ * @property {Function} loadRuns - () => Promise<void>
+ * @property {Function} deleteRun - (runId: string) => Promise<void>
+ * @property {Function} updateRun - (runId: string, updates: Object) => Promise<void>
+ * @property {boolean} isTracking
+ * @property {boolean} backgroundTaskRegistered
+ * @property {boolean} locationUpdatesEnabled
+ * @property {UnitPreference} unitPreference
+ * @property {ThemePreference} theme
+ * @property {AudioCues} audioCues
+ * @property {Function} setError - (error: Error|null) => void
+ * @property {Function} clearError - () => void
+ */
 
 #### 2.2.2 State Persistence
 - **AsyncStorage** for offline support
@@ -87,71 +76,81 @@ interface RunState {
 ## 3. Data Models
 
 ### 3.1 Run Interface
-```typescript
-interface Run {
-  id: string;
-  startTime: Date;
-  endTime?: Date;
-  distance: number; // in meters
-  duration: number; // in seconds
-  pace: number; // seconds per kilometer
-  path: Array<{
-    latitude: number;
-    longitude: number;
-    timestamp: number;
-    altitude?: number;
-    speed?: number;
-    accuracy?: number; // GPS accuracy in meters
-    altitudeAccuracy?: number; // Altitude accuracy in meters
-    heading?: number; // Bearing in degrees
-    heartRate?: number; // BPM at this point
-  }>;
-  shoeId?: string;
-  notes?: string;
-  weather?: {
-    temperature?: number; // in Celsius
-    condition?: 'clear' | 'partly-cloudy' | 'cloudy' | 'rain' | 'snow' | 'thunderstorm' | 'fog' | 'windy';
-    humidity?: number; // percentage
-    windSpeed?: number; // in m/s
-    windDirection?: number; // degrees from North
-    pressure?: number; // in hPa
-  };
-  workoutType?: 'easy' | 'tempo' | 'interval' | 'long' | 'race' | 'recovery';
-  effort?: 1 | 2 | 3 | 4 | 5; // RPE scale
-  mood?: 'terrible' | 'bad' | 'neutral' | 'good' | 'great';
-  isPaused: boolean;
-  pausedDuration: number; // Total time paused in ms
-  elevationGain?: number; // in meters
-  elevationLoss?: number; // in meters
-  avgHeartRate?: number; // in BPM
-  maxHeartRate?: number; // in BPM
-  heartRateZones?: {
-    zone1: number; // Very light
-    zone2: number; // Light
-    zone3: number; // Moderate
-    zone4: number; // Hard
-    zone5: number; // Maximum
-  };
-  cadence?: number; // steps per minute
-  strideLength?: number; // in meters
-  trainingLoad?: number; // TRIMP score
-  tags?: string[]; // Custom tags for organization
-  isRace?: boolean;
-  raceType?: '5k' | '10k' | 'half-marathon' | 'marathon' | 'ultra' | 'other';
-  raceTime?: number; // in seconds, for goal tracking
-  isIndoor?: boolean; // Whether the run was on a treadmill
-  treadmillIncline?: number; // Incline percentage if on treadmill
-  surfaceType?: 'road' | 'track' | 'trail' | 'treadmill' | 'indoor';
-  perceivedEffort?: number; // 1-10 scale
-  temperatureFeelsLike?: number; // in Celsius
-  hydrationVolume?: number; // in ml
-  caloriesBurned?: number;
-  trainingPlanId?: string; // Reference to a training plan
-  workoutId?: string; // Reference to a specific workout in a plan
-  isFavorite?: boolean;
-  shoeMileageAtStart?: number; // Shoe's total mileage at run start
-  shoeMileageAtEnd?: number; // Shoe's total mileage at run end
-}
+```javascript
+/**
+ * @typedef {Object} LocationPoint
+ * @property {number} latitude
+ * @property {number} longitude
+ * @property {number} timestamp - Unix timestamp in milliseconds
+ * @property {number} [altitude] - In meters
+ * @property {number} [speed] - In meters per second
+ * @property {number} [accuracy] - GPS accuracy in meters
+ * @property {number} [altitudeAccuracy] - Altitude accuracy in meters
+ * @property {number} [heading] - Bearing in degrees from true north
+ * @property {number} [heartRate] - BPM at this point
+ *
+ * @typedef {Object} WeatherData
+ * @property {number} [temperature] - In Celsius
+ * @property {'clear'|'partly-cloudy'|'cloudy'|'rain'|'snow'|'thunderstorm'|'fog'|'windy'} [condition]
+ * @property {number} [humidity] - Percentage (0-100)
+ * @property {number} [windSpeed] - In m/s
+ * @property {number} [windDirection] - Degrees from North (0-360)
+ * @property {number} [pressure] - In hPa
+ *
+ * @typedef {Object} HeartRateZones
+ * @property {number} zone1 - Very light intensity
+ * @property {number} zone2 - Light intensity
+ * @property {number} zone3 - Moderate intensity
+ * @property {number} zone4 - Hard intensity
+ * @property {number} zone5 - Maximum intensity
+ *
+ * @typedef {'easy'|'tempo'|'interval'|'long'|'race'|'recovery'} WorkoutType
+ * @typedef {1|2|3|4|5} EffortLevel // RPE scale
+ * @typedef {'terrible'|'bad'|'neutral'|'good'|'great'} Mood
+ * @typedef {'5k'|'10k'|'half-marathon'|'marathon'|'ultra'|'other'} RaceType
+ * @typedef {'road'|'track'|'trail'|'treadmill'|'indoor'} SurfaceType
+ *
+ * @typedef {Object} Run
+ * @property {string} id - Unique identifier
+ * @property {Date} startTime - When the run started
+ * @property {Date} [endTime] - When the run ended
+ * @property {number} distance - In meters
+ * @property {number} duration - In seconds
+ * @property {number} pace - Seconds per kilometer
+ * @property {LocationPoint[]} path - Array of location points
+ * @property {string} [shoeId] - ID of shoe used
+ * @property {string} [notes] - User notes
+ * @property {WeatherData} [weather] - Weather conditions
+ * @property {WorkoutType} [workoutType]
+ * @property {EffortLevel} [effort] - Perceived exertion (RPE)
+ * @property {Mood} [mood] - User's mood after run
+ * @property {boolean} isPaused - Whether run is currently paused
+ * @property {number} pausedDuration - Total time paused in ms
+ * @property {number} [elevationGain] - In meters
+ * @property {number} [elevationLoss] - In meters
+ * @property {number} [avgHeartRate] - In BPM
+ * @property {number} [maxHeartRate] - In BPM
+ * @property {HeartRateZones} [heartRateZones]
+ * @property {number} [cadence] - Steps per minute
+ * @property {number} [strideLength] - In meters
+ * @property {number} [trainingLoad] - TRIMP score
+ * @property {string[]} [tags] - Custom tags
+ * @property {boolean} [isRace] - Whether this was a race
+ * @property {RaceType} [raceType]
+ * @property {number} [raceTime] - In seconds
+ * @property {boolean} [isIndoor] - Treadmill/indoor run
+ * @property {number} [treadmillIncline] - Percentage (0-100)
+ * @property {SurfaceType} [surfaceType]
+ * @property {number} [perceivedEffort] - 1-10 scale
+ * @property {number} [temperatureFeelsLike] - In Celsius
+ * @property {number} [hydrationVolume] - In ml
+ * @property {number} [caloriesBurned]
+ * @property {string} [trainingPlanId] - Reference to training plan
+ * @property {string} [workoutId] - Reference to workout in plan
+ * @property {boolean} [isFavorite]
+ * @property {number} [shoeMileageAtStart] - In meters
+ * @property {number} [shoeMileageAtEnd] - In meters
+ */
 ```
 
 ## 4. Screen Specifications

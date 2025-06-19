@@ -85,11 +85,11 @@
   - [x] Shoe data storage
   - [x] Usage statistics
 - [ ] Implement enhanced data model
-  - [ ] Update Run interface with new fields
+  - [ ] Update Run object structure with new fields
+  - [ ] Add JSDoc comments for all data models
   - [ ] Add data validation for new fields
   - [ ] Create migration for existing runs
   - [ ] Implement data transformation utilities
-  - [ ] Add TypeScript types for new fields
   - [ ] Update form components for new fields
   - [ ] Add data migration tests
 - [ ] Performance Optimization
@@ -137,11 +137,6 @@
   - [ ] Date/time utilities
 
 - [ ] Test state management
-  - [ ] Store actions and reducers
-  - [ ] Selectors and computed values
-  - [ ] State persistence
-  - [ ] Error handling
-
 ### Integration Testing
 - [ ] Set up Detox for E2E testing
   - [ ] Configure test environments
@@ -246,8 +241,11 @@
   - [ ] Add PR template
   - [ ] Document development workflow
 
+## 📋 Design Reference
+- [Run Tracking Flow Design](./docs/run-tracking-flow-design.md) - Detailed technical design for the run tracking feature
+
 ## 🔄 Next Steps
-1. Implement run tracking functionality
+1. Implement run tracking functionality according to design
 2. Complete shoe management screens
 3. Add tests for stores and components
 4. Set up CI/CD pipeline
