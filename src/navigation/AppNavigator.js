@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Screens
 import HomeScreen from '../screens/HomeScreen';
 import RunTrackerScreen from '../screens/RunTrackerScreen';
+import PreRunScreen from '../screens/run_tracking/PreRunScreen';
 import RunLogScreen from '../screens/RunLogScreen';
 import ShoeListScreen from '../screens/ShoeListScreen';
 import ShoeDetailScreen from '../screens/ShoeDetailScreen';
@@ -32,6 +33,11 @@ const AppNavigator = () => {
         name="Home" 
         component={HomeScreen} 
         options={{ title: 'StrideSync' }} 
+      />
+      <Stack.Screen 
+        name="PreRun" 
+        component={PreRunScreen} 
+        options={{ title: 'Start Run' }} 
       />
       <Stack.Screen 
         name="RunTracker" 

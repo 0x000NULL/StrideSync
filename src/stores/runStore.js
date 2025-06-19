@@ -1,3 +1,5 @@
+// Polyfill for crypto.getRandomValues() needed by uuid
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, parseISO } from 'date-fns';
 import { STORAGE_KEYS, saveData, loadData } from '../services/storage';

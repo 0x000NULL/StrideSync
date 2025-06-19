@@ -1,7 +1,15 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, View, Platform } from 'react-native';
+import PropTypes from 'prop-types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialIcons } from '@expo/vector-icons';
+
+// Debug helper
+const logError = (message, ...args) => {
+  if (__DEV__) {
+    console.error(`[Button] ${message}`, ...args);
+  }
+};
 
 const Button = ({
   title,
@@ -17,6 +25,14 @@ const Button = ({
   textStyle,
   ...rest
 }) => {
+  // Validate required props
+  if (title === undefined || title === null) {
+    logError('Button is missing required prop: title');
+  }
+  
+  if (onPress === undefined || onPress === null) {
+    logError('Button is missing required prop: onPress');
+  }
   const theme = useTheme();
 
   const getVariantStyles = () => {
@@ -163,6 +179,23 @@ const Button = ({
     const iconSize = size === 'large' ? 24 : size === 'small' ? 16 : 20;
     const iconColor = variantStyles.text?.color || theme.colors.text.light;
     
+    // If icon is a string, render MaterialIcons with that name
+    if (typeof icon === 'string') {
+      return (
+        <MaterialIcons 
+          name={icon} 
+          size={iconSize} 
+          color={iconColor}
+          style={[
+            iconPosition === 'left' && styles.iconLeft,
+            iconPosition === 'right' && styles.iconRight,
+            isIconOnly && { margin: 0 },
+          ]}
+        />
+      );
+    }
+    
+    // If icon is a React element, clone it with the appropriate props
     return React.cloneElement(icon, {
       size: iconSize,
       color: iconColor,
@@ -170,6 +203,7 @@ const Button = ({
         iconPosition === 'left' && styles.iconLeft,
         iconPosition === 'right' && styles.iconRight,
         isIconOnly && { margin: 0 },
+        icon.props?.style, // Preserve any existing styles
       ],
     });
   };
@@ -200,6 +234,32 @@ const Button = ({
       )}
     </TouchableOpacity>
   );
+};
+
+Button.propTypes = {
+  title: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'text', 'danger']),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  icon: PropTypes.string,
+  iconPosition: PropTypes.oneOf(['left', 'right']),
+  disabled: PropTypes.bool,
+  loading: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  style: PropTypes.object,
+  textStyle: PropTypes.object,
+};
+
+Button.defaultProps = {
+  variant: 'primary',
+  size: 'medium',
+  icon: null,
+  iconPosition: 'left',
+  disabled: false,
+  loading: false,
+  fullWidth: false,
+  style: {},
+  textStyle: {},
 };
 
 export default Button;

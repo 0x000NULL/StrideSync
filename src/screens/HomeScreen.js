@@ -262,7 +262,7 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.startButton}
-          onPress={() => navigation.navigate('RunTracker')}
+          onPress={() => navigation.navigate('PreRun')}
         >
           <MaterialCommunityIcons 
             name="run-fast" 
@@ -325,7 +325,7 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.noRunsText}>No runs recorded yet</Text>
               <TouchableOpacity 
                 style={styles.startRunButton}
-                onPress={() => navigation.navigate('RunTracker')}
+                onPress={() => navigation.navigate('PreRun')}
               >
                 <Text style={styles.startRunButtonText}>Start Your First Run</Text>
               </TouchableOpacity>
