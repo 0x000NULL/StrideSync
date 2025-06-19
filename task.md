@@ -54,10 +54,10 @@
   - [x] Sorting options
   - [x] Loading and error states
   - [x] Pull-to-refresh
-- [ ] Run tracking flow
-  - [ ] Run tracking screen
-  - [ ] Run summary screen
-  - [ ] Save run screen
+- [x] Run tracking flow
+  - [x] Run tracking screen
+  - [x] Run summary screen
+  - [x] Save run screen
 - [ ] Run details view
   - [ ] Run statistics
   - [ ] Map view with route

@@ -11,6 +11,8 @@ import RetiredShoesReportScreen from '../screens/RetiredShoesReportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AddShoeScreen from '../screens/AddShoeScreen'; // Added import
 import EditShoeScreen from '../screens/EditShoeScreen'; // Import EditShoeScreen
+import RunSummaryScreen from '../screens/RunSummaryScreen'; // Import RunSummaryScreen
+import SaveRunScreen from '../screens/SaveRunScreen'; // Import SaveRunScreen
 
 const Stack = createNativeStackNavigator();
 
@@ -72,6 +74,16 @@ const AppNavigator = () => {
         name="Settings" 
         component={SettingsScreen} 
         options={{ title: 'Settings' }} 
+      />
+      <Stack.Screen
+        name="RunSummary"
+        component={RunSummaryScreen}
+        options={{ title: 'Run Summary' }}
+      />
+      <Stack.Screen
+        name="SaveRun"
+        component={SaveRunScreen}
+        options={{ title: 'Save Run Details' }}
       />
     </Stack.Navigator>
   );
