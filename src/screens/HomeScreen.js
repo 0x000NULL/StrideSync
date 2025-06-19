@@ -244,7 +244,8 @@ const HomeScreen = ({ navigation }) => {
             title="This Week" 
             value={formatDistance(weeklyStats.totalDistance).value.toFixed(1)}
             unit={formatDistance(weeklyStats.totalDistance).unit}
-            icon={<MaterialCommunityIcons name="run" />}
+            icon="run"
+            iconType="material-community"
             color="#4CAF50"
             subtitle={`${weeklyStats.totalRuns} runs`}
           />
@@ -252,7 +253,8 @@ const HomeScreen = ({ navigation }) => {
             title="This Month" 
             value={formatDistance(monthlyStats.totalDistance).value.toFixed(1)}
             unit={formatDistance(monthlyStats.totalDistance).unit}
-            icon={<MaterialCommunityIcons name="calendar-month" />}
+            icon="calendar-month"
+            iconType="material-community"
             color="#2196F3"
             subtitle={`${monthlyStats.totalRuns} runs`}
           />

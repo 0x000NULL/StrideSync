@@ -699,15 +699,15 @@ export const createShoeStore = (set, get) => ({
         ? Math.min(100, Math.round(((usage.total || 0) / shoe.maxDistance) * 100))
         : null
     };
-  },
+  }),
   
-  getActiveShoes: () => {
-    return get().getFilteredShoes().filter(shoe => shoe.isActive);
-  },
+  getActiveShoes: memoized('getActiveShoes', () => 
+    get().getFilteredShoes().filter(shoe => shoe.isActive)
+  ),
   
-  getInactiveShoes: () => {
-    return get().getFilteredShoes().filter(shoe => !shoe.isActive);
-  },
+  getInactiveShoes: memoized('getInactiveShoes', () => 
+    get().getFilteredShoes().filter(shoe => !shoe.isActive)
+  ),
   
   // Get statistics for all shoes
   getAllShoesStats: () => {
