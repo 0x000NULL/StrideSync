@@ -101,7 +101,7 @@ const SaveRunScreen = ({ navigation }) => {
   }, [currentRun, runStatus, navigation, runName]);
 
 
-  const handleSaveRun = ()_=> {
+  const handleSaveRun = () => {
     if (!currentRun) {
       Alert.alert("Error", "No run data available to save.");
       return;

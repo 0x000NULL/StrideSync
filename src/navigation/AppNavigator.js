@@ -4,18 +4,25 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Screens
 import HomeScreen from '../screens/HomeScreen';
 import RunTrackerScreen from '../screens/RunTrackerScreen';
-import PreRunScreen from '../screens/run_tracking/PreRunScreen';
 import RunLogScreen from '../screens/RunLogScreen';
 import ShoeListScreen from '../screens/ShoeListScreen';
 import ShoeDetailScreen from '../screens/ShoeDetailScreen';
 import RetiredShoesReportScreen from '../screens/RetiredShoesReportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import AddShoeScreen from '../screens/AddShoeScreen'; // Added import
-import EditShoeScreen from '../screens/EditShoeScreen'; // Import EditShoeScreen
+import AddShoeScreen from '../screens/AddShoeScreen';
+import EditShoeScreen from '../screens/EditShoeScreen';
+
+// Run Flow Screens
+import PreRunScreen from '../screens/run_tracking/PreRunScreen';
+import ActiveRunScreen from '../screens/run_tracking/ActiveRunScreen';
+import PauseScreen from '../screens/run_tracking/PauseScreen';
+import RunSummaryScreen from '../screens/run_tracking/RunSummaryScreen';
+import SaveRunScreen from '../screens/run_tracking/SaveRunScreen';
 
 const Stack = createNativeStackNavigator();
 
-const AppNavigator = () => {
+// Main App Navigator with all regular screens
+const MainStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="Home"
@@ -33,11 +40,6 @@ const AppNavigator = () => {
         name="Home" 
         component={HomeScreen} 
         options={{ title: 'StrideSync' }} 
-      />
-      <Stack.Screen 
-        name="PreRun" 
-        component={PreRunScreen} 
-        options={{ title: 'Start Run' }} 
       />
       <Stack.Screen 
         name="RunTracker" 
@@ -60,7 +62,7 @@ const AppNavigator = () => {
         options={{ title: 'Shoe Details' }} 
       />
       <Stack.Screen
-        name="AddShoe" // Added Screen
+        name="AddShoe"
         component={AddShoeScreen}
         options={{ title: 'Add New Shoe' }}
       />
@@ -79,8 +81,57 @@ const AppNavigator = () => {
         component={SettingsScreen} 
         options={{ title: 'Settings' }} 
       />
+      {/* Run Flow Screens */}
+      <Stack.Screen 
+        name="PreRun" 
+        component={PreRunScreen} 
+        options={{ 
+          title: 'New Run',
+          headerShown: false,
+          presentation: 'modal',
+        }} 
+      />
+      <Stack.Screen 
+        name="ActiveRun" 
+        component={ActiveRunScreen} 
+        options={{ 
+          title: 'Run in Progress',
+          headerShown: true,
+          gestureEnabled: false,
+          headerBackTitle: 'Back',
+        }} 
+      />
+      <Stack.Screen 
+        name="Pause" 
+        component={PauseScreen} 
+        options={{ 
+          title: 'Run Paused',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="RunSummary" 
+        component={RunSummaryScreen} 
+        options={{ 
+          title: 'Run Summary',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="SaveRun" 
+        component={SaveRunScreen} 
+        options={{ 
+          title: 'Save Run',
+          headerShown: true,
+        }} 
+      />
     </Stack.Navigator>
   );
+};
+
+// Root Navigator that combines both main stack and run flow
+const AppNavigator = () => {
+  return <MainStack />;
 };
 
 export default AppNavigator;

@@ -3,18 +3,80 @@ import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { pauseRun, completeRunTracking, stopRun } from '../../stores/run_tracking/runSlice'; // Adjust path as needed
 
-// Placeholder Components
-const MapViewPlaceholder = ({ path }) => (
-  <View style={styles.mapView}>
-    <Text>MapView Placeholder</Text>
-    {path && path.length > 0 && (
-      <Text>Path points: {path.length}</Text>
-    )}
-    {path && path.length > 0 && (
-       <Text>Last Lat: {path[path.length-1].latitude.toFixed(4)} Lng: {path[path.length-1].longitude.toFixed(4)}</Text>
-    )}
-  </View>
-);
+// Map Components
+import MapView, { Polyline, Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+
+const RunMapView = ({ path }) => {
+  const [region, setRegion] = useState(null);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
+  // Request location permission when component mounts
+  useEffect(() => {
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        setHasLocationPermission(status === 'granted');
+        
+        if (status !== 'granted') {
+          console.log('Permission to access location was denied');
+          return;
+        }
+      } catch (err) {
+        console.warn('Error getting location permission:', err);
+      }
+    })();
+  }, []);
+
+  // Update map region when path changes
+  useEffect(() => {
+    if (path && path.length > 0) {
+      const lastPoint = path[path.length - 1];
+      setRegion({
+        latitude: lastPoint.latitude,
+        longitude: lastPoint.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [path]);
+
+  if (!hasLocationPermission) {
+    return (
+      <View style={[styles.mapView, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Location permission is required to track your run</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.mapView}>
+      <MapView
+        style={styles.map}
+        region={region}
+        showsUserLocation={true}
+        followsUserLocation={true}
+        showsMyLocationButton={true}
+        loadingEnabled={true}
+      >
+        {path && path.length > 1 && (
+          <Polyline
+            coordinates={path}
+            strokeColor="#0000ff"
+            strokeWidth={4}
+          />
+        )}
+        {path && path.length > 0 && (
+          <Marker
+            coordinate={path[path.length - 1]}
+            title="Current Location"
+            pinColor="blue"
+          />
+        )}
+      </MapView>
+    </View>
+  );
+};
 
 const StatsDisplay = ({ distance, duration, pace }) => (
   <View style={styles.statsDisplay}>
@@ -139,7 +201,7 @@ const ActiveRunScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <MapViewPlaceholder path={currentRun?.path} />
+      <RunMapView path={currentRun?.path} />
       <StatsDisplay distance={distance} duration={elapsedTime} pace={pace} />
       <ControlButtons
         onPause={handlePauseRun}
@@ -165,10 +227,12 @@ const styles = StyleSheet.create({
   },
   mapView: {
     height: 300,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
     marginBottom: 10,
+    overflow: 'hidden',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
   statsDisplay: {
     padding: 15,

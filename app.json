@@ -16,16 +16,31 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ethanaldrich.stridesync",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "StrideSync needs access to your location to track your runs accurately.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "StrideSync needs access to your location to track your runs in the background.",
+        "NSLocationAlwaysUsageDescription": "StrideSync needs access to your location to track your runs in the background.",
+        "UIBackgroundModes": ["location", "fetch"]
       }
     },
+
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ethanaldrich.stridesync"
+      "package": "com.ethanaldrich.stridesync",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
