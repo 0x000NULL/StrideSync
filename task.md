@@ -30,6 +30,17 @@
   - [x] Set up Zustand stores (run, shoe, settings)
   - [x] Configure persistence with AsyncStorage
   - [x] Create store structure and utilities
+- [ ] Implement enhanced state management
+  - [ ] Update RunState interface with new fields and actions
+  - [ ] Implement state persistence layer
+  - [ ] Add state validation and error handling
+  - [ ] Create background task management
+  - [ ] Implement state migration utilities
+  - [ ] Add state versioning support
+  - [ ] Create state debugging tools
+  - [ ] Add state reset functionality
+  - [ ] Implement state backup/restore
+  - [ ] Add state change logging (dev only)
 - [x] Integrate Zustand with HomeScreen
   - [x] Display real run statistics
   - [x] Show recent runs
@@ -73,6 +84,23 @@
   - [x] Run data storage
   - [x] Shoe data storage
   - [x] Usage statistics
+- [ ] Implement enhanced data model
+  - [ ] Update Run interface with new fields
+  - [ ] Add data validation for new fields
+  - [ ] Create migration for existing runs
+  - [ ] Implement data transformation utilities
+  - [ ] Add TypeScript types for new fields
+  - [ ] Update form components for new fields
+  - [ ] Add data migration tests
+- [ ] Performance Optimization
+  - [ ] Implement location point decimation
+  - [ ] Optimize map rendering performance
+  - [ ] Add data compression for storage
+  - [ ] Implement lazy loading for run history
+  - [ ] Optimize state updates with batching
+  - [ ] Add memory usage monitoring
+  - [ ] Implement adaptive location tracking
+  - [ ] Add battery optimization settings
 - [ ] Future: SQLite with ElectricSQL
   - [ ] Initialize database schema
   - [ ] Create data access layer
@@ -82,14 +110,90 @@
   - [ ] Handle data conflicts
   - [ ] Add offline status indicator
 
-## 🧪 Testing (Next Up)
-- [ ] Set up testing framework
-  - [ ] Configure Jest + React Testing Library
-  - [ ] Add test utilities
-- [ ] Write unit tests
-  - [ ] Test utility functions
-  - [ ] Test presentational components
-  - [ ] Test store actions and selectors
+## 🛡️ Error Handling
+- [ ] Implement error handling infrastructure
+  - [ ] Create error boundary components
+  - [ ] Set up error logging service
+  - [ ] Implement error reporting UI components
+  - [ ] Add error recovery mechanisms
+  - [ ] Create error monitoring dashboard
+  - [ ] Implement error analytics
+  - [ ] Add error localization
+  - [ ] Create error documentation
+
+## 🧪 Testing
+
+### Unit Testing
+- [ ] Set up Jest + React Testing Library
+  - [ ] Configure test environment
+  - [ ] Set up test coverage reporting
+  - [ ] Add snapshot testing
+  - [ ] Configure test mocking
+
+- [ ] Test utility functions
+  - [ ] Distance and pace calculations
+  - [ ] Unit conversions
+  - [ ] Data validation
+  - [ ] Date/time utilities
+
+- [ ] Test state management
+  - [ ] Store actions and reducers
+  - [ ] Selectors and computed values
+  - [ ] State persistence
+  - [ ] Error handling
+
+### Integration Testing
+- [ ] Set up Detox for E2E testing
+  - [ ] Configure test environments
+  - [ ] Set up test devices/emulators
+  - [ ] Create test data factories
+
+- [ ] Test critical user flows
+  - [ ] Complete run tracking
+  - [ ] Run history management
+  - [ ] Shoe tracking
+  - [ ] Settings configuration
+
+- [ ] Test error scenarios
+  - [ ] Error boundary handling
+  - [ ] Recovery flows
+  - [ ] Offline behavior
+  - [ ] Permission handling
+
+### Performance Testing
+- [ ] Set up performance monitoring
+  - [ ] Configure Flipper
+  - [ ] Set up React DevTools Profiler
+  - [ ] Add performance metrics collection
+
+- [ ] Performance test scenarios
+  - [ ] Long-running sessions
+  - [ ] Large run history
+  - [ ] Low-memory conditions
+  - [ ] Background/foreground switching
+
+### Test Automation
+- [ ] CI/CD Integration
+  - [ ] Set up GitHub Actions
+  - [ ] Configure automated test runs
+  - [ ] Set up test result reporting
+  - [ ] Enforce code coverage requirements
+
+- [ ] Visual Regression Testing
+  - [ ] Set up Maestro
+  - [ ] Create baseline screenshots
+  - [ ] Configure visual diffing
+
+### Manual Testing
+- [ ] Test Plan Documentation
+  - [ ] Create test cases
+  - [ ] Document test scenarios
+  - [ ] Set up test data
+
+- [ ] Exploratory Testing
+  - [ ] Usability testing
+  - [ ] Edge case exploration
+  - [ ] Cross-device testing
 - [ ] Write integration tests
   - [ ] Test navigation flows
   - [ ] Test user interactions
