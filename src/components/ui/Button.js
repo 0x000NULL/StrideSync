@@ -210,6 +210,7 @@ const Button = ({
 
   return (
     <TouchableOpacity
+      testID={`button-${title ? title.replace(/\s+/g, '-').toLowerCase() : 'icon'}`}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
