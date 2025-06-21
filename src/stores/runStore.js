@@ -2,6 +2,7 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, parseISO } from 'date-fns';
+import { haversineDistance } from '../utils/unitUtils';
 
 // Helper function to calculate pace in min/km
 export const calculatePace = (distance, duration) => {
@@ -142,7 +143,7 @@ export const createRunStore = (set, get) => ({
 
   addLocationPoint: (location) => {
     const { currentRun } = get();
-    if (!currentRun) return;
+    if (!currentRun || currentRun.isPaused) return;
 
     const newPoint = {
       latitude: location.coords.latitude,
@@ -153,10 +154,24 @@ export const createRunStore = (set, get) => ({
       speed: location.coords.speed,
     };
 
+    const newRoute = [...(currentRun.route || []), newPoint];
+    let newDistance = currentRun.distance || 0;
+
+    if (newRoute.length > 1) {
+      const lastPoint = newRoute[newRoute.length - 2];
+      const distanceIncrement = haversineDistance(lastPoint, newPoint) / 1000; // to kilometers
+      
+      // Add increment only if it's a reasonable value to filter out GPS jumps
+      if (distanceIncrement > 0.001 && distanceIncrement < 1) {
+        newDistance += distanceIncrement;
+      }
+    }
+
     set({
       currentRun: {
         ...currentRun,
-        route: [...(currentRun.route || []), newPoint],
+        route: newRoute,
+        distance: newDistance,
       },
     });
   },

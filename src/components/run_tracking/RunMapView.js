@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { useTheme } from '@react-navigation/native';
 
 const RunMapView = ({ path }) => {
+  const { colors } = useTheme();
   const [region, setRegion] = useState(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isFollowingUser, setIsFollowingUser] = useState(true);
@@ -48,7 +50,7 @@ const RunMapView = ({ path }) => {
   if (!hasLocationPermission) {
     return (
       <View style={[styles.mapView, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Location permission is required to track your run</Text>
+        <Text style={{ color: colors.text.secondary }}>Location permission is required to track your run</Text>
       </View>
     );
   }
@@ -70,7 +72,7 @@ const RunMapView = ({ path }) => {
         {path && path.length > 1 && (
           <Polyline
             coordinates={path}
-            strokeColor="#0000ff"
+            strokeColor={colors.primary}
             strokeWidth={4}
           />
         )}
@@ -91,10 +93,10 @@ const RunMapView = ({ path }) => {
       </MapView>
       {!isFollowingUser && (
         <TouchableOpacity 
-            style={styles.recenterButton}
+            style={[styles.recenterButton, { backgroundColor: colors.surface }]}
             onPress={() => setIsFollowingUser(true)}
         >
-            <Text style={styles.recenterText}>Recenter</Text>
+            <Text style={[styles.recenterText, { color: colors.primary }]}>Recenter</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -115,7 +117,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 20,
         right: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 20,
@@ -126,7 +127,6 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
     },
     recenterText: {
-        color: '#007AFF', // Blue color like system buttons
         fontWeight: 'bold',
     },
 });

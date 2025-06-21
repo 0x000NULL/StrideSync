@@ -45,3 +45,24 @@ export const toKilometers = (value, fromUnit) => {
 export const fromKilometers = (kmValue, toUnit) => {
   return toUnit === 'mi' ? kmValue * KM_TO_MI : kmValue;
 };
+
+/**
+ * Calculates the Haversine distance between two points on the Earth.
+ * @param {{latitude: number, longitude: number}} point1 - The first coordinate.
+ * @param {{latitude: number, longitude: number}} point2 - The second coordinate.
+ * @returns {number} The distance in meters.
+ */
+export const haversineDistance = (point1, point2) => {
+  const R = 6371e3; // Earth's radius in meters
+  const lat1 = point1.latitude * Math.PI / 180; // φ, λ in radians
+  const lat2 = point2.latitude * Math.PI / 180;
+  const deltaLat = (point2.latitude - point1.latitude) * Math.PI / 180;
+  const deltaLon = (point2.longitude - point1.longitude) * Math.PI / 180;
+
+  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // in meters
+};
