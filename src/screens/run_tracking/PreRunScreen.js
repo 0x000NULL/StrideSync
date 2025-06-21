@@ -103,7 +103,7 @@ const PreRunScreen = ({ navigation }) => {
     dispatch(beginRunTracking(runData));
 
     // Navigate to ActiveRunScreen (assuming it's part of the same navigator)
-    navigation.navigate('ActiveRun'); // Uncomment when navigation is fully set up
+    navigation.navigate('ActiveRun');
     console.log("Would navigate to ActiveRun screen now.");
   };
 

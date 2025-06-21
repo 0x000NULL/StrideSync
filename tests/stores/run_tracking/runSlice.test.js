@@ -18,12 +18,12 @@ import runReducer, {
   cancelActiveRun,
   // Assume setSelectedRunId is also exported if used in saveRun logic in tests
   setSelectedRunId,
-} from './runSlice';
-import AsyncStorage from '@react-NAMEREDACTED-async-storage/async-storage'; // Corrected import for mocking
-import * as backgroundLocationTask from '../../services/run_tracking/backgroundLocationTask';
+} from '../../../src/stores/run_tracking/runSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Corrected import for mocking
+import * as backgroundLocationTask from '../../../src/services/run_tracking/backgroundLocationTask';
 
 // Mock AsyncStorage
-jest.mock('@react-NAMEREDACTED-async-storage/async-storage', () => ({
+jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
@@ -31,17 +31,38 @@ jest.mock('@react-NAMEREDACTED-async-storage/async-storage', () => ({
 }));
 
 // Mock backgroundLocationTask services
-jest.mock('../../services/run_tracking/backgroundLocationTask', () => ({
-  ...jest.requireActual('../../services/run_tracking/backgroundLocationTask'), // Import actual constants like LOCATION_TASK_NAME if needed
+const mockActualBackgroundLocationTask = jest.requireActual('../../../src/services/run_tracking/backgroundLocationTask');
+jest.mock('../../../src/services/run_tracking/backgroundLocationTask', () => ({
+  ...mockActualBackgroundLocationTask, // Import actual constants like LOCATION_TASK_NAME if needed
   registerBackgroundLocationTaskAsync: jest.fn(),
   unregisterBackgroundLocationTaskAsync: jest.fn(),
 }));
 
 
 describe('runSlice reducer', () => {
+  // Define expected initial state structure for comparison,
+  // to avoid issues if the imported 'initialState' is problematic in the test environment.
+  const expectedInitialStateShape = {
+    runStatus: 'idle',
+    currentRun: null,
+    runs: [],
+    selectedRunId: null,
+    isSaving: false,
+    lastError: null,
+    isTracking: false,
+    backgroundTaskRegistered: false,
+    locationUpdatesEnabled: false,
+    hydrated: false,
+  };
+
   it('should return the initial state', () => {
-    expect(runReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+    // Compare the reducer's initial output against the expected shape.
+    expect(runReducer(undefined, { type: 'unknown' })).toEqual(expectedInitialStateShape);
   });
+
+  // For other tests that used the imported initialState, we might need to adapt them
+  // or trust that if the first test passes, the reducer's internal initialState is correct.
+  // For the rehydrateState test, we'll compare against the expectedInitialStateShape.runs
 
   describe('synchronous actions', () => {
     it('should handle startNewRun', () => {
@@ -220,9 +241,10 @@ describe('runSlice reducer', () => {
     });
 
     it('should handle rehydrateState with empty payload', () => {
-      const nextState = runReducer(initialState, rehydrateState(null));
-      expect(nextState.runs).toEqual(initialState.runs);
-      expect(nextState.currentRun).toEqual(initialState.currentRun);
+      // Pass expectedInitialStateShape to the reducer if its internal initialState is problematic for this test
+      const nextState = runReducer(expectedInitialStateShape, rehydrateState(null));
+      expect(nextState.runs).toEqual(expectedInitialStateShape.runs);
+      expect(nextState.currentRun).toEqual(expectedInitialStateShape.currentRun);
       expect(nextState.hydrated).toBe(true); // Still marks as hydrated
     });
 
