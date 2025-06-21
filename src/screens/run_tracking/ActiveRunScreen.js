@@ -1,191 +1,91 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { pauseRun, completeRunTracking, stopRun } from '../../stores/run_tracking/runSlice'; // Adjust path as needed
+import { useStore } from '../../stores/useStore';
 
-// Map Components
-import MapView, { Polyline, Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-
-const RunMapView = ({ path }) => {
-  const [region, setRegion] = useState(null);
-  const [hasLocationPermission, setHasLocationPermission] = useState(false);
-
-  // Request location permission when component mounts
-  useEffect(() => {
-    (async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        setHasLocationPermission(status === 'granted');
-        
-        if (status !== 'granted') {
-          console.log('Permission to access location was denied');
-          return;
-        }
-      } catch (err) {
-        console.warn('Error getting location permission:', err);
-      }
-    })();
-  }, []);
-
-  // Update map region when path changes
-  useEffect(() => {
-    if (path && path.length > 0) {
-      const lastPoint = path[path.length - 1];
-      setRegion({
-        latitude: lastPoint.latitude,
-        longitude: lastPoint.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      });
-    }
-  }, [path]);
-
-  if (!hasLocationPermission) {
-    return (
-      <View style={[styles.mapView, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Location permission is required to track your run</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.mapView}>
-      <MapView
-        style={styles.map}
-        region={region}
-        showsUserLocation={true}
-        followsUserLocation={true}
-        showsMyLocationButton={true}
-        loadingEnabled={true}
-      >
-        {path && path.length > 1 && (
-          <Polyline
-            coordinates={path}
-            strokeColor="#0000ff"
-            strokeWidth={4}
-          />
-        )}
-        {path && path.length > 0 && (
-          <Marker
-            coordinate={path[path.length - 1]}
-            title="Current Location"
-            pinColor="blue"
-          />
-        )}
-      </MapView>
-    </View>
-  );
-};
-
-const StatsDisplay = ({ distance, duration, pace }) => (
-  <View style={styles.statsDisplay}>
-    <Text style={styles.statText}>Distance: {distance.toFixed(2)} km</Text>
-    <Text style={styles.statText}>Duration: {formatDuration(duration)}</Text>
-    <Text style={styles.statText}>Pace: {pace ? pace.toFixed(2) + ' min/km' : '--:-- min/km'}</Text>
-  </View>
-);
-
-const ControlButtons = ({ onPause, onLap, onStop, isPaused }) => (
-  <View style={styles.controlButtons}>
-    <Button title={isPaused ? "Resume" : "Pause"} onPress={onPause} />
-    <Button title="Lap" onPress={onLap} disabled={isPaused} />
-    <Button title="Stop" onPress={onStop} color="red" />
-  </View>
-);
+// Import extracted components
+import RunMapView from '../../components/run_tracking/RunMapView';
+import StatsDisplay from '../../components/run_tracking/StatsDisplay';
+import ControlButtons from '../../components/run_tracking/ControlButtons';
 
 const BatteryOptimizationIndicator = ({ isActive }) => {
   if (!isActive) return null;
   return <Text style={styles.batteryIndicator}>Battery Optimization Active</Text>;
 };
 
-// Helper to format duration (seconds to HH:MM:SS)
-const formatDuration = (totalSeconds) => {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+const LapsDisplay = ({ laps }) => {
+  if (!laps || laps.length === 0) return null;
+
+  return (
+    <View style={styles.lapsContainer}>
+      <Text style={styles.lapsHeader}>Laps</Text>
+      {laps.map((lap, index) => {
+        const lapPace = lap.distance > 0 ? (lap.duration / 60) / lap.distance : 0;
+        const paceMinutes = Math.floor(lapPace);
+        const paceSeconds = Math.round((lapPace - paceMinutes) * 60);
+
+        return (
+          <View key={index} style={styles.lapItem}>
+            <Text>Lap {index + 1}</Text>
+            <Text>{lap.distance.toFixed(2)} km</Text>
+            <Text>{new Date(lap.duration * 1000).toISOString().substr(11, 8)}</Text>
+            <Text>{paceMinutes}:{paceSeconds.toString().padStart(2, '0')} /km</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
 };
 
 const ActiveRunScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const currentRun = useSelector(state => state.run.currentRun);
-  const runStatus = useSelector(state => state.run.runStatus);
-  const isTracking = useSelector(state => state.run.isTracking);
+  const currentRun = useStore(state => state.currentRun);
+  const { pauseRun, resumeRun, saveRun, addLap } = useStore(state => ({
+    pauseRun: state.pauseRun,
+    resumeRun: state.resumeRun,
+    saveRun: state.saveRun,
+    addLap: state.addLap,
+  }));
 
-
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     let timer;
-    if (runStatus === 'active' && currentRun?.startTime && isTracking) {
-      // Calculate initial elapsed time if run was already active (e.g. rehydrated)
-      const initialElapsed = (Date.now() - currentRun.startTime) / 1000 + (currentRun.pausedDuration ? currentRun.pausedDuration /1000 : 0) ;
-      setElapsedTime(initialElapsed);
-
-      timer = setInterval(() => {
-        setElapsedTime(prevTime => prevTime + 1);
-      }, 1000);
-    } else if (runStatus === 'paused' && currentRun?.startTime) {
-        // When paused, ensure elapsedTime reflects the state up to the pause.
-        const currentTotalDuration = (Date.now() - currentRun.startTime) / 1000;
-        const activeDuration = currentTotalDuration - (currentRun.pausedDuration ? currentRun.pausedDuration/1000 : 0);
-        // This needs more robust logic based on how pause duration is tracked in currentRun
-        // For now, if it's paused, we just display what was last calculated or a static value from currentRun.duration
-         setElapsedTime(currentRun.duration || 0);
-
-
+    if (currentRun && !currentRun.isPaused) {
+      timer = setInterval(() => setNow(Date.now()), 1000);
     } else {
       clearInterval(timer);
     }
     return () => clearInterval(timer);
-  }, [runStatus, currentRun, isTracking]);
+  }, [currentRun, currentRun?.isPaused]);
 
+  const elapsedTime = useMemo(() => {
+    if (!currentRun?.startTime) return 0;
+    
+    const startTime = new Date(currentRun.startTime).getTime();
+    
+    // If paused, endTime holds the time of the pause. Otherwise, use `now` for a live update.
+    const endTime = currentRun.isPaused && currentRun.endTime ? new Date(currentRun.endTime).getTime() : now;
+    
+    return (endTime - startTime) / 1000;
+  }, [currentRun, now]);
+  
+  const distance = currentRun?.distance || 0; // Get distance directly from the store
+  const pace = currentRun?.pace;
 
-  const distance = useMemo(() => {
-    // Basic distance calculation placeholder - replace with actual calculation from path
-    if (currentRun?.path && currentRun.path.length > 1) {
-      // This is a very rough placeholder. Real distance calculation is complex.
-      return currentRun.path.length * 0.01; // e.g. 10 meters per point
-    }
-    return currentRun?.distance || 0; // Assuming distance in km if directly from currentRun
-  }, [currentRun]);
-
-  const pace = useMemo(() => {
-    if (distance > 0 && elapsedTime > 0) {
-      return (elapsedTime / 60) / distance; // min/km
-    }
-    return null; // Return null instead of 0 for zero distance
-  }, [distance, elapsedTime]);
-
-  const handlePauseRun = () => {
-    if (runStatus === 'active') {
-      dispatch(pauseRun());
-      // Note: resumeRun action would be dispatched from PauseScreen or here if Pause button becomes Resume
-    } else if (runStatus === 'paused') {
-      // This screen might not handle resume, PauseScreen could.
-      // Or, if it does: dispatch(resumeRun());
-      console.log("Resuming run logic would be here or in PauseScreen");
-      // For now, let's assume PauseScreen handles resume, or button text changes
-      // and dispatches resumeRun. If this button is "Resume", it should dispatch resumeRun.
-      // This example assumes PauseScreen is separate.
-      navigation.navigate('Pause');
+  const handlePauseResume = () => {
+    if (currentRun?.isPaused) {
+      resumeRun();
+    } else {
+      pauseRun();
     }
   };
 
   const handleLap = () => {
-    console.log('Lap button pressed');
-    // Implement lap logic: store current time/distance, reset segment timer/distance
+    addLap();
   };
 
   const handleStopRun = () => {
     console.log('Stopping run...');
-    // Option 1: Dispatch completeRunTracking which handles unregistration and stopRun
-    dispatch(completeRunTracking({ endTime: Date.now(), finalDistance: distance, finalDuration: elapsedTime }));
-    // Option 2: Dispatch stopRun directly if completeRunTracking is not fully set up
-    // dispatch(stopRun({ endTime: Date.now(), finalDistance: distance, finalDuration: elapsedTime }));
-
-    // Navigate to SaveRun screen instead of directly to RunSummary
+    saveRun();
     navigation.navigate('SaveRun');
   };
 
@@ -217,28 +117,27 @@ const ActiveRunScreen = ({ navigation }) => {
     );
   }
 
-  // Show "Resume" on button if paused, "Pause" if active
-  const isPaused = runStatus === 'paused';
-
   return (
     <ScrollView style={styles.container}>
-      <RunMapView path={currentRun?.path} />
+      <RunMapView path={currentRun?.route} />
       <StatsDisplay distance={distance} duration={elapsedTime} pace={pace} />
       <ControlButtons
-        onPause={handlePauseRun}
+        onPause={handlePauseResume}
         onLap={handleLap}
         onStop={handleStopRun}
-        isPaused={isPaused}
+        isPaused={currentRun.isPaused}
       />
+      <LapsDisplay laps={currentRun.laps} />
       <BatteryOptimizationIndicator isActive={true} /> {/* Placeholder */}
-      <View style={styles.debugInfo}>
-        <Text>Run Status: {runStatus}</Text>
-        <Text>Is Tracking: {isTracking ? 'Yes' : 'No'}</Text>
-        <Text>Path points: {currentRun?.path?.length || 0}</Text>
-        {currentRun?.startTime ? (
-          <Text>Start Time: {new Date(currentRun.startTime).toLocaleTimeString()}</Text>
-        ) : null}
-      </View>
+      {__DEV__ && (
+        <View style={styles.debugInfo}>
+            <Text>Run Status: {currentRun.isPaused ? 'Paused' : 'Active'}</Text>
+            <Text>Path points: {currentRun?.route?.length || 0}</Text>
+            {currentRun?.startTime ? (
+            <Text>Start Time: {new Date(currentRun.startTime).toLocaleTimeString()}</Text>
+            ) : null}
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -248,38 +147,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  mapView: {
-    height: 300,
-    width: '100%',
-    marginBottom: 10,
-    overflow: 'hidden',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  statsDisplay: {
-    padding: 15,
-    backgroundColor: '#fff',
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  statText: {
-    fontSize: 18,
-    marginBottom: 5,
-  },
-  controlButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    marginBottom: 10,
-  },
   batteryIndicator: {
     textAlign: 'center',
     padding: 5,
     backgroundColor: 'orange',
     color: 'white',
     marginBottom: 10,
+  },
+  lapsContainer: {
+    padding: 15,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  lapsHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  lapItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   debugInfo: {
     padding: 10,

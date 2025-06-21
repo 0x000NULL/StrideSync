@@ -117,6 +117,7 @@ RunFlowNavigator (Stack Navigator)
  * @property {number} duration - In seconds
  * @property {number} pace - Seconds per kilometer
  * @property {LocationPoint[]} path - Array of location points
+ * @property {Object[]} laps - Array of { distance, duration }
  * @property {string} [shoeId] - ID of shoe used
  * @property {string} [notes] - User notes
  * @property {WeatherData} [weather] - Weather conditions
@@ -175,26 +176,32 @@ RunFlowNavigator (Stack Navigator)
 - On mount, if `runType` is 'outdoor', the screen requests foreground location permissions using `expo-location`.
 - It uses `Location.watchPositionAsync` to monitor the GPS signal and updates the `gpsStatus` state in real-time. The location subscription is managed in a `useEffect` hook to ensure it's properly started and stopped based on the `runType`.
 - The "Start Run" button is disabled for outdoor runs until a 'good' GPS signal is acquired.
-- On "Start Run" press, it calls the `beginRunTracking` action from the `runStore` with the configured settings and navigates the user to the `ActiveRunScreen`.
+- On "Start Run" press, it calls the `startRun` action from the `runStore` with the configured settings and navigates the user to the `ActiveRunScreen`.
 
 ### 4.2 Active Run Screen
-**Purpose**: Real-time run tracking
+**Purpose**: Display real-time run data, provide controls, and show a live map of the user's route.
 
-**Components**:
-- MapView (react-native-maps)
-- StatsDisplay (current pace, distance, time, heart rate)
-- ControlButtons (pause, lap, stop)
-- BatteryOptimizationIndicator
+**UI Components**:
+- `RunMapView`: A dedicated component that encapsulates the `react-native-maps` functionality. It displays the user's route via a `Polyline`, adds a `Marker` for the start and current positions, and includes a "Recenter" button to re-engage user following after a manual pan.
+- `StatsDisplay`: A component that shows the primary run metrics: total distance, elapsed duration, and current pace.
+- `ControlButtons`: A row of buttons providing core run controls: a toggleable "Pause"/"Resume" button, a "Lap" button, and a "Stop" button.
+- `LapsDisplay`: A list that appears and grows as the user records laps, showing the distance, duration, and pace for each lap.
+- `BatteryOptimizationIndicator`: A banner to inform the user if any battery-saving measures are active (placeholder).
 
-**State**:
-- currentRun: Run
-- currentLocation: LocationObject | null
-- isTracking: boolean
-- currentSplit: number
-- splits: Array<{ distance: number, time: number }>
+**State Management (via Zustand hooks)**:
+- The screen is almost entirely driven by the `currentRun` object from the `runStore`.
+- A single `useStore` hook provides access to the `currentRun` object and all necessary actions: `pauseRun`, `resumeRun`, `addLap`, and `saveRun`.
+- A local `useState` hook with a `setInterval` is used only to trigger re-renders every second, ensuring the displayed `elapsedTime` is always current. The duration itself is derived directly from `currentRun.startTime` and the current time.
+
+**Core Logic**:
+- The component renders the live run data from the `currentRun` object.
+- The "Pause"/"Resume" button toggles the `isPaused` state in the `runStore` by calling `pauseRun()` or `resumeRun()`.
+- The "Lap" button calls the `addLap()` action, which appends a new lap object (containing the current distance and duration) to the `currentRun.laps` array in the store.
+- The "Stop" button calls the `saveRun()` action, which finalizes the run data in the store, and then navigates the user to the `SaveRunScreen` for final review and notes.
+- If no `currentRun` is active, the screen displays a message and automatically navigates the user back to the home screen.
 
 ### 4.3 Pause Screen
-**Purpose**: Temporary run interruption
+**Purpose**: Temporary run interruption. The current implementation handles pause/resume directly on the `ActiveRunScreen`, making a separate `PauseScreen` potentially redundant unless more complex pause-state functionality is required.
 
 **Components**:
 - RunStatsSummary

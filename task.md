@@ -69,7 +69,15 @@
   - [x] Pre-run screen
     - [x] Shoe selector
     - [x] GPS integration
-  - [ ] Active run screen
+  - [x] Active run screen
+    - [x] Refactor to use Zustand for state management
+    - [ ] Implement accurate distance calculation (Haversine)
+    - [x] Simplify timer logic to be derived from state
+    - [x] Fix pause/resume flow to be a simple toggle
+    - [x] Implement lap functionality
+    - [x] Extract sub-components (MapView, StatsDisplay) into separate files
+    - [ ] Apply global theme for UI consistency
+    - [x] Enhance map with start marker and follow-user toggle
   - [ ] Pause screen
   - [ ] Run summary screen
   - [ ] Save run screen

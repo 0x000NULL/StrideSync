@@ -105,6 +105,7 @@ export const createRunStore = (set, get) => ({
       notes: '',
       shoeId: null,
       route: [], // Array of { latitude, longitude, timestamp }
+      laps: [], // Array of { distance, duration }
       isPaused: false,
       ...initialData,
     };
@@ -156,6 +157,27 @@ export const createRunStore = (set, get) => ({
       currentRun: {
         ...currentRun,
         route: [...(currentRun.route || []), newPoint],
+      },
+    });
+  },
+
+  addLap: () => {
+    const { currentRun } = get();
+    if (!currentRun || currentRun.isPaused) return;
+
+    // Calculate current duration
+    const startTime = new Date(currentRun.startTime).getTime();
+    const duration = (Date.now() - startTime) / 1000;
+
+    const newLap = {
+      distance: currentRun.distance,
+      duration: duration,
+    };
+
+    set({
+      currentRun: {
+        ...currentRun,
+        laps: [...(currentRun.laps || []), newLap],
       },
     });
   },
