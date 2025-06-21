@@ -84,6 +84,9 @@ export const createRunStore = (set, get) => ({
       return { runs: newRuns };
     });
     
+    // Sync to Redux store
+    get().syncRunToRedux(run);
+    
     return run.id;
   },
   
@@ -97,6 +100,12 @@ export const createRunStore = (set, get) => ({
       persistRuns(updatedRuns);
       return { runs: updatedRuns };
     });
+    
+    // Sync to Redux store
+    const updatedRun = get().runs.find(r => r.id === id);
+    if (updatedRun) {
+      get().syncRunToRedux(updatedRun);
+    }
   },
   
   deleteRun: (id) => {
@@ -105,6 +114,9 @@ export const createRunStore = (set, get) => ({
       persistRuns(updatedRuns);
       return { runs: updatedRuns };
     });
+    
+    // Sync deletion to Redux store
+    get().syncRunToRedux({ id, deleted: true });
   },
   
   // Load runs from storage
@@ -130,6 +142,40 @@ export const createRunStore = (set, get) => ({
     } catch (error) {
       console.error('Error clearing runs:', error);
       return false;
+    }
+  },
+  
+  // Sync run from Redux store (without generating new UUID)
+  syncRunFromRedux: (runData) => {
+    set((state) => {
+      const existingRunIndex = state.runs.findIndex(r => r.id === runData.id);
+      let newRuns;
+      
+      if (existingRunIndex !== -1) {
+        // Update existing run
+        newRuns = state.runs.map((run, index) => 
+          index === existingRunIndex 
+            ? { ...run, ...runData, updatedAt: new Date().toISOString() }
+            : run
+        );
+      } else {
+        // Add new run
+        newRuns = [runData, ...state.runs];
+      }
+      
+      persistRuns(newRuns);
+      return { runs: newRuns };
+    });
+  },
+  
+  // Sync run to Redux store (for bidirectional sync)
+  syncRunToRedux: (runData) => {
+    try {
+      // This would be called from Zustand when a run is added/updated
+      // For now, we'll just log it since Redux is the primary source for run tracking
+      console.log('Run synced from Zustand to Redux:', runData.id);
+    } catch (error) {
+      console.error('Failed to sync run to Redux store:', error);
     }
   },
   

@@ -21,7 +21,7 @@ import SaveRunScreen from '../screens/run_tracking/SaveRunScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Main App Navigator with all regular screens
+// Main App Navigator with all screens
 const MainStack = () => {
   return (
     <Stack.Navigator
@@ -81,14 +81,14 @@ const MainStack = () => {
         component={SettingsScreen} 
         options={{ title: 'Settings' }} 
       />
-      {/* Run Flow Screens */}
+      
+      {/* Run Flow Screens with specific presentation modes */}
       <Stack.Screen 
         name="PreRun" 
         component={PreRunScreen} 
         options={{ 
           title: 'New Run',
           headerShown: false,
-          presentation: 'modal',
         }} 
       />
       <Stack.Screen 
@@ -98,7 +98,7 @@ const MainStack = () => {
           title: 'Run in Progress',
           headerShown: true,
           gestureEnabled: false,
-          headerBackTitle: 'Back',
+          headerBackVisible: false, // Prevent going back during active run
         }} 
       />
       <Stack.Screen 
@@ -107,14 +107,7 @@ const MainStack = () => {
         options={{ 
           title: 'Run Paused',
           headerShown: true,
-        }} 
-      />
-      <Stack.Screen 
-        name="RunSummary" 
-        component={RunSummaryScreen} 
-        options={{ 
-          title: 'Run Summary',
-          headerShown: true,
+          presentation: 'modal', // Pause should also be a modal
         }} 
       />
       <Stack.Screen 
@@ -123,13 +116,23 @@ const MainStack = () => {
         options={{ 
           title: 'Save Run',
           headerShown: true,
+          presentation: 'modal', // This should be a modal
+        }} 
+      />
+      <Stack.Screen 
+        name="RunSummary" 
+        component={RunSummaryScreen} 
+        options={{ 
+          title: 'Run Summary',
+          headerShown: true,
+          headerBackVisible: false, // Prevent going back to SaveRun
         }} 
       />
     </Stack.Navigator>
   );
 };
 
-// Root Navigator that combines both main stack and run flow
+// Root Navigator
 const AppNavigator = () => {
   return <MainStack />;
 };

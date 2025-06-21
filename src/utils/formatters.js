@@ -20,7 +20,7 @@ export const formatDistance = (meters, withUnit = true) => {
  * @returns {string} Formatted pace string (e.g., "4:30 /km")
  */
 export const formatPace = (secondsPerKm) => {
-  if (!secondsPerKm) return '--';
+  if (!secondsPerKm || secondsPerKm <= 0) return '--:-- /km';
   
   const minutes = Math.floor(secondsPerKm / 60);
   const seconds = Math.round(secondsPerKm % 60);
@@ -32,20 +32,12 @@ export const formatPace = (secondsPerKm) => {
  * @param {number} seconds - Duration in seconds
  * @returns {string} Formatted duration string (e.g., "1h 23m" or "45m 30s")
  */
-export const formatDuration = (seconds) => {
-  if (!seconds && seconds !== 0) return '--';
-  
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.round(seconds % 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${remainingSeconds.toString().padStart(2, '0')}s`;
-  } else {
-    return `${remainingSeconds}s`;
-  }
+export const formatDuration = (totalSeconds) => {
+  if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
 /**
@@ -115,3 +107,5 @@ export const formatWithPlus = (num) => {
   if (num === null || num === undefined) return '--';
   return num > 0 ? `+${num}` : num.toString();
 };
+
+

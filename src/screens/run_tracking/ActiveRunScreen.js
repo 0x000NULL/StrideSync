@@ -82,7 +82,7 @@ const StatsDisplay = ({ distance, duration, pace }) => (
   <View style={styles.statsDisplay}>
     <Text style={styles.statText}>Distance: {distance.toFixed(2)} km</Text>
     <Text style={styles.statText}>Duration: {formatDuration(duration)}</Text>
-    <Text style={styles.statText}>Pace: {pace.toFixed(2)} min/km</Text>
+    <Text style={styles.statText}>Pace: {pace ? pace.toFixed(2) + ' min/km' : '--:-- min/km'}</Text>
   </View>
 );
 
@@ -94,9 +94,10 @@ const ControlButtons = ({ onPause, onLap, onStop, isPaused }) => (
   </View>
 );
 
-const BatteryOptimizationIndicator = ({ isActive }) => (
-  isActive ? <Text style={styles.batteryIndicator}>Battery Optimization Active</Text> : null
-);
+const BatteryOptimizationIndicator = ({ isActive }) => {
+  if (!isActive) return null;
+  return <Text style={styles.batteryIndicator}>Battery Optimization Active</Text>;
+};
 
 // Helper to format duration (seconds to HH:MM:SS)
 const formatDuration = (totalSeconds) => {
@@ -154,7 +155,7 @@ const ActiveRunScreen = ({ navigation }) => {
     if (distance > 0 && elapsedTime > 0) {
       return (elapsedTime / 60) / distance; // min/km
     }
-    return 0;
+    return null; // Return null instead of 0 for zero distance
   }, [distance, elapsedTime]);
 
   const handlePauseRun = () => {
@@ -184,14 +185,34 @@ const ActiveRunScreen = ({ navigation }) => {
     // Option 2: Dispatch stopRun directly if completeRunTracking is not fully set up
     // dispatch(stopRun({ endTime: Date.now(), finalDistance: distance, finalDuration: elapsedTime }));
 
-    navigation.navigate('RunSummary');
+    // Navigate to SaveRun screen instead of directly to RunSummary
+    navigation.navigate('SaveRun');
   };
 
   if (!currentRun) {
+    // If no active run, navigate back to Home
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      }, 2000); // Give user 2 seconds to see the message
+      
+      return () => clearTimeout(timer);
+    }, [navigation]);
+
     return (
-      <View style={styles.container}>
-        <Text>No active run data. Returning to PreRun or Home...</Text>
-        {/* Add a button to navigate back if appropriate, or handle in useEffect */}
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.noRunText}>No active run found</Text>
+        <Text style={styles.noRunSubtext}>Returning to home screen...</Text>
+        <Button 
+          title="Go to Home" 
+          onPress={() => navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          })}
+        />
       </View>
     );
   }
@@ -214,7 +235,9 @@ const ActiveRunScreen = ({ navigation }) => {
         <Text>Run Status: {runStatus}</Text>
         <Text>Is Tracking: {isTracking ? 'Yes' : 'No'}</Text>
         <Text>Path points: {currentRun?.path?.length || 0}</Text>
-         {currentRun?.startTime && <Text>Start Time: {new Date(currentRun.startTime).toLocaleTimeString()}</Text>}
+        {currentRun?.startTime ? (
+          <Text>Start Time: {new Date(currentRun.startTime).toLocaleTimeString()}</Text>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -261,7 +284,16 @@ const styles = StyleSheet.create({
   debugInfo: {
     padding: 10,
     backgroundColor: '#eee',
-  }
+  },
+  noRunText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  noRunSubtext: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
 });
 
 export default ActiveRunScreen;

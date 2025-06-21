@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Storage keys
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   RUNS: '@StrideSync:runs',
   SHOES: '@StrideSync:shoes',
   SHOE_USAGE: '@StrideSync:shoeUsage',

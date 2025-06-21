@@ -96,7 +96,7 @@ const SaveRunScreen = ({ navigation }) => {
     } else if (runStatus !== 'saving') {
       // If there's no currentRun and we are not in 'saving' status (which might be transiently nulling currentRun)
       // then perhaps the user navigated here incorrectly.
-      Alert.alert("No Run Data", "There is no active run to save.", [{ text: "OK", onPress: () => navigation.navigate('PreRun') }]);
+      Alert.alert("No Run Data", "There is no active run to save.", [{ text: "OK", onPress: () => navigation.navigate('Home') }]);
     }
   }, [currentRun, runStatus, navigation, runName]);
 
@@ -115,18 +115,36 @@ const SaveRunScreen = ({ navigation }) => {
       weather: { ...(currentRun.weather || {}), condition: weather }, // Merge with existing weather data if any
       effort,
       mood,
+      // Ensure proper data mapping for distance and duration
+      distance: (currentRun.finalDistance || currentRun.distance || 0) * 1000, // Convert km to meters
+      duration: currentRun.finalDuration || currentRun.duration || 0, // Use finalDuration if available
       // Potentially add export preferences to metadata if needed, or handle export here
       // For now, export toggles are UI only.
       status: 'completed', // Ensure status is marked as completed
       endTime: currentRun.endTime || Date.now(), // Ensure endTime is set
     };
 
-    console.log('Saving run:', finalRunData);
+    console.log('=== RUN DATA STRUCTURE DEBUG ===');
+    console.log('Current run raw data:', JSON.stringify(currentRun, null, 2));
+    console.log('Final run data to save:', JSON.stringify(finalRunData, null, 2));
+    console.log('Distance:', finalRunData.distance || finalRunData.finalDistance);
+    console.log('Duration:', finalRunData.duration || finalRunData.finalDuration);
+    console.log('Start time:', finalRunData.startTime);
+    console.log('End time:', finalRunData.endTime);
+
+    console.log('Saving run:', finalRunData.name, 'with ID:', finalRunData.id);
     dispatch(saveRun(finalRunData)); // This action should add to runs array and clear currentRun
     dispatch(setSelectedRunId(finalRunData.id)); // Set this for RunSummaryScreen
 
-    // Navigate to RunSummaryScreen with the ID of the saved run
-    navigation.navigate('RunSummary', { runId: finalRunData.id });
+    // Instead of navigating to RunSummary from modal, reset the stack and navigate
+    // This prevents modal chain issues
+    navigation.reset({
+      index: 1,
+      routes: [
+        { name: 'Home' },
+        { name: 'RunSummary', params: { runId: finalRunData.id } }
+      ],
+    });
   };
 
   const handleDiscard = () => {
@@ -139,7 +157,11 @@ const SaveRunScreen = ({ navigation }) => {
           text: "Discard",
           onPress: () => {
             dispatch(cancelActiveRun()); // This should also unregister background tasks
-            navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
+            // Reset navigation stack to Home to avoid modal navigation issues
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            });
           },
           style: "destructive"
         },
@@ -152,7 +174,7 @@ const SaveRunScreen = ({ navigation }) => {
         if (!currentRun && runStatus !== 'idle' && runStatus !== 'saving') {
             // runStatus idle means it was discarded, saving is a brief moment currentRun might be cleared by saveRun
             Alert.alert("Run Ended", "The active run session has ended.", [
-                { text: "OK", onPress: () => navigation.navigate('PreRun') }
+                { text: "OK", onPress: () => navigation.navigate('Home') }
             ]);
         }
     }, [currentRun, runStatus, navigation]);

@@ -24,7 +24,7 @@ const StatsGrid = ({ run }) => {
     if (run?.distance > 0 && run?.duration > 0) {
       return (run.duration / 60) / (run.distance / 1000); // min/km, assuming distance in meters
     }
-    return 0;
+    return null; // Return null instead of 0 for zero distance
   }, [run?.distance, run?.duration]);
 
   return (
@@ -40,7 +40,7 @@ const StatsGrid = ({ run }) => {
       </View>
       <View style={styles.statItem}>
         <Text style={styles.statLabel}>Average Pace:</Text>
-        <Text style={styles.statValue}>{pace?.toFixed(2) || 'N/A'} min/km</Text>
+        <Text style={styles.statValue}>{pace ? pace.toFixed(2) + ' min/km' : '--:-- min/km'}</Text>
       </View>
       <View style={styles.statItem}>
         <Text style={styles.statLabel}>Elevation Gain:</Text>
@@ -101,23 +101,31 @@ const RunSummaryScreen = ({ navigation, route }) => {
      runToDisplayId = currentRun.id;
   }
 
-
   const runs = useSelector(state => state.run.runs);
+  
   const runDetails = useMemo(() => {
-    if (!runToDisplayId) return null;
+    if (!runToDisplayId) {
+      console.log('No run ID to display');
+      return null;
+    }
+    
     // If the run was just completed and is in currentRun, use that.
     if (currentRun && currentRun.id === runToDisplayId && (runStatus === 'complete' || runStatus === 'saving')) {
+        console.log('Using currentRun for display');
         return currentRun;
     }
-    return runs.find(r => r.id === runToDisplayId);
+    
+    const foundRun = runs.find(r => r.id === runToDisplayId);
+    console.log('Looking for run ID:', runToDisplayId);
+    console.log('Available runs:', runs.map(r => ({ id: r.id, name: r.name })));
+    console.log('Found run:', foundRun ? { id: foundRun.id, name: foundRun.name } : 'NOT FOUND');
+    
+    return foundRun;
   }, [runToDisplayId, runs, currentRun, runStatus]);
 
   const handleDone = () => {
-    // Navigate to a main screen, e.g., a Run Log or Home screen
-    // This depends on your app's navigation structure
-    navigation.popToTop(); // Example: Go to the top of the current stack
-    // Or navigate to a specific tab/navigator:
-    // navigation.navigate('MainAppTabs', { screen: 'RunLog' });
+    // Navigate back to the Home screen
+    navigation.navigate('Home');
   };
 
   if (!runDetails) {

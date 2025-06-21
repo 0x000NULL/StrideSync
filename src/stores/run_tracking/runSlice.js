@@ -66,6 +66,25 @@ const saveRelevantState = async (state) => {
   }
 };
 
+// Utility function to sync run to Zustand store
+const syncRunToZustand = (runData) => {
+  try {
+    // Dynamically import the Zustand store to avoid circular dependencies
+    const { useStore } = require('../useStore');
+    const zustandStore = useStore.getState();
+    
+    // Use the dedicated sync method
+    if (zustandStore.syncRunFromRedux) {
+      zustandStore.syncRunFromRedux(runData);
+      console.log('Synced run to Zustand store:', runData.id);
+    } else {
+      console.warn('Zustand store syncRunFromRedux method not found');
+    }
+  } catch (error) {
+    console.error('Failed to sync run to Zustand store:', error);
+  }
+};
+
 // THUNKS for run lifecycle incorporating background tasks
 export const beginRunTracking = createAsyncThunk(
   'run/beginTracking',
@@ -138,6 +157,23 @@ const runSlice = createSlice({
         // e.g., only rehydrate currentRun if the app wasn't in an active/paused state.
         // For now, a simple rehydration. If app closed mid-run, this would restore it.
         state.currentRun = action.payload.currentRun || state.currentRun;
+        
+        // Sync loaded runs to Zustand store
+        if (action.payload.runs && action.payload.runs.length > 0) {
+          try {
+            const { useStore } = require('../useStore');
+            const zustandStore = useStore.getState();
+            if (zustandStore.syncRunFromRedux) {
+              // Sync each run from Redux to Zustand
+              action.payload.runs.forEach(run => {
+                zustandStore.syncRunFromRedux(run);
+              });
+              console.log('Synced', action.payload.runs.length, 'runs to Zustand store');
+            }
+          } catch (error) {
+            console.error('Failed to sync loaded runs to Zustand store:', error);
+          }
+        }
       }
       state.hydrated = true;
     },
@@ -186,8 +222,12 @@ const runSlice = createSlice({
       state.currentRun = null; // Clear current run after saving
       state.runStatus = 'idle';
       state.isSaving = false;
+      
+      console.log('Run saved to Redux store:', action.payload.name, '- Total runs:', state.runs.length);
+      
       // Save state after saving a run
       saveRelevantState(state);
+      syncRunToZustand(action.payload);
     },
     discardRun: (state) => {
       state.currentRun = null;
@@ -204,6 +244,17 @@ const runSlice = createSlice({
         state.runStatus = 'idle';
       }
       saveRelevantState(state);
+      // Sync deletion to Zustand store
+      try {
+        const { useStore } = require('../useStore');
+        const zustandStore = useStore.getState();
+        if (zustandStore.deleteRun) {
+          zustandStore.deleteRun(action.payload);
+          console.log('Synced run deletion to Zustand store:', action.payload);
+        }
+      } catch (error) {
+        console.error('Failed to sync run deletion to Zustand store:', error);
+      }
     },
     updateRun: (state, action) => { // payload: { runId, updates }
       const index = state.runs.findIndex(run => run.id === action.payload.runId);
@@ -214,6 +265,17 @@ const runSlice = createSlice({
         state.currentRun = { ...state.currentRun, ...action.payload.updates };
       }
       saveRelevantState(state);
+      // Sync update to Zustand store
+      try {
+        const { useStore } = require('../useStore');
+        const zustandStore = useStore.getState();
+        if (zustandStore.updateRun) {
+          zustandStore.updateRun(action.payload.runId, action.payload.updates);
+          console.log('Synced run update to Zustand store:', action.payload.runId);
+        }
+      } catch (error) {
+        console.error('Failed to sync run update to Zustand store:', error);
+      }
     },
     setError: (state, action) => {
       state.lastError = action.payload;
@@ -226,6 +288,9 @@ const runSlice = createSlice({
     },
     setLocationUpdatesEnabled: (state, action) => {
       state.locationUpdatesEnabled = action.payload;
+    },
+    setSelectedRunId: (state, action) => {
+      state.selectedRunId = action.payload;
     },
     addLocationToCurrentRun: (state, action) => {
       console.log('addLocationToCurrentRun payload:', action.payload); // Temporary Log
@@ -279,6 +344,7 @@ export const {
   updateRun,
   setBackgroundTaskRegistered,
   setLocationUpdatesEnabled,
+  setSelectedRunId,
   addLocationToCurrentRun,
   setError,
   clearError,
