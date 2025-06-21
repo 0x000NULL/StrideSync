@@ -65,6 +65,12 @@ export const createRunStore = (set, get) => ({
   sortBy: 'date',
   sortOrder: 'desc',
 
+  // Selector to get a single run by ID
+  getRunById: (id) => {
+    const runs = get().runs;
+    return runs.find((run) => run.id === id);
+  },
+
   // Actions
   setFilters: (filters) => set({ filters: { ...get().filters, ...filters } }),
   
@@ -344,10 +350,6 @@ export const createRunStore = (set, get) => ({
   },
 
   // Selectors
-  getRunById: (id) => {
-    return get().runs.find((run) => run.id === id);
-  },
-
   getRunsByShoe: (shoeId) => {
     return get().runs.filter((run) => run.shoeId === shoeId);
   },

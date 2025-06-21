@@ -11,6 +11,7 @@ import RetiredShoesReportScreen from '../screens/RetiredShoesReportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AddShoeScreen from '../screens/AddShoeScreen';
 import EditShoeScreen from '../screens/EditShoeScreen';
+import RunDetailScreen from '../screens/RunDetailScreen';
 
 // Run Flow Screens
 import PreRunScreen from '../screens/run_tracking/PreRunScreen';
@@ -50,6 +51,11 @@ const MainStack = () => {
         name="RunLog" 
         component={RunLogScreen} 
         options={{ title: 'Run Log' }} 
+      />
+      <Stack.Screen 
+        name="RunDetails" 
+        component={RunDetailScreen} 
+        options={{ title: 'Run Details' }} 
       />
       <Stack.Screen 
         name="ShoeList" 

@@ -61,3 +61,8 @@ export const useShoeStats = (shoeId) =>
         : null,
     };
   });
+
+// Convenience hooks to mirror older naming
+export const useRunStore = (selector) => useStore(selector);
+export const useShoeStore = (selector) => useStore(selector);
+export const useSettingsStore = (selector) => useStore(selector);
