@@ -30,17 +30,17 @@
   - [x] Set up Zustand stores (run, shoe, settings)
   - [x] Configure persistence with AsyncStorage
   - [x] Create store structure and utilities
-- [ ] Implement enhanced state management
-  - [ ] Update RunState interface with new fields and actions
-  - [ ] Implement state persistence layer
-  - [ ] Add state validation and error handling
-  - [ ] Create background task management
-  - [ ] Implement state migration utilities
-  - [ ] Add state versioning support
-  - [ ] Create state debugging tools
-  - [ ] Add state reset functionality
-  - [ ] Implement state backup/restore
-  - [ ] Add state change logging (dev only)
+- [x] Implement enhanced state management
+  - [x] Update RunState interface with new fields and actions
+  - [x] Implement state persistence layer
+  - [x] Add state validation and error handling
+  - [x] Create background task management
+  - [x] Implement state migration utilities
+  - [x] Add state versioning support
+  - [x] Create state debugging tools
+  - [x] Add state reset functionality
+  - [x] Implement state backup/restore
+  - [x] Add state change logging (dev only)
 - [x] Integrate Zustand with HomeScreen
   - [x] Display real run statistics
   - [x] Show recent runs
@@ -66,7 +66,11 @@
   - [x] Loading and error states
   - [x] Pull-to-refresh
 - [ ] Run tracking flow
-  - [ ] Run tracking screen
+  - [x] Pre-run screen
+    - [x] Shoe selector
+    - [x] GPS integration
+  - [ ] Active run screen
+  - [ ] Pause screen
   - [ ] Run summary screen
   - [ ] Save run screen
 - [ ] Run details view

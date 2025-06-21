@@ -38,12 +38,11 @@ RunFlowNavigator (Stack Navigator)
  * @property {Function} startNewRun - (params: Object) => void
  * @property {Function} pauseRun - () => void
  * @property {Function} resumeRun - () => void
- * @property {Function} stopRun - () => Promise<Object>
- * @property {Function} saveRun - (run: Object) => Promise<void>
+ * @property {Function} stopRun - () => void
+ * @property {Function} saveRun - (run: Object) => void
  * @property {Function} discardRun - () => void
- * @property {Function} loadRuns - () => Promise<void>
- * @property {Function} deleteRun - (runId: string) => Promise<void>
- * @property {Function} updateRun - (runId: string, updates: Object) => Promise<void>
+ * @property {Function} deleteRun - (runId: string) => void
+ * @property {Function} updateRun - (runId: string, updates: Object) => void
  * @property {boolean} isTracking
  * @property {boolean} backgroundTaskRegistered
  * @property {boolean} locationUpdatesEnabled
@@ -55,10 +54,10 @@ RunFlowNavigator (Stack Navigator)
  */
 
 #### 2.2.2 State Persistence
-- **AsyncStorage** for offline support
-  - Persist runs, settings, and app state
-  - Implement data versioning for migrations
-  - Use JSON serialization with compression for large run data
+- **Zustand `persist` middleware** is used for all offline storage.
+  - The entire app state (runs, shoes, settings) is persisted to **AsyncStorage**.
+  - The middleware handles data serialization and hydration automatically.
+  - Versioning is managed within the middleware configuration to handle state migrations.
 
 #### 2.2.3 Background Tasks
 - **expo-task-manager** for continuous tracking
@@ -156,21 +155,27 @@ RunFlowNavigator (Stack Navigator)
 ## 4. Screen Specifications
 
 ### 4.1 Pre-run Screen
-**Purpose**: Configure run settings before starting
+**Purpose**: Configure run settings before starting.
 
-**Components**:
-- ShoeSelector (with quick add)
-- RunTypeSelector (outdoor/indoor)
-- GoalInput (time/distance/open)
-- AudioCuesToggle
-- GPSStatusIndicator
+**UI Components**:
+- `ShoeSelector`: A modal-based component to select an active shoe from the user's collection.
+- `RunTypeSelector`: A button group to toggle between 'Outdoor' and 'Indoor' runs.
+- `GoalInput`: Allows setting a goal for the run (open-ended, distance-based, or time-based).
+- `AudioCuesToggle`: A switch to enable or disable audio feedback during the run.
+- `GPSStatusIndicator`: Displays the real-time status of the GPS signal ('Searching', 'Good', 'Poor') when in 'Outdoor' mode. This component is hidden for 'Indoor' runs.
 
-**State**:
-- selectedShoeId: string | null
-- runType: 'outdoor' | 'indoor'
-- goal: { type: 'time' | 'distance' | 'open', value?: number }
-- audioCuesEnabled: boolean
-- gpsStatus: 'searching' | 'good' | 'poor' | 'unavailable'
+**State Management (via Zustand hooks)**:
+- `selectedShoeId`: Stored via `useState`, holds the ID of the chosen shoe.
+- `runType`: `useState` hook to manage 'outdoor' vs. 'indoor'.
+- `goal`: `useState` hook for the goal object `{ type, value }`.
+- `audioCuesEnabled`: `useState` boolean for the audio cues switch.
+- `gpsStatus`: `useState` to hold the current GPS status string.
+
+**Core Logic**:
+- On mount, if `runType` is 'outdoor', the screen requests foreground location permissions using `expo-location`.
+- It uses `Location.watchPositionAsync` to monitor the GPS signal and updates the `gpsStatus` state in real-time. The location subscription is managed in a `useEffect` hook to ensure it's properly started and stopped based on the `runType`.
+- The "Start Run" button is disabled for outdoor runs until a 'good' GPS signal is acquired.
+- On "Start Run" press, it calls the `beginRunTracking` action from the `runStore` with the configured settings and navigates the user to the `ActiveRunScreen`.
 
 ### 4.2 Active Run Screen
 **Purpose**: Real-time run tracking

@@ -1,17 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { format, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
-import { saveData, loadData } from '../services/storage';
 
 const EMPTY_SHOE_USAGE = Object.freeze({ total: 0, monthly: {} });
-
-// Storage keys
-const STORAGE_KEYS = {
-  RUNS: '@StrideSync:runs',
-  SHOES: '@StrideSync:shoes',
-  SHOE_USAGE: '@StrideSync:shoeUsage',
-  SETTINGS: '@StrideSync:settings',
-  VERSION: '@StrideSync:version',
-};
 
 // Cache for memoized selectors
 const statsCache = new Map();
@@ -39,32 +29,6 @@ const memoized = (prefix, fn) => (...args) => {
   return result;
 };
 
-const PERSIST_DEBOUNCE_MS = 500;
-let persistShoesTimeout = null;
-let persistShoeUsageTimeout = null;
-
-const persistShoes = (shoes) => {
-  if (persistShoesTimeout) {
-    clearTimeout(persistShoesTimeout);
-  }
-  
-  persistShoesTimeout = setTimeout(() => {
-    saveData(STORAGE_KEYS.SHOES, shoes).catch(console.error);
-    persistShoesTimeout = null;
-  }, PERSIST_DEBOUNCE_MS);
-};
-
-const persistShoeUsage = (shoeUsage) => {
-  if (persistShoeUsageTimeout) {
-    clearTimeout(persistShoeUsageTimeout);
-  }
-  
-  persistShoeUsageTimeout = setTimeout(() => {
-    saveData(STORAGE_KEYS.SHOE_USAGE, shoeUsage).catch(console.error);
-    persistShoeUsageTimeout = null;
-  }, PERSIST_DEBOUNCE_MS);
-};
-
 export const createShoeStore = (set, get) => ({
   // State
   shoes: [],
@@ -89,7 +53,7 @@ export const createShoeStore = (set, get) => ({
   updateShoeMileage: (run) => {
     if (!run.shoeId || !run.distance) return;
     
-    const { shoes, shoeUsage } = get();
+    const { shoes } = get();
     const shoe = shoes.find(s => s.id === run.shoeId);
     if (!shoe) return;
     
@@ -97,21 +61,20 @@ export const createShoeStore = (set, get) => ({
     const monthYear = format(runDate, 'yyyy-MM');
     
     // Update monthly usage
-    const updatedUsage = {
-      ...shoeUsage,
-      [shoe.id]: {
-        ...(shoeUsage[shoe.id] || {}),
-        [monthYear]: (shoeUsage[shoe.id]?.[monthYear] || 0) + run.distance,
-        total: (shoeUsage[shoe.id]?.total || 0) + run.distance,
-        lastUsed: Math.max(shoeUsage[shoe.id]?.lastUsed || 0, runDate.getTime())
+    set((state) => ({
+      shoeUsage: {
+        ...state.shoeUsage,
+        [shoe.id]: {
+          ...(state.shoeUsage[shoe.id] || {}),
+          [monthYear]: (state.shoeUsage[shoe.id]?.[monthYear] || 0) + run.distance,
+          total: (state.shoeUsage[shoe.id]?.total || 0) + run.distance,
+          lastUsed: Math.max(state.shoeUsage[shoe.id]?.lastUsed || 0, runDate.getTime())
+        }
       }
-    };
-    
-    set({ shoeUsage: updatedUsage });
-    persistShoeUsage(updatedUsage);
+    }));
     
     // Auto-retire shoe if over max distance
-    const currentMileage = updatedUsage[shoe.id]?.total || 0;
+    const currentMileage = get().shoeUsage[shoe.id]?.total || 0;
     if (shoe.isActive && shoe.maxDistance > 0 && currentMileage >= shoe.maxDistance) {
       get().retireShoe(shoe.id, 'Automatically retired: Reached maximum distance');
     }
@@ -248,9 +211,10 @@ export const createShoeStore = (set, get) => ({
     
     if (shoe.maxDistance > 0 && weeklyAverage > 0) {
       const remainingWeeks = (shoe.maxDistance - totalDistance) / weeklyAverage;
-      const retirementDate = new Date(lastRun);
-      retirementDate.setDate(retirementDate.getDate() + Math.ceil(remainingWeeks * 7));
-      estimatedRetirementDate = retirementDate.toISOString();
+      if (isFinite(remainingWeeks)) {
+        estimatedRetirementDate = new Date();
+        estimatedRetirementDate.setDate(now.getDate() + remainingWeeks * 7);
+      }
     }
     
     // Calculate pace statistics if available
@@ -264,9 +228,9 @@ export const createShoeStore = (set, get) => ({
       : 0;
     
     // Calculate average heart rate if available
-    const runsWithHR = shoeRuns.filter(run => run.averageHeartRate);
+    const runsWithHR = shoeRuns.filter(run => run.avgHeartRate);
     const averageHeartRate = runsWithHR.length > 0
-      ? Math.round(runsWithHR.reduce((sum, run) => sum + run.averageHeartRate, 0) / runsWithHR.length)
+      ? Math.round(shoeRuns.reduce((sum, run) => sum + (run.avgHeartRate || 0), 0) / shoeRuns.length) || 0
       : 0;
     
     return {
@@ -523,163 +487,87 @@ export const createShoeStore = (set, get) => ({
       });
   },
   
-  // Load data from storage
-  loadShoes: async () => {
-    try {
-      set({ isLoading: true });
-      const [shoes, shoeUsage] = await Promise.all([
-        loadData(STORAGE_KEYS.SHOES, []),
-        loadData(STORAGE_KEYS.SHOE_USAGE, {})
-      ]);
-      
-      set({ 
-        shoes,
-        shoeUsage,
-        isLoading: false 
-      });
-      
-      return { shoes, shoeUsage };
-    } catch (error) {
-      console.error('Error loading shoes:', error);
-      set({ error: 'Failed to load shoes', isLoading: false });
-      return { shoes: [], shoeUsage: {} };
-    }
-  },
-  
-  // Clear all data (for testing/development)
-  clearAllShoes: async () => {
-    try {
-      await Promise.all([
-        saveData(STORAGE_KEYS.SHOES, []),
-        saveData(STORAGE_KEYS.SHOE_USAGE, {})
-      ]);
-      
-      set({ 
-        shoes: [],
-        shoeUsage: {}
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error clearing shoes:', error);
-      return false;
-    }
-  },
-  
-  // Import/Export functionality
-  exportShoes: async () => {
-    const { shoes, shoeUsage } = get();
-    return {
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
-      shoes,
-      shoeUsage
-    };
-  },
-  
-  importShoes: async (data) => {
-    if (!data || !Array.isArray(data.shoes) || typeof data.shoeUsage !== 'object') {
-      throw new Error('Invalid import data');
-    }
-    
-    await Promise.all([
-      saveData(STORAGE_KEYS.SHOES, data.shoes),
-      saveData(STORAGE_KEYS.SHOE_USAGE, data.shoeUsage)
-    ]);
-    
-    set({
-      shoes: data.shoes,
-      shoeUsage: data.shoeUsage
-    });
-    
-    return true;
-  },
-  
   // Add a new shoe
   addShoe: (shoeData) => {
     const newShoe = {
       id: uuidv4(),
-      name: '',
-      brand: '',
-      model: '',
-      purchaseDate: new Date().toISOString(),
-      initialDistance: 0, // km
-      maxDistance: 800, // km
-      isActive: true,
-      notes: '',
-      imageUri: null,
+      ...shoeData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      ...shoeData,
+      isActive: true,
+      retirementDate: null,
+      retirementReason: null,
     };
 
-    set((state) => {
-      const newShoes = [newShoe, ...state.shoes];
-      persistShoes(newShoes);
-      return { shoes: newShoes };
-    });
+    set((state) => ({ shoes: [newShoe, ...state.shoes] }));
 
-    return newShoe.id;
+    return newShoe;
   },
 
+  // Update an existing shoe
   updateShoe: (id, updates) => {
-    set((state) => {
-      const updatedShoes = state.shoes.map((shoe) =>
-        shoe.id === id 
-          ? { 
-              ...shoe, 
-              ...updates, 
-              updatedAt: new Date().toISOString() 
-            } 
+    set((state) => ({
+      shoes: state.shoes.map((shoe) =>
+        shoe.id === id ? { ...shoe, ...updates, updatedAt: new Date().toISOString() } : shoe
+      ),
+    }));
+  },
+
+  // Retire a shoe
+  retireShoe: (id, reason) => {
+    set((state) => ({
+      shoes: state.shoes.map((shoe) =>
+        shoe.id === id
+          ? {
+              ...shoe,
+              isActive: false,
+              retirementDate: new Date().toISOString(),
+              retirementReason: reason,
+              updatedAt: new Date().toISOString(),
+            }
           : shoe
-      );
-      persistShoes(updatedShoes);
-      return { shoes: updatedShoes };
-    });
+      ),
+    }));
   },
 
-  deleteShoe: async (id) => {
-    // First, remove shoeId from any runs that reference it
-    const { runs, updateRun } = get();
-    await Promise.all(
-      runs
-        .filter((run) => run.shoeId === id)
-        .map((run) => updateRun(run.id, { shoeId: null }))
-    );
-
-    // Then delete the shoe
-    set((state) => {
-      const updatedShoes = state.shoes.filter((shoe) => shoe.id !== id);
-      persistShoes(updatedShoes);
-      
-      // Also clean up shoe usage data
-      const { shoeUsage } = state;
-      const { [id]: _, ...remainingUsage } = shoeUsage;
-      persistShoeUsage(remainingUsage);
-      
-      return { 
-        shoes: updatedShoes,
-        shoeUsage: remainingUsage 
-      };
-    });
-  },
-
-  toggleShoeActive: (id) => {
-    set((state) => {
-      const updatedShoes = state.shoes.map((shoe) =>
-        shoe.id === id 
-          ? { 
-              ...shoe, 
-              isActive: !shoe.isActive,
-              updatedAt: new Date().toISOString() 
-            } 
+  // Un-retire a shoe
+  unretireShoe: (id) => {
+    set((state) => ({
+      shoes: state.shoes.map((shoe) =>
+        shoe.id === id
+          ? {
+              ...shoe,
+              isActive: true,
+              retirementDate: null,
+              retirementReason: null,
+              updatedAt: new Date().toISOString(),
+            }
           : shoe
-      );
-      persistShoes(updatedShoes);
-      return { shoes: updatedShoes };
-    });
+      ),
+    }));
   },
 
+  // Delete a shoe
+  deleteShoe: (id) => {
+    set((state) => ({
+      shoes: state.shoes.filter((shoe) => shoe.id !== id),
+      shoeUsage: Object.fromEntries(
+        Object.entries(state.shoeUsage).filter(([shoeId]) => shoeId !== id)
+      ),
+    }));
+  },
+
+  // Clear all shoes (for testing/development)
+  clearAllShoes: () => {
+    set({ shoes: [], shoeUsage: {} });
+  },
+  
+  // Get all brands
+  getBrands: memoized('getBrands', () => {
+    const { shoes } = get();
+    return Array.from(new Set(shoes.map(shoe => shoe.brand)));
+  }),
+  
   // Selectors
   getShoeById: memoized('getShoeById', (id) => {
     const shoe = get().shoes.find((shoe) => shoe.id === id);

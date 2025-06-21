@@ -8,11 +8,15 @@ Learn how to track your runs and analyze your performance with StrideSync.
    - Tap the large "Start Run" button
    - Or select "New Run" from the Runs tab
 
-2. **Run Settings**
-   - Select your shoes (optional but recommended)
-   - Choose run type: Outdoor, Treadmill, or Indoor Track
-   - Set a distance or time goal (optional)
-   - Enable audio cues if desired
+2. **Preparing Your Run**
+   On the "Prepare Your Run" screen, you can set up your session:
+   - **Select Your Shoe**: Tap "Select a Shoe" to bring up a list of your active running shoes. Choosing a shoe helps you track its mileage automatically.
+   - **Choose Run Type**:
+     - **Outdoor**: For runs outside where GPS signal is available.
+     - **Indoor**: For treadmill or indoor track runs where GPS is not used.
+   - **Set a Goal**: You can start an open-ended run or set a specific goal for **Distance** or **Time**.
+   - **Enable Audio Cues**: Toggle this switch on to receive spoken feedback about your pace and distance at regular intervals during your run.
+   - **Check GPS (for Outdoor Runs)**: Before you start, the app will show your GPS signal status. For best accuracy, wait for the status to turn "Good".
 
 3. **During Your Run**
    - View real-time stats: distance, pace, duration, and more

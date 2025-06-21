@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Switch, ScrollView, Button } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { useStoreContext } from '../providers/StoreProvider';
+import { useStore } from '../../stores/useStore';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 
 const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
@@ -23,15 +23,11 @@ const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
 };
 
 const SettingsScreen = () => {
-  const theme = useTheme();
-  // Use the store context
-  const store = useStoreContext();
-  
-  if (!store) {
-    return null; // or a loading indicator
-  }
-  
-  const { settings, updateSettings } = store;
+  const { theme, setTheme } = useTheme();
+  const settings = useStore((state) => state.settings);
+  const updateSettings = useStore((state) => state.updateSettings);
+  const backupState = useStore((state) => state.backupState);
+  const restoreState = useStore((state) => state.restoreState);
   
   // Destructure with defaults
   const { 
@@ -47,9 +43,7 @@ const SettingsScreen = () => {
   
   // Handle theme toggle
   const handleThemeToggle = (value) => {
-    updateSettings({ 
-      theme: value ? 'dark' : 'light' 
-    });
+    setTheme(value ? 'dark' : 'light');
   };
   
   const styles = StyleSheet.create({
@@ -92,6 +86,9 @@ const SettingsScreen = () => {
       color: theme.colors.text.primary,
       flex: 1,
       marginRight: theme.spacing.md,
+    },
+    button: {
+      marginTop: 10,
     },
     versionText: {
       ...theme.typography.caption,
@@ -213,6 +210,16 @@ const SettingsScreen = () => {
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
               thumbColor={theme.colors.background}
             />
+          </View>
+        </View>
+        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Data Management</Text>
+          <View style={styles.settingItem}>
+            <Button title="Backup Data" onPress={backupState} color={theme.colors.primary} />
+          </View>
+          <View style={styles.settingItem}>
+            <Button title="Restore Data" onPress={restoreState} color={theme.colors.primary} />
           </View>
         </View>
         

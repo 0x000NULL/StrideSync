@@ -1,0 +1,69 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Card } from '../ui/Card';
+import { LoadingIndicator } from '../ui/LoadingIndicator';
+
+const GPSStatusIndicator = ({ gpsStatus }) => {
+  const getStatusStyle = () => {
+    switch (gpsStatus) {
+      case 'good':
+        return styles.good;
+      case 'poor':
+        return styles.poor;
+      case 'searching':
+      default:
+        return styles.searching;
+    }
+  };
+
+  const statusText = gpsStatus.charAt(0).toUpperCase() + gpsStatus.slice(1);
+
+  return (
+    <Card style={styles.card}>
+      <View style={styles.container}>
+        <Text style={styles.label}>GPS Status</Text>
+        <View style={styles.statusContainer}>
+          {gpsStatus === 'searching' && <LoadingIndicator size="small" />}
+          <Text style={[styles.statusText, getStatusStyle()]}>{statusText}</Text>
+        </View>
+      </View>
+    </Card>
+  );
+};
+
+const styles = StyleSheet.create({
+  card: {
+    padding: 15,
+    marginBottom: 15,
+  },
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  searching: {
+    color: '#f39c12', // Orange
+  },
+  good: {
+    color: '#2ecc71', // Green
+  },
+  poor: {
+    color: '#e74c3c', // Red
+  },
+});
+
+export default GPSStatusIndicator; 

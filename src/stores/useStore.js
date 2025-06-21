@@ -6,6 +6,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createRunStore } from './runStore';
 import { createShoeStore } from './shoeStore';
 import { createSettingsStore } from './settingsStore';
+import { createBackupSlice, createMigrate } from './stateMiddlewares';
+
+// Define migrations
+const migrations = {
+  2: (state) => {
+    // Example migration: add a new property to all runs
+    return {
+      ...state,
+      runs: state.runs.map((run) => ({
+        ...run,
+        newProperty: 'default value',
+      })),
+    };
+  },
+};
 
 // Create the main store by combining all stores
 export const useStore = create(
@@ -14,6 +29,7 @@ export const useStore = create(
       ...createRunStore(set, get),
       ...createShoeStore(set, get),
       ...createSettingsStore(set, get),
+      ...createBackupSlice(set, get),
     }),
     {
       name: 'stride-sync-storage', // unique name for the storage key
@@ -23,8 +39,10 @@ export const useStore = create(
         runs: state.runs,
         shoes: state.shoes,
         settings: state.settings,
+        shoeUsage: state.shoeUsage,
       }),
-      version: 1, // increment this to clear storage on version mismatch
+      version: 2, // increment this to trigger migrations
+      migrate: createMigrate(migrations),
     }
   )
 );

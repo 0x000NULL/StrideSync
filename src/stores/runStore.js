@@ -2,7 +2,6 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, parseISO } from 'date-fns';
-import { STORAGE_KEYS, saveData, loadData } from '../services/storage';
 
 // Helper function to calculate pace in min/km
 export const calculatePace = (distance, duration) => {
@@ -30,22 +29,6 @@ const calculatePeriodStats = (runs, startDate, endDate) => {
     averagePace: calculatePace(totalDistance, totalDuration),
     totalRuns,
   };
-};
-
-const PERSIST_DEBOUNCE_MS = 500;
-let persistTimeout = null;
-
-const persistRuns = (runs) => {
-  // Cancel any pending persist operations
-  if (persistTimeout) {
-    clearTimeout(persistTimeout);
-  }
-  
-  // Debounce the save operation
-  persistTimeout = setTimeout(() => {
-    saveData(STORAGE_KEYS.RUNS, runs).catch(console.error);
-    persistTimeout = null;
-  }, PERSIST_DEBOUNCE_MS);
 };
 
 export const createRunStore = (set, get) => ({
@@ -84,105 +67,30 @@ export const createRunStore = (set, get) => ({
       updatedAt: new Date().toISOString(),
     };
     
-    set((state) => {
-      const newRuns = [run, ...state.runs];
-      persistRuns(newRuns);
-      return { runs: newRuns };
-    });
-    
-    // Sync to Redux store
-    get().syncRunToRedux(run);
+    set((state) => ({ runs: [run, ...state.runs] }));
     
     return run.id;
   },
   
   updateRun: (id, updates) => {
-    set((state) => {
-      const updatedRuns = state.runs.map((run) =>
+    set((state) => ({
+      runs: state.runs.map((run) =>
         run.id === id
           ? { ...run, ...updates, updatedAt: new Date().toISOString() }
           : run
-      );
-      persistRuns(updatedRuns);
-      return { runs: updatedRuns };
-    });
-    
-    // Sync to Redux store
-    const updatedRun = get().runs.find(r => r.id === id);
-    if (updatedRun) {
-      get().syncRunToRedux(updatedRun);
-    }
+      ),
+    }));
   },
   
   deleteRun: (id) => {
-    set((state) => {
-      const updatedRuns = state.runs.filter((run) => run.id !== id);
-      persistRuns(updatedRuns);
-      return { runs: updatedRuns };
-    });
-    
-    // Sync deletion to Redux store
-    get().syncRunToRedux({ id, deleted: true });
-  },
-  
-  // Load runs from storage
-  loadRuns: async () => {
-    try {
-      set({ isLoading: true });
-      const runs = await loadData(STORAGE_KEYS.RUNS, []);
-      set({ runs, isLoading: false });
-      return runs;
-    } catch (error) {
-      console.error('Error loading runs:', error);
-      set({ error: 'Failed to load runs', isLoading: false });
-      return [];
-    }
+    set((state) => ({
+      runs: state.runs.filter((run) => run.id !== id)
+    }));
   },
   
   // Clear all runs (for testing/development)
-  clearAllRuns: async () => {
-    try {
-      await saveData(STORAGE_KEYS.RUNS, []);
-      set({ runs: [] });
-      return true;
-    } catch (error) {
-      console.error('Error clearing runs:', error);
-      return false;
-    }
-  },
-  
-  // Sync run from Redux store (without generating new UUID)
-  syncRunFromRedux: (runData) => {
-    set((state) => {
-      const existingRunIndex = state.runs.findIndex(r => r.id === runData.id);
-      let newRuns;
-      
-      if (existingRunIndex !== -1) {
-        // Update existing run
-        newRuns = state.runs.map((run, index) => 
-          index === existingRunIndex 
-            ? { ...run, ...runData, updatedAt: new Date().toISOString() }
-            : run
-        );
-      } else {
-        // Add new run
-        newRuns = [runData, ...state.runs];
-      }
-      
-      persistRuns(newRuns);
-      return { runs: newRuns };
-    });
-  },
-  
-  // Sync run to Redux store (for bidirectional sync)
-  syncRunToRedux: (runData) => {
-    try {
-      // This would be called from Zustand when a run is added/updated
-      // For now, we'll just log it since Redux is the primary source for run tracking
-      console.log('Run synced from Zustand to Redux:', runData.id);
-    } catch (error) {
-      console.error('Failed to sync run to Redux store:', error);
-    }
+  clearAllRuns: () => {
+    set({ runs: [] });
   },
   
   startRun: (initialData = {}) => {
