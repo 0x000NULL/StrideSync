@@ -5,6 +5,11 @@ import * as Location from 'expo-location';
 import { useTheme } from '@react-navigation/native';
 import PropTypes from 'prop-types';
 
+// Define commonly used colors to avoid inline color literals (react-native/no-color-literals)
+const COLORS = {
+  black: '#000',
+};
+
 const RunMapView = ({ path }) => {
   const { colors } = useTheme();
   const [region, setRegion] = useState(null);
@@ -135,7 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 20,
     elevation: 4,
-    shadowColor: colors.black || colors.text.dark, // Using theme color
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

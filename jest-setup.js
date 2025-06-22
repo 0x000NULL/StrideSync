@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { Platform } from 'react-native';
 import React from 'react';
-import PropTypes from 'prop-types';
+import mockPropTypes from 'prop-types';
 
 // Force Platform.OS to 'ios' for all tests.
 // This relies on jest-expo preset having already set up a basic Platform object.
@@ -153,13 +153,22 @@ const mockReduxDispatchFn = jest.fn(actionOrThunk => {
   }
   return actionOrThunk;
 });
-jest.mock('react-redux', () => ({
+jest.mock('react-redux', () => {
   // Do not spread jest.requireActual if it causes ESM/CJS issues.
   // Provide only the mocks needed.
-  useSelector: jest.fn(selector => selector({})),
-  useDispatch: () => mockReduxDispatchFn,
-  Provider: jest.fn(({ children }) => children), // Mock Provider if needed
-}));
+
+  // Create a mock Provider component with propTypes defined to avoid lint warnings
+  const MockProvider = jest.fn(({ children }) => children);
+  MockProvider.propTypes = {
+    children: mockPropTypes.node.isRequired,
+  };
+
+  return {
+    useSelector: jest.fn(selector => selector({})),
+    useDispatch: () => mockReduxDispatchFn,
+    Provider: MockProvider,
+  };
+});
 
 // --- End of Common Mocks ---
 
@@ -175,8 +184,8 @@ jest.mock('@react-navigation/elements', () => {
     </View>
   );
   MockHeader.propTypes = {
-    headerTitle: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    title: PropTypes.string,
+    headerTitle: mockPropTypes.oneOfType([mockPropTypes.func, mockPropTypes.string]),
+    title: mockPropTypes.string,
   };
   return {
     ...actualElements,
@@ -261,7 +270,6 @@ const mockSafeAreaInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const mockSafeAreaFrame = { x: 0, y: 0, width: 390, height: 844 };
 
 jest.mock('react-native-safe-area-context', () => {
-  const React = require('react'); // Ensure React is in scope for JSX and context
   const ActualSafeAreaContext = jest.requireActual('react-native-safe-area-context');
 
   // Create a mock context provider that provides the mockInsets value
@@ -283,17 +291,22 @@ jest.mock('react-native-safe-area-context', () => {
   };
 
   MockSafeAreaProvider.propTypes = {
-    children: PropTypes.node.isRequired,
+    children: mockPropTypes.node.isRequired,
   };
+
+  // Declare SafeAreaConsumer separately so we can attach propTypes for lint
+  // and testing clarity.
+  const SafeAreaConsumer = ({ children }) => children(mockSafeAreaInsets);
+  SafeAreaConsumer.propTypes = { children: mockPropTypes.node };
 
   return {
     ...ActualSafeAreaContext, // Spread actual exports
     SafeAreaProvider: MockSafeAreaProvider, // Use our mock provider
-    SafeAreaConsumer: ({ children }) => children(mockSafeAreaInsets),
+    SafeAreaConsumer,
     SafeAreaView: jest.fn(props => {
       const { View } = require('react-native');
       const MockSafeAreaView = ({ children }) => <View>{children}</View>;
-      MockSafeAreaView.propTypes = { children: PropTypes.node };
+      MockSafeAreaView.propTypes = { children: mockPropTypes.node };
       MockSafeAreaView.displayName = 'MockSafeAreaView';
       return <MockSafeAreaView {...props} />;
     }),
@@ -310,16 +323,27 @@ jest.mock('react-native-safe-area-context', () => {
 // Mock victory-native
 jest.mock('victory-native', () => {
   const { View } = require('react-native');
+  const VictoryBar = props => <View testID="mock-victory-bar" {...props} />;
+
+  const VictoryChart = props => (
+    <View testID="mock-victory-chart" {...props}>
+      {props.children}
+    </View>
+  );
+  VictoryChart.propTypes = {
+    children: mockPropTypes.node,
+  };
+
+  const VictoryLine = props => <View testID="mock-victory-line" {...props} />;
+  const VictoryPie = props => <View testID="mock-victory-pie" {...props} />;
+  const VictoryAxis = props => <View testID="mock-victory-axis" {...props} />;
+
   return {
-    VictoryBar: props => <View testID="mock-victory-bar" {...props} />,
-    VictoryChart: props => (
-      <View testID="mock-victory-chart" {...props}>
-        {props.children}
-      </View>
-    ),
-    VictoryLine: props => <View testID="mock-victory-line" {...props} />,
-    VictoryPie: props => <View testID="mock-victory-pie" {...props} />,
-    VictoryAxis: props => <View testID="mock-victory-axis" {...props} />,
+    VictoryBar,
+    VictoryChart,
+    VictoryLine,
+    VictoryPie,
+    VictoryAxis,
     // Add other Victory components used in your app
   };
 });
@@ -385,7 +409,6 @@ jest.mock('./src/theme/ThemeProvider', () => {
 
 // Mock @expo/vector-icons to provide a mock for MaterialIcons
 jest.mock('@expo/vector-icons', () => {
-  const React = require('react');
   const { Text } = require('react-native');
   const MockMaterialIcons = ({ name, style, testID }) => (
     <Text testID={testID || `icon-${name}`} style={style}>
@@ -393,9 +416,9 @@ jest.mock('@expo/vector-icons', () => {
     </Text>
   );
   MockMaterialIcons.propTypes = {
-    name: PropTypes.string.isRequired,
-    style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-    testID: PropTypes.string,
+    name: mockPropTypes.string.isRequired,
+    style: mockPropTypes.oneOfType([mockPropTypes.object, mockPropTypes.array]),
+    testID: mockPropTypes.string,
   };
   MockMaterialIcons.displayName = 'MockMaterialIcons';
   return {
@@ -431,12 +454,12 @@ afterEach(() => {
 
 // Mock @react-navigation/native-stack to avoid font errors
 jest.mock('@react-navigation/native-stack', () => {
-  const React = require('react');
+  // React and PropTypes are already imported in module scope – reuse them here.
   return {
     createNativeStackNavigator: jest.fn(() => {
       const Navigator = ({ children }) => <>{children}</>;
       Navigator.propTypes = {
-        children: PropTypes.node.isRequired,
+        children: mockPropTypes.node.isRequired,
       };
       Navigator.displayName = 'MockNativeStackNavigator.Navigator';
 
@@ -454,9 +477,9 @@ jest.mock('@react-navigation/native-stack', () => {
         return <>{children}</>;
       };
       Screen.propTypes = {
-        component: PropTypes.elementType,
-        name: PropTypes.string.isRequired,
-        children: PropTypes.node,
+        component: mockPropTypes.elementType,
+        name: mockPropTypes.string.isRequired,
+        children: mockPropTypes.node,
       };
       Screen.displayName = 'MockNativeStackNavigator.Screen';
 

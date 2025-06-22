@@ -9,10 +9,9 @@ import RunDetailsForm from '../../components/run_tracking/save_run/RunDetailsFor
 import WeatherSelector from '../../components/run_tracking/save_run/WeatherSelector';
 import EffortMoodSelector from '../../components/run_tracking/save_run/EffortMoodSelector';
 import ShoeSelector from '../../components/run_tracking/ShoeSelector';
-import { useTheme } from '../../theme/ThemeProvider';
+import { theme } from '../../theme/theme';
 
 const SaveRunScreen = ({ navigation }) => {
-  const theme = useTheme();
   const dispatch = useDispatch();
   // Changed to use useStore hook from Zustand
   const currentRun = useSelector(state => state.run.currentRun);
@@ -160,7 +159,8 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.lg, // Use theme spacing
     color: theme.colors.text.primary, // Use theme text color
   },
-  formSection: { // This style is also used by a View wrapping ShoeSelector
+  formSection: {
+    // This style is also used by a View wrapping ShoeSelector
     marginHorizontal: theme.spacing.md,
     marginVertical: theme.spacing.sm,
   },

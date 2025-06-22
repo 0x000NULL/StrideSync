@@ -48,9 +48,7 @@ describe('ShoeSelector', () => {
   });
 
   it('displays a list of active shoes in the modal', () => {
-    const { getByText } = render(
-      <ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />
-    );
+    const { getByText } = render(<ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />);
 
     fireEvent.press(getByText('Select a Shoe'));
 

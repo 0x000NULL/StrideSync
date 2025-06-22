@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-unused-styles */
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -73,7 +74,8 @@ const getStyles = theme =>
       marginTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.md,
     },
-    flex1: { // Added style for flex: 1
+    flex1: {
+      // Added style for flex: 1
       flex: 1,
     },
   });

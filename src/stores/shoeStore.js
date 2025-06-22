@@ -1,11 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-  format,
-  subMonths,
-  startOfMonth,
-  endOfMonth,
-  isWithinInterval,
-} from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
 const EMPTY_SHOE_USAGE = Object.freeze({ total: 0, monthly: {} });
 
@@ -408,10 +402,10 @@ export const createShoeStore = (set, get) => ({
         totalRuns: periodRuns.length,
         totalDistance: periodRuns.reduce((sum, run) => sum + (run.distance || 0), 0),
         shoes: Object.entries(usageByShoe).map(([shoeId, distance]) => {
-        const foundShoe = shoes.find(s => s.id === shoeId); // Renamed from shoe
+          const shoeInfo = shoes.find(s => s.id === shoeId);
           return {
             shoeId,
-          name: foundShoe?.name || 'Unknown Shoe',
+            name: shoeInfo?.name || 'Unknown Shoe',
             distance,
             percentage: 0, // Will be calculated later
           };
@@ -552,26 +546,28 @@ export const createShoeStore = (set, get) => ({
   // Get all brands
   getBrands: memoized('getBrands', () => {
     const { shoes } = get();
-    return Array.from(new Set(shoes.map(shoe => shoe.brand)));
+    return Array.from(new Set(shoes.map(s => s.brand)));
   }),
 
   // Selectors
   getShoeById: memoized('getShoeById', id => {
-    const shoe = get().shoes.find(shoe => shoe.id === id);
-    if (!shoe) return null;
+    const selectedShoe = get().shoes.find(s => s.id === id);
+    if (!selectedShoe) return null;
 
     const usage = get().getShoeUsage(id);
     const stats = get().getShoeStats(id);
 
     return {
-      ...shoe,
+      ...selectedShoe,
       ...usage,
       ...stats,
       remainingDistance:
-        shoe.maxDistance > 0 ? Math.max(0, shoe.maxDistance - (usage.total || 0)) : null,
+        selectedShoe.maxDistance > 0
+          ? Math.max(0, selectedShoe.maxDistance - (usage.total || 0))
+          : null,
       percentageUsed:
-        shoe.maxDistance > 0
-          ? Math.min(100, Math.round(((usage.total || 0) / shoe.maxDistance) * 100))
+        selectedShoe.maxDistance > 0
+          ? Math.min(100, Math.round(((usage.total || 0) / selectedShoe.maxDistance) * 100))
           : null,
     };
   }),
@@ -601,9 +597,9 @@ export const createShoeStore = (set, get) => ({
       purchaseDate: shoe.purchaseDate,
     }));
 
-    const totalDistance = stats.reduce((sum, shoe) => sum + (shoe.totalDistance || 0), 0);
-    const activeShoes = stats.filter(shoe => shoe.isActive);
-    const retiredShoes = stats.filter(shoe => !shoe.isActive);
+    const totalDistance = stats.reduce((sum, statsItem) => sum + (statsItem.totalDistance || 0), 0);
+    const activeShoes = stats.filter(statsItem => statsItem.isActive);
+    const retiredShoes = stats.filter(statsItem => !statsItem.isActive);
 
     return {
       totalShoes: stats.length,

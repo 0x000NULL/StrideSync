@@ -1,9 +1,6 @@
 // Polyfill for crypto.getRandomValues() needed by uuid
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  isWithinInterval,
-} from 'date-fns';
 import { haversineDistance } from '../utils/unitUtils';
 
 // Helper function to calculate pace in min/km

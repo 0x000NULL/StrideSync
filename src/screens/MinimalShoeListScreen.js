@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
+import { theme } from '../theme/theme';
 
 const MinimalShoeListScreen = ({ navigation }) => {
   // Mock data for testing
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
   },
   title: {
     fontSize: 24,
@@ -57,19 +58,19 @@ const styles = StyleSheet.create({
   shoeItem: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: theme.colors.border,
   },
   shoeName: {
     fontSize: 16,
     fontWeight: '500',
   },
   shoeBrand: {
-    color: '#666',
+    color: theme.colors.text.secondary,
     marginTop: 4,
   },
   addButton: {
     flexDirection: 'row',
-    backgroundColor: '#f4511e',
+    backgroundColor: theme.colors.secondary,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   addButtonText: {
-    color: 'white',
+    color: theme.colors.text.light,
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,

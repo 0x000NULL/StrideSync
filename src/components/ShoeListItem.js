@@ -21,7 +21,7 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
     brand,
     model,
     maxDistance = 800, // This is always in km (base unit for storage)
-    purchaseDate,
+    // purchaseDate removed as unused in this component
     isActive = true,
     imageUrl = null,
     stats = {},

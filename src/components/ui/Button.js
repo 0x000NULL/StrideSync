@@ -162,7 +162,8 @@ const Button = ({
     iconOnly: {
       padding: theme.spacing.sm,
     },
-    iconMarginZero: { // Added for iconOnly case
+    iconMarginZero: {
+      // Added for iconOnly case
       margin: 0,
     },
     loadingContainer: {

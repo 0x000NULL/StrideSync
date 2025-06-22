@@ -3,12 +3,17 @@ import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import ActiveRunScreen from '../../../src/screens/run_tracking/ActiveRunScreen';
 import * as runSliceActions from '../../../src/stores/run_tracking/runSlice';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
 
 let mockPauseRunSpy;
 let mockCompleteRunTrackingSpy;
 let mockStopRunSpy;
 let mockNavigationResetSpy; // Spy for navigation.reset
+
+// Utility to create a fresh navigation mock for every render
+const createNavigationMock = () => ({
+  navigate: jest.fn(),
+  reset: (...args) => mockNavigationResetSpy(...args),
+});
 
 describe('ActiveRunScreen', () => {
   const initialMockRun = {
@@ -33,10 +38,8 @@ describe('ActiveRunScreen', () => {
       .spyOn(runSliceActions, 'stopRun')
       .mockReturnValue({ type: 'run/stopRun' });
 
-    // Get the globally mocked navigation functions to spy on or check calls
-    // Important: useNavigation() returns the mocked object from jest-setup.js
-    const navigationHooks = useNavigation();
-    mockNavigationResetSpy = navigationHooks.reset; // This is already a jest.fn()
+    // Fresh reset spy for each test
+    mockNavigationResetSpy = jest.fn();
 
     const expoLocationMock = jest.requireMock('expo-location');
     expoLocationMock.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted' });
@@ -47,8 +50,6 @@ describe('ActiveRunScreen', () => {
     mockPauseRunSpy.mockRestore();
     mockCompleteRunTrackingSpy.mockRestore();
     mockStopRunSpy.mockRestore();
-    // mockNavigationResetSpy is a jest.fn() from the global mock,
-    // it will be cleared by clearAllMocks in jest-setup.js's afterEach
     jest.clearAllMocks();
   });
 
@@ -74,12 +75,11 @@ describe('ActiveRunScreen', () => {
       };
       return callback(state);
     });
-    // Use the specific mock for reset in the navigationProp passed to the component
-    const navigationProp = {
-      navigate: useNavigation().navigate,
-      reset: mockNavigationResetSpy, // Pass the spy instance
-    };
-    return render(<ActiveRunScreen navigation={navigationProp} />);
+    // Provide a fresh navigation mock for each render
+    const navigationMock = createNavigationMock();
+    // Expose navigate for assertions in tests needing it
+    const renderResult = render(<ActiveRunScreen navigation={navigationMock} />);
+    return { ...renderResult, navigationMock };
   };
 
   it('renders "No active run" message and navigates if currentRun is null', async () => {
@@ -165,25 +165,22 @@ describe('ActiveRunScreen', () => {
     });
 
     it('handles "Pause" (labeled "Resume") button press when paused', async () => {
-      const { getByText } = renderScreen(initialMockRun, 'paused', false);
-      const navigation = useNavigation(); // This gets the global mock
+      const { getByText, navigationMock } = renderScreen(initialMockRun, 'paused', false);
       await act(async () => {
         fireEvent.press(getByText('Resume'));
       });
-      // The navigation prop passed to component has navigation.navigate (which is mockNavigateFn)
-      expect(navigation.navigate).toHaveBeenCalledWith('Pause');
+      expect(navigationMock.navigate).toHaveBeenCalledWith('Pause');
     });
 
     it('handles "Stop" button press', async () => {
-      const { getByText } = renderScreen();
+      const { getByText, navigationMock } = renderScreen();
       const dispatch = useDispatch();
-      const navigation = useNavigation();
       await act(async () => {
         fireEvent.press(getByText('Stop'));
       });
       expect(dispatch).toHaveBeenCalledTimes(1);
       expect(mockCompleteRunTrackingSpy).toHaveBeenCalled();
-      expect(navigation.navigate).toHaveBeenCalledWith('SaveRun');
+      expect(navigationMock.navigate).toHaveBeenCalledWith('SaveRun');
     });
 
     it('handles "Lap" button press', () => {
@@ -214,7 +211,7 @@ describe('ActiveRunScreen', () => {
         distance: 0.05,
       };
       const { getByText, rerender } = renderScreen(runData, 'active', true);
-      const navigationProp = { navigate: useNavigation().navigate, reset: mockNavigationResetSpy };
+      const navigationProp = { navigate: jest.fn(), reset: mockNavigationResetSpy };
 
       await waitFor(() => expect(getByText('Duration: 00:00:05')).toBeTruthy());
       act(() => {

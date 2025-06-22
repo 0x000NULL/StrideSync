@@ -25,7 +25,13 @@ const ControlButtons = ({ onPause, onLap, onStop, isPaused }) => {
         variant="secondary"
         testID={isPaused ? 'button-resume' : 'button-pause'}
       />
-      <Button title="Lap" onPress={onLap} disabled={isPaused} variant="outline" testID="button-lap" />
+      <Button
+        title="Lap"
+        onPress={onLap}
+        disabled={isPaused}
+        variant="outline"
+        testID="button-lap"
+      />
       <Button title="Stop" onPress={onStop} variant="danger" testID="button-stop" />
     </View>
   );

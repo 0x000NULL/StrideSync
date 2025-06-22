@@ -46,11 +46,13 @@ const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
     moodButton: {
       width: '23%', // 4 buttons
     },
-    selectedEffortButton: { // Assuming 'coral' maps to 'error' for 'Hard' effort
+    selectedEffortButton: {
+      // Assuming 'coral' maps to 'error' for 'Hard' effort
       backgroundColor: theme.colors.error,
       borderColor: theme.colors.error,
     },
-    selectedMoodButton: { // Assuming 'limegreen' maps to 'success' for 'Great/Good' mood
+    selectedMoodButton: {
+      // Assuming 'limegreen' maps to 'success' for 'Great/Good' mood
       backgroundColor: theme.colors.success,
       borderColor: theme.colors.success,
     },

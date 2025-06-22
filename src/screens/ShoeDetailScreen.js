@@ -1,12 +1,6 @@
+/* eslint-disable react-native/no-unused-styles */
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../stores/useStore';
 import { format, parseISO } from 'date-fns';
@@ -19,6 +13,8 @@ import PropTypes from 'prop-types';
 const ShoeDetailScreen = ({ route, navigation }) => {
   const { shoeId } = route.params;
   const theme = useTheme();
+  // Generate styles based on current theme
+  const styles = getStyles(theme);
   const { formatDistance } = useUnits(); // Call useUnits
   const [retirementReason, setRetirementReason] = useState('');
   const [showRetirementForm, setShowRetirementForm] = useState(false);
@@ -254,138 +250,140 @@ ShoeDetailScreen.propTypes = {
   }).isRequired,
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 16,
-  },
-  header: {
-    marginBottom: 24,
-    alignItems: 'center',
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  brand: {
-    fontSize: 18,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: theme.colors.surfaceVariant || theme.colors.surface, // Using theme color
-    marginBottom: 12,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  retirementReason: {
-    marginTop: 8,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.surface || theme.colors.background, // Using theme color (surface is often slightly off-white)
-    width: '100%',
-  },
-  reasonLabel: {
-    fontSize: 12,
-    // color: theme.colors.textSecondary, // Already applied inline
-    marginBottom: 4,
-  },
-  reasonText: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    // color: theme.colors.text, // Already applied inline
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around', // Changed from space-between for better spacing with 3 cards
-    marginBottom: 24,
-    flexWrap: 'wrap',
-  },
-  actionButton: {
-    marginBottom: 24,
-  },
-  retirementForm: {
-    marginBottom: 24,
-    padding: 16, // Added padding
-    borderRadius: 8, // Added borderRadius
-    // backgroundColor: theme.colors.card, // Consider adding a background
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    // color: theme.colors.text, // Applied inline
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12, // Fine-tuned padding
-    paddingVertical: 10, // Fine-tuned padding
-    marginBottom: 16, // Increased margin
-    fontSize: 16,
-    textAlignVertical: 'top',
-    // borderColor, color, backgroundColor applied inline
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around', // Changed from space-between
-  },
-  button: {
-    flex: 1, // Each button takes equal space
-    marginHorizontal: 8, // Added horizontal margin between buttons
-  },
-  detailsSection: {
-    marginTop: 16,
-    padding: 16, // Added padding
-    borderRadius: 8, // Added borderRadius
-    // backgroundColor: theme.colors.card, // Consider adding a background
-  },
-  sectionTitle: {
-    fontSize: 20, // Increased size
-    fontWeight: 'bold',
-    marginBottom: 16, // Increased margin
-    paddingBottom: 10, // Increased padding
-    borderBottomWidth: 1,
-    // borderBottomColor: theme.colors.border, // Use theme border color
-    // color: theme.colors.text, // Applied inline
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10, // Increased margin
-    paddingVertical: 4, // Added vertical padding for spacing
-  },
-  detailLabel: {
-    fontSize: 15, // Increased size
-    // color: theme.colors.textSecondary, // Applied inline
-  },
-  detailValue: {
-    fontSize: 15, // Increased size
-    fontWeight: '500',
-    // color: theme.colors.text, // Applied inline
-  },
-  errorText: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    // color: theme.colors.text, // Applied inline
-  },
-});
+// Dynamic styles generator – moved from static to function to use theme safely
+const getStyles = theme =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    contentContainer: {
+      padding: 16,
+    },
+    header: {
+      marginBottom: 24,
+      alignItems: 'center',
+    },
+    name: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 4,
+      textAlign: 'center',
+    },
+    brand: {
+      fontSize: 18,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 16,
+      backgroundColor: theme.colors.surfaceVariant || theme.colors.surface, // Using theme color
+      marginBottom: 12,
+    },
+    statusDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginRight: 8,
+    },
+    statusText: {
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    retirementReason: {
+      marginTop: 8,
+      padding: 12,
+      borderRadius: 8,
+      backgroundColor: theme.colors.surface || theme.colors.background, // Using theme color (surface is often slightly off-white)
+      width: '100%',
+    },
+    reasonLabel: {
+      fontSize: 12,
+      // color: theme.colors.textSecondary, // Already applied inline
+      marginBottom: 4,
+    },
+    reasonText: {
+      fontSize: 14,
+      fontStyle: 'italic',
+      // color: theme.colors.text, // Already applied inline
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around', // Changed from space-between for better spacing with 3 cards
+      marginBottom: 24,
+      flexWrap: 'wrap',
+    },
+    actionButton: {
+      marginBottom: 24,
+    },
+    retirementForm: {
+      marginBottom: 24,
+      padding: 16, // Added padding
+      borderRadius: 8, // Added borderRadius
+      // backgroundColor: theme.colors.card, // Consider adding a background
+    },
+    label: {
+      fontSize: 16,
+      marginBottom: 8,
+      // color: theme.colors.text, // Applied inline
+    },
+    input: {
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 12, // Fine-tuned padding
+      paddingVertical: 10, // Fine-tuned padding
+      marginBottom: 16, // Increased margin
+      fontSize: 16,
+      textAlignVertical: 'top',
+      // borderColor, color, backgroundColor applied inline
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around', // Changed from space-between
+    },
+    button: {
+      flex: 1, // Each button takes equal space
+      marginHorizontal: 8, // Added horizontal margin between buttons
+    },
+    detailsSection: {
+      marginTop: 16,
+      padding: 16, // Added padding
+      borderRadius: 8, // Added borderRadius
+      // backgroundColor: theme.colors.card, // Consider adding a background
+    },
+    sectionTitle: {
+      fontSize: 20, // Increased size
+      fontWeight: 'bold',
+      marginBottom: 16, // Increased margin
+      paddingBottom: 10, // Increased padding
+      borderBottomWidth: 1,
+      // borderBottomColor: theme.colors.border, // Use theme border color
+      // color: theme.colors.text, // Applied inline
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 10, // Increased margin
+      paddingVertical: 4, // Added vertical padding for spacing
+    },
+    detailLabel: {
+      fontSize: 15, // Increased size
+      // color: theme.colors.textSecondary, // Applied inline
+    },
+    detailValue: {
+      fontSize: 15, // Increased size
+      fontWeight: '500',
+      // color: theme.colors.text, // Applied inline
+    },
+    errorText: {
+      textAlign: 'center',
+      marginTop: 20,
+      fontSize: 16,
+      // color: theme.colors.text, // Applied inline
+    },
+  });
 
 export default ShoeDetailScreen;

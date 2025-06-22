@@ -12,10 +12,8 @@ import {
   Platform,
   Animated,
   Easing,
-  Dimensions,
 } from 'react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { useTheme } from '../theme/ThemeProvider';
 import { format, parseISO } from 'date-fns';
 import { useRunStore, useShoeStore } from '../stores/useStore'; // Consolidated
@@ -170,7 +168,8 @@ const RunLogScreen = ({ navigation }) => {
 
   // Custom refresh control component
   const CustomRefreshControl = useCallback(
-    ({ isRefreshing, onPullToRefresh, ...props }) => { // Renamed props
+    ({ isRefreshing, onPullToRefresh, ...props }) => {
+      // Renamed props
       const spin = refreshRotation.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
@@ -199,6 +198,7 @@ const RunLogScreen = ({ navigation }) => {
         </RefreshControl>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refreshRotation, theme.colors]
   );
 
@@ -556,7 +556,8 @@ const RunLogScreen = ({ navigation }) => {
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
-    retryButtonWithBorder: { // For the specific retry button that had inline border
+    retryButtonWithBorder: {
+      // For the specific retry button that had inline border
       borderWidth: 1,
       // Note: backgroundColor and borderColor are already handled by being inside retryButton style
     },
@@ -588,7 +589,9 @@ const RunLogScreen = ({ navigation }) => {
           {[1, 2, 3].map(i => (
             <View key={i} style={styles.skeletonDetailItem}>
               <View style={[styles.skeletonText, styles.skeletonWidth70]} />
-              <View style={[styles.skeletonText, styles.skeletonWidth60, styles.skeletonMarginTopXs]} />
+              <View
+                style={[styles.skeletonText, styles.skeletonWidth60, styles.skeletonMarginTopXs]}
+              />
             </View>
           ))}
         </View>
@@ -1086,7 +1089,9 @@ const RunLogScreen = ({ navigation }) => {
             data={filteredRuns}
             renderItem={renderRunItem}
             keyExtractor={item => item.id}
-            refreshControl={<CustomRefreshControl isRefreshing={refreshing} onPullToRefresh={onRefresh} />}
+            refreshControl={
+              <CustomRefreshControl isRefreshing={refreshing} onPullToRefresh={onRefresh} />
+            }
             contentContainerStyle={{ paddingBottom: theme.spacing.lg }}
           />
         ) : (

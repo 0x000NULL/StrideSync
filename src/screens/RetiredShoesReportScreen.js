@@ -70,17 +70,22 @@ const RetiredShoesReportScreen = ({ navigation }) => {
     };
   }, [retiredShoes, getShoeStats]);
 
-  const handleShoePress = React.useCallback(shoeId => {
-    navigation.navigate('ShoeDetail', { shoeId });
-  }, [navigation]);
+  const handleShoePress = React.useCallback(
+    shoeId => {
+      navigation.navigate('ShoeDetail', { shoeId });
+    },
+    [navigation]
+  );
 
-  const renderRetiredShoeListItem = React.useCallback(({ item }) => (
-    <RetiredShoeListItem item={item} onPressItem={handleShoePress} />
-  ), [handleShoePress]);
+  const renderRetiredShoeListItem = React.useCallback(
+    ({ item }) => <RetiredShoeListItem item={item} onPressItem={handleShoePress} />,
+    [handleShoePress]
+  );
 
-  const renderDivider = React.useCallback(() => (
-    <ReportDivider style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-  ), [theme.colors.border, styles.divider]);
+  const renderDivider = React.useCallback(
+    () => <ReportDivider style={[styles.divider, { backgroundColor: theme.colors.border }]} />,
+    [theme.colors.border]
+  );
 
   if (retiredShoes.length === 0) {
     return (

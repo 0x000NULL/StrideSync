@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+/* eslint-disable react-native/no-unused-styles */
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native';
 import { useStore } from '../../stores/useStore';
 import { shallow } from 'zustand/shallow';
@@ -26,26 +27,15 @@ ShoeSelectItem.propTypes = {
 };
 ShoeSelectItem.displayName = 'ShoeSelectItem';
 
-
-const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
-  const theme = useTheme();
-  const [modalVisible, setModalVisible] = useState(false);
-  const shoes = useStore(state => state.shoes, shallow);
-  const activeShoes = useMemo(() => shoes.filter(shoe => shoe.isActive), [shoes]);
-  const selectedShoe = activeShoes.find(shoe => shoe.id === selectedShoeId);
-
-  const handleSelectShoe = shoeId => {
-    onSelectShoe(shoeId);
-    setModalVisible(false);
-  };
-
-  const styles = StyleSheet.create({
+// Helper to build styles with access to theme
+const createStyles = theme =>
+  StyleSheet.create({
     card: {
       padding: theme.spacing.md,
     },
     label: {
-      fontSize: 16, // Consider theme.typography.subtitle1.fontSize
-      fontWeight: '600', // Consider theme.typography.subtitle1.fontWeight
+      fontSize: 16,
+      fontWeight: '600',
       marginBottom: theme.spacing.sm,
       color: theme.colors.text.primary,
     },
@@ -60,11 +50,11 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
       backgroundColor: theme.colors.surface,
     },
     selectorText: {
-      fontSize: 16, // Consider theme.typography.body1.fontSize
+      fontSize: 16,
       color: theme.colors.text.primary,
     },
     arrow: {
-      fontSize: 12, // Consider theme.typography.caption.fontSize
+      fontSize: 12,
       color: theme.colors.text.secondary,
     },
     modalContainer: {
@@ -77,25 +67,25 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
       borderTopLeftRadius: theme.borderRadius.lg,
       borderTopRightRadius: theme.borderRadius.lg,
       padding: theme.spacing.lg,
-      maxHeight: '60%', // This could be a theme variable too if needed
+      maxHeight: '60%',
     },
     modalTitle: {
-      fontSize: 20, // Consider theme.typography.h5.fontSize
-      fontWeight: 'bold', // Consider theme.typography.h5.fontWeight
+      fontSize: 20,
+      fontWeight: 'bold',
       marginBottom: theme.spacing.lg,
       textAlign: 'center',
-      color: theme.colors.text.primary, // Added this, was missing color
+      color: theme.colors.text.primary,
     },
     shoeItem: {
       paddingVertical: theme.spacing.md,
     },
     shoeName: {
-      fontSize: 18, // Consider theme.typography.subtitle1.fontSize
+      fontSize: 18,
       fontWeight: '500',
-      color: theme.colors.text.primary, // Added this, was missing color
+      color: theme.colors.text.primary,
     },
     shoeBrand: {
-      fontSize: 14, // Consider theme.typography.body2.fontSize
+      fontSize: 14,
       color: theme.colors.text.secondary,
       marginTop: theme.spacing.xxs,
     },
@@ -104,6 +94,42 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
       backgroundColor: theme.colors.border,
     },
   });
+
+const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
+  const theme = useTheme();
+  const [modalVisible, setModalVisible] = useState(false);
+  const shoes = useStore(state => state.shoes, shallow);
+  const activeShoes = useMemo(() => shoes.filter(shoe => shoe.isActive), [shoes]);
+  const selectedShoe = activeShoes.find(shoe => shoe.id === selectedShoeId);
+
+  const handleSelectShoe = useCallback(
+    shoeId => {
+      onSelectShoe(shoeId);
+      setModalVisible(false);
+    },
+    [onSelectShoe]
+  );
+
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // Memoized render functions to avoid unstable nested components
+  const renderShoeItem = useCallback(
+    ({ item }) => (
+      <ShoeSelectItem
+        item={item}
+        onPress={() => handleSelectShoe(item.id)}
+        styles={{
+          // Pass only necessary styles
+          shoeItem: styles.shoeItem,
+          shoeName: styles.shoeName,
+          shoeBrand: styles.shoeBrand,
+        }}
+      />
+    ),
+    [handleSelectShoe, styles]
+  );
+
+  const renderSeparator = useCallback(() => <View style={styles.separator} />, [styles]);
 
   return (
     <>
@@ -129,18 +155,8 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
             <FlatList
               data={activeShoes}
               keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <ShoeSelectItem
-                  item={item}
-                  onPress={() => handleSelectShoe(item.id)}
-                  styles={{ // Pass only necessary styles
-                    shoeItem: styles.shoeItem,
-                    shoeName: styles.shoeName,
-                    shoeBrand: styles.shoeBrand,
-                  }}
-                />
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              renderItem={renderShoeItem}
+              ItemSeparatorComponent={renderSeparator}
             />
             <Button title="Cancel" onPress={() => setModalVisible(false)} variant="outline" />
           </View>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { theme } from '../theme/theme';
 
 const MinimalAddEditShoeScreen = () => {
   const [name, setName] = useState('');
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
   },
   title: {
     fontSize: 24,
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: theme.colors.border,
     padding: 10,
     marginBottom: 15,
     borderRadius: 5,

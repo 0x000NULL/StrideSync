@@ -107,8 +107,18 @@ const ActionButtons = ({ onResume, onSave, onDiscard }) => {
   });
   return (
     <View style={styles.actionButtonsContainer}>
-      <Button title="Resume Run" onPress={onResume} variant="success" style={{ marginBottom: theme.spacing.sm }} />
-      <Button title="Finish & Save Run" onPress={onSave} variant="primary" style={{ marginBottom: theme.spacing.sm }} />
+      <Button
+        title="Resume Run"
+        onPress={onResume}
+        variant="success"
+        style={{ marginBottom: theme.spacing.sm }}
+      />
+      <Button
+        title="Finish & Save Run"
+        onPress={onSave}
+        variant="primary"
+        style={{ marginBottom: theme.spacing.sm }}
+      />
       <Button title="Discard Run" onPress={onDiscard} variant="danger" />
     </View>
   );
@@ -136,13 +146,13 @@ const PauseScreen = ({ navigation }) => {
       backgroundColor: theme.colors.surfaceVariant,
       borderRadius: theme.borderRadius.sm,
     },
-    text: { // Generic text style if needed for "Redirecting..."
-        color: theme.colors.text.primary,
-        textAlign: 'center',
-        padding: theme.spacing.lg,
-    }
+    text: {
+      // Generic text style if needed for "Redirecting..."
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+      padding: theme.spacing.lg,
+    },
   });
-
 
   // Update local notes if currentRun.notes changes from elsewhere (e.g. rehydration)
   useEffect(() => {
@@ -201,12 +211,12 @@ const PauseScreen = ({ navigation }) => {
 
   // useEffect for navigation based on currentRun
   useEffect(() => {
-    if (!currentRun && (runStatus === 'paused' || runStatus === 'complete')) { // Only navigate if we expected a run but it's gone
+    if (!currentRun && (runStatus === 'paused' || runStatus === 'complete')) {
+      // Only navigate if we expected a run but it's gone
       console.log('PauseScreen: currentRun is null, navigating away.');
       navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
     }
   }, [currentRun, runStatus, navigation]);
-
 
   if (runStatus !== 'paused' && runStatus !== 'complete') {
     return (
@@ -234,9 +244,11 @@ const PauseScreen = ({ navigation }) => {
         onDiscard={handleDiscardRun}
       />
       <View style={styles.debugInfo}>
-        <Text style={{color: theme.colors.text.secondary}}>Run Status: {runStatus}</Text>
-        <Text style={{color: theme.colors.text.secondary}}>Run ID: {currentRun?.id}</Text>
-        <Text style={{color: theme.colors.text.secondary}}>Stored Notes: {currentRun?.notes}</Text>
+        <Text style={{ color: theme.colors.text.secondary }}>Run Status: {runStatus}</Text>
+        <Text style={{ color: theme.colors.text.secondary }}>Run ID: {currentRun?.id}</Text>
+        <Text style={{ color: theme.colors.text.secondary }}>
+          Stored Notes: {currentRun?.notes}
+        </Text>
       </View>
     </ScrollView>
   );

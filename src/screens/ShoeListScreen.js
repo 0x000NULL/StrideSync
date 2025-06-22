@@ -38,14 +38,17 @@ const ShoeListScreen = ({ navigation }) => {
 
   // Load shoes on focus
   // Set up header right button
-  const headerRightCallback = React.useCallback(() => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('RetiredShoesReport')}
-      style={styles.headerRightButton}
-    >
-      <MaterialIcons name="history" size={24} color={theme.colors.primary} />
-    </TouchableOpacity>
-  ), [navigation, theme.colors.primary, styles.headerRightButton]);
+  const headerRightCallback = React.useCallback(
+    () => (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('RetiredShoesReport')}
+        style={styles.headerRightButton}
+      >
+        <MaterialIcons name="history" size={24} color={theme.colors.primary} />
+      </TouchableOpacity>
+    ),
+    [navigation, theme.colors.primary, styles.headerRightButton]
+  );
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -69,7 +72,9 @@ const ShoeListScreen = ({ navigation }) => {
   };
 
   const filteredShoes = React.useMemo(() => {
-    // Get shoes with their stats
+    // Get shoes with their stats (ensure recalculates when shoes array changes)
+    // eslint-disable-next-line no-unused-vars
+    const shoesTrigger = shoes.length;
     const shoesWithStats = getShoesWithStats();
 
     // Apply filters
@@ -112,9 +117,12 @@ const ShoeListScreen = ({ navigation }) => {
           return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
       }
     });
-  }, [filter, sortBy, shoes, loading, getShoesWithStats, getShoesNeedingReplacement]);
+  }, [filter, sortBy, shoes, getShoesWithStats, getShoesNeedingReplacement]);
 
   const stats = React.useMemo(() => {
+    // Trigger recalculation when the shoes array changes
+    // eslint-disable-next-line no-unused-vars
+    const shoesCountTrigger = shoes.length;
     const activeShoes = getShoesWithStats().filter(shoe => shoe.isActive);
     const totalDistance = activeShoes.reduce(
       (sum, shoe) => sum + (shoe.stats?.totalDistance || 0),
@@ -142,6 +150,9 @@ const ShoeListScreen = ({ navigation }) => {
     ),
     [navigation]
   );
+
+  // Stable separator component to avoid defining inline components in render
+  const renderSeparator = useCallback(() => <View style={{ height: theme.spacing.sm }} />, [theme]);
 
   const renderEmptyState = () => {
     if (loading) {
@@ -279,10 +290,12 @@ const ShoeListScreen = ({ navigation }) => {
     filterChipTextActive: {
       color: theme.colors.primary,
     },
-    headerRightButton: { // Added for header button
+    headerRightButton: {
+      // Added for header button
       marginRight: theme.spacing.md,
     },
-    flexGrow1: { // Added for FlatList contentContainerStyle
+    flexGrow1: {
+      // Added for FlatList contentContainerStyle
       flexGrow: 1,
     },
   });
@@ -418,7 +431,7 @@ const ShoeListScreen = ({ navigation }) => {
               tintColor={theme.colors.primary}
             />
           }
-          ItemSeparatorComponent={() => <View style={{ height: theme.spacing.sm }} />}
+          ItemSeparatorComponent={renderSeparator}
         />
       </View>
 

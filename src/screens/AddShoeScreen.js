@@ -85,7 +85,8 @@ const AddShoeScreen = () => {
       flexDirection: 'row',
       justifyContent: 'space-around',
     },
-    flex1: { // Added style for flex: 1
+    flex1: {
+      // Added style for flex: 1
       flex: 1,
     },
   });

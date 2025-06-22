@@ -147,7 +147,7 @@ const ActiveRunScreen = ({ navigation }) => {
 
     // If we shouldn't run, just return a no-op cleanup.
     return () => {};
-  }, [currentRun?.isPaused, runStatus, isTracking]);
+  }, [currentRun, runStatus, isTracking]);
 
   const distance = currentRun?.distance || 0;
 
@@ -336,10 +336,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
   },
-  containerCentered: { // Added for the !currentRun case
+  containerCentered: {
+    // Added for the !currentRun case
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
 });
 
 BatteryOptimizationIndicator.propTypes = {

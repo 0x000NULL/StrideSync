@@ -58,10 +58,18 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
           <View key={index} style={[styles.textContainer, style]}>
             <View style={[styles.line, { backgroundColor: theme.colors.surfaceVariant }]} />
             <View
-              style={[styles.line, styles.lineWidth90, { backgroundColor: theme.colors.surfaceVariant }]}
+              style={[
+                styles.line,
+                styles.lineWidth90,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
             />
             <View
-              style={[styles.line, styles.lineWidth80, { backgroundColor: theme.colors.surfaceVariant }]}
+              style={[
+                styles.line,
+                styles.lineWidth80,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
             />
           </View>
         );

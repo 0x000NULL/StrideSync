@@ -3,10 +3,14 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from '../../src/navigation/AppNavigator';
 import { View, Text, TouchableOpacity } from 'react-native'; // Import common elements once
-import PropTypes from 'prop-types';
 
 // --- Helper to create simple mock screen components ---
 const createMockScreenComponent = (displayName, testID, navigationProp = false) => {
+  // Require PropTypes within the factory to avoid issues with Jest hoisting order
+  // (jest.mock calls are hoisted to the top, which can cause a top-level require
+  //  that happens later in the file to be undefined at execution time).
+  const PropTypesLocal = require('prop-types');
+
   const MockComponent = props => (
     <View testID={testID}>
       <Text>Mock {displayName}</Text>
@@ -22,12 +26,13 @@ const createMockScreenComponent = (displayName, testID, navigationProp = false) 
       )}
     </View>
   );
-  MockComponent.propTypes = {
-    navigation: PropTypes.shape({
-      navigate: PropTypes.func,
-    }),
-  };
   MockComponent.displayName = displayName;
+  MockComponent.propTypes = {
+    navigation: PropTypesLocal.shape({
+      navigate: PropTypesLocal.func,
+    }),
+    children: PropTypesLocal.node,
+  };
   return MockComponent;
 };
 
@@ -80,7 +85,15 @@ jest.mock('../../src/screens/run_tracking/SaveRunScreen', () =>
 
 // Mock ThemeProvider and StoreProvider as App.js does, in case any screen options use them.
 jest.mock('../../src/theme/ThemeProvider', () => {
+  // Reuse the already-imported React to avoid shadowing
+  const PropTypes = require('prop-types');
   const ActualThemeProvider = jest.requireActual('../../src/theme/ThemeProvider');
+
+  const ThemeProvider = ({ children }) => <>{children}</>;
+  ThemeProvider.propTypes = {
+    children: PropTypes.node,
+  };
+
   return {
     ...ActualThemeProvider,
     useTheme: () => ({
@@ -93,15 +106,9 @@ jest.mock('../../src/theme/ThemeProvider', () => {
       },
       spacing: { md: 16 },
     }),
-    ThemeProvider: ({ children }) => <>{children}</>,
+    ThemeProvider,
   };
 });
-// Assign propTypes to the ThemeProvider mock
-const ThemeProviderMock = jest.requireMock('../../src/theme/ThemeProvider').ThemeProvider;
-ThemeProviderMock.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 
 jest.mock('../../src/providers/StoreProvider', () => ({
   StoreProvider: jest.fn(({ children }) => <>{children}</>),
@@ -110,7 +117,7 @@ jest.mock('../../src/providers/StoreProvider', () => ({
 // Assign propTypes to the StoreProvider mock
 const StoreProviderMock = jest.requireMock('../../src/providers/StoreProvider').StoreProvider;
 StoreProviderMock.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: require('prop-types').node,
 };
 
 describe('AppNavigator', () => {

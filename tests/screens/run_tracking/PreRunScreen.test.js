@@ -3,11 +3,11 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import PreRunScreen from '../../../src/screens/run_tracking/PreRunScreen';
 import { useStore } from '../../../src/stores/useStore';
 import * as Location from 'expo-location';
-import PropTypes from 'prop-types';
 
 // Mock child components and external libraries
 jest.mock('../../../src/components/run_tracking/ShoeSelector', () => {
   const { View, Text, TouchableOpacity } = require('react-native');
+  const PropTypes = require('prop-types');
   const MockShoeSelector = ({ selectedShoeId, onSelectShoe }) => (
     <View>
       <Text>Shoe Selector</Text>
@@ -16,11 +16,11 @@ jest.mock('../../../src/components/run_tracking/ShoeSelector', () => {
       </TouchableOpacity>
     </View>
   );
+  MockShoeSelector.displayName = 'MockShoeSelector';
   MockShoeSelector.propTypes = {
     selectedShoeId: PropTypes.string,
     onSelectShoe: PropTypes.func.isRequired,
   };
-  MockShoeSelector.displayName = 'MockShoeSelector';
   return MockShoeSelector;
 });
 
@@ -85,14 +85,17 @@ describe('PreRunScreen', () => {
 
   it('disables start button until GPS is good for outdoor run', async () => {
     const { getByText, findByText } = renderScreen();
-    const startButton = getByText('Start Run');
 
     // Initially disabled
-    expect(startButton.props.accessibilityState.disabled).toBe(true);
+    expect(getByText('Start Run').props.accessibilityState.disabled).toBe(true);
 
-    // Becomes enabled
+    // Wait for GPS status to become good
     await findByText(/GPS Status: Good/i);
-    expect(startButton.props.accessibilityState.disabled).toBe(false);
+
+    // Re-query start button to get the updated props
+    await waitFor(() => {
+      expect(getByText('Start Run').props.accessibilityState.disabled).toBe(false);
+    });
   });
 
   it('enables start button immediately for indoor run', () => {
@@ -105,8 +108,11 @@ describe('PreRunScreen', () => {
   it('dispatches beginRunTracking and navigates on start press', async () => {
     const { getByText, findByText } = renderScreen();
 
-    // Wait for GPS
+    // Wait for GPS to be good and button enabled
     await findByText(/GPS Status: Good/i);
+    await waitFor(() => {
+      expect(getByText('Start Run').props.accessibilityState.disabled).toBe(false);
+    });
 
     // Select a shoe using the mock
     fireEvent.press(getByText('Select a Shoe'));

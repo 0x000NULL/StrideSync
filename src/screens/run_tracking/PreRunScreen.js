@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { useStore } from '../../stores/useStore';
@@ -16,7 +16,7 @@ import Button from '../../components/ui/Button';
 import { useTheme } from '../../theme/ThemeProvider';
 
 const PreRunScreen = () => {
-  const theme = useTheme();
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const beginRunTracking = useStore(state => state.beginRunTracking);
   const dispatch = useDispatch?.();
@@ -26,7 +26,7 @@ const PreRunScreen = () => {
   const [goal, setGoal] = useState({ type: 'open', value: '' });
   const [audioCuesEnabled, setAudioCuesEnabled] = useState(false);
   const [gpsStatus, setGpsStatus] = useState('searching');
-  const [locationSubscription, setLocationSubscription] = useState(null);
+  const locationSubscriptionRef = useRef(null);
 
   const startGpsTracking = useCallback(async () => {
     setGpsStatus('searching');
@@ -51,21 +51,23 @@ const PreRunScreen = () => {
         }
       }
     );
-    setLocationSubscription(subscription);
+    locationSubscriptionRef.current = subscription;
   }, []);
 
   useEffect(() => {
     if (runType === 'outdoor') {
       startGpsTracking();
     } else {
-      locationSubscription?.remove();
+      locationSubscriptionRef.current?.remove();
+      locationSubscriptionRef.current = null;
       setGpsStatus('unavailable');
     }
 
     return () => {
-      locationSubscription?.remove();
+      locationSubscriptionRef.current?.remove();
+      locationSubscriptionRef.current = null;
     };
-  }, [runType, startGpsTracking, locationSubscription]); // Added locationSubscription
+  }, [runType, startGpsTracking]);
 
   const handleStartRun = () => {
     if (runType === 'outdoor' && gpsStatus !== 'good') {
@@ -91,8 +93,8 @@ const PreRunScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Prepare Your Run</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text.primary }]}>Prepare Your Run</Text>
 
       <ShoeSelector selectedShoeId={selectedShoeId} onSelectShoe={setSelectedShoeId} />
       <RunTypeSelector runType={runType} onSelectRunType={setRunType} />
@@ -121,18 +123,16 @@ const PreRunScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: theme.spacing.md, // Use theme spacing
-    backgroundColor: theme.colors.background, // Use theme background
+    padding: 16,
   },
   title: {
-    fontSize: 28, // Consider theme.typography.h1.fontSize
+    fontSize: 28,
     fontWeight: 'bold',
-    marginVertical: theme.spacing.lg, // Use theme spacing
+    marginVertical: 24,
     textAlign: 'center',
-    color: theme.colors.text.primary, // Use theme text color
   },
   startButtonContainer: {
-    margin: theme.spacing.lg, // Use theme spacing
+    margin: 24,
   },
 });
 

@@ -40,7 +40,11 @@ const SimpleTest = () => {
         placeholder="Type something..."
         placeholderTextColor={theme.colors.text.secondary} // Use theme placeholder color
       />
-      <Button title="Click me" onPress={() => console.log('Button pressed')} color={theme.colors.primary} />
+      <Button
+        title="Click me"
+        onPress={() => console.log('Button pressed')}
+        color={theme.colors.primary}
+      />
     </View>
   );
 };

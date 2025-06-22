@@ -10,6 +10,10 @@ import PropTypes from 'prop-types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import RunMapView from '../../components/run_tracking/RunMapView';
+import { theme } from '../../theme/theme';
+
+// Extract colors to use in StyleSheet definitions
+const { colors } = theme;
 
 const StatsGrid = ({ run }) => {
   const { formatDistance } = useUnits();
@@ -171,13 +175,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingVertical: 20,
-    color: colors.text, // Primary text color from navigation theme
+    color: colors.text.primary, // Primary text color from navigation theme
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: colors.text, // Primary text color
+    color: colors.text.primary, // Primary text color
   },
   placeholderContent: {
     justifyContent: 'center',
@@ -200,18 +204,18 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     maxWidth: '60%', // For notes or long values
     textAlign: 'right',
   },
   errorText: {
     fontSize: 18,
-    color: 'red', // Navigation themes don't typically have an 'error' color. Keeping literal red.
+    color: colors.error || 'red', // Use theme error color if available
     textAlign: 'center',
     marginBottom: 10,
   },
