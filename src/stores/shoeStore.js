@@ -4,7 +4,6 @@ import {
   subMonths,
   startOfMonth,
   endOfMonth,
-  eachDayOfInterval,
   isWithinInterval,
 } from 'date-fns';
 
@@ -103,7 +102,6 @@ export const createShoeStore = (set, get) => ({
 
     const shoeRuns = runs.filter(run => run.shoeId === shoeId);
     const now = new Date();
-    const oneYearAgo = subMonths(now, 12);
 
     if (shoeRuns.length === 0) {
       return {
@@ -298,18 +296,6 @@ export const createShoeStore = (set, get) => ({
     };
   }), // END OF MEMOIZED WRAPPER
 
-  // Get shoes that need replacement soon
-  getShoesNeedingReplacement: () => {
-    const { shoes } = get();
-    return shoes.filter(shoe => {
-      if (!shoe.isActive) return false;
-      const stats = get().getShoeStats(shoe.id); // This will now call the memoized version
-      if (!stats || !shoe.maxDistance) return false;
-      const usagePercentage = (stats.totalDistance / shoe.maxDistance) * 100;
-      return usagePercentage >= 80; // 80% or more of max distance
-    });
-  },
-
   // Get recently retired shoes (last 30 days)
   getRecentlyRetiredShoes: (days = 30) => {
     const { shoes } = get();
@@ -360,21 +346,6 @@ export const createShoeStore = (set, get) => ({
       .getShoesWithStats()
       .filter(shoe => shoe.isActive && shoe.maxDistance > 0)
       .sort((a, b) => a.stats.remainingDistance - b.stats.remainingDistance);
-  },
-
-  // Get shoes that need replacement soon
-  getShoesNeedingReplacement: (threshold = 20) => {
-    return get()
-      .getShoesWithStats()
-      .filter(shoe => {
-        if (!shoe.isActive || !shoe.maxDistance) return false;
-        const percentageLeft =
-          ((shoe.maxDistance - (shoe.stats?.totalDistance || 0)) / shoe.maxDistance) * 100;
-        return percentageLeft >= 100 - threshold && percentageLeft < 100;
-      })
-      .sort(
-        (a, b) => b.stats?.totalDistance / b.maxDistance - a.stats?.totalDistance / a.maxDistance
-      );
   },
 
   // Get shoes by activity level
@@ -437,10 +408,10 @@ export const createShoeStore = (set, get) => ({
         totalRuns: periodRuns.length,
         totalDistance: periodRuns.reduce((sum, run) => sum + (run.distance || 0), 0),
         shoes: Object.entries(usageByShoe).map(([shoeId, distance]) => {
-          const shoe = shoes.find(s => s.id === shoeId);
+        const foundShoe = shoes.find(s => s.id === shoeId); // Renamed from shoe
           return {
             shoeId,
-            name: shoe?.name || 'Unknown Shoe',
+          name: foundShoe?.name || 'Unknown Shoe',
             distance,
             percentage: 0, // Will be calculated later
           };
@@ -701,16 +672,6 @@ export const createShoeStore = (set, get) => ({
     }
   },
 
-  // Return shoes enriched with their usage/statistics
-  getShoesWithStats: () => {
-    const { shoes, getShoeStats, getShoeUsage } = get();
-    return shoes.map(shoe => ({
-      ...shoe,
-      usage: getShoeUsage(shoe.id),
-      stats: getShoeStats(shoe.id),
-    }));
-  },
-
   // Shoes that have reached (or exceeded) their configured maximum distance while still active
   getShoesNeedingReplacement: () => {
     const { shoes, getShoeUsage, getShoeStats } = get();
@@ -729,8 +690,9 @@ export const createShoeStore = (set, get) => ({
   },
 
   // Convenience: get shoes based on active/retired status
-  getShoesByActivity: isActive => {
-    const { shoes } = get();
-    return shoes.filter(shoe => shoe.isActive === isActive);
-  },
+  // This was a duplicate, the one above (getShoesByActivity by period) is kept.
+  // getShoesByActivity: isActive => {
+  //   const { shoes } = get();
+  //   return shoes.filter(shoe => shoe.isActive === isActive);
+  // },
 });

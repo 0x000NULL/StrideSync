@@ -48,7 +48,7 @@ describe('ShoeSelector', () => {
   });
 
   it('displays a list of active shoes in the modal', () => {
-    const { getByText, getAllByRole } = render(
+    const { getByText } = render(
       <ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />
     );
 

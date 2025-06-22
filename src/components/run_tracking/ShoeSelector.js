@@ -5,8 +5,30 @@ import { shallow } from 'zustand/shallow';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import PropTypes from 'prop-types';
+import { useTheme } from '../../theme/ThemeProvider';
+
+// Extracted item component for the FlatList
+const ShoeSelectItem = React.memo(({ item, onPress, styles }) => (
+  <TouchableOpacity style={styles.shoeItem} onPress={onPress}>
+    <Text style={styles.shoeName}>{item.name}</Text>
+    <Text style={styles.shoeBrand}>{item.brand}</Text>
+  </TouchableOpacity>
+));
+
+ShoeSelectItem.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    brand: PropTypes.string,
+  }).isRequired,
+  onPress: PropTypes.func.isRequired,
+  styles: PropTypes.object.isRequired, // Pass relevant styles
+};
+ShoeSelectItem.displayName = 'ShoeSelectItem';
+
 
 const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
+  const theme = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const shoes = useStore(state => state.shoes, shallow);
   const activeShoes = useMemo(() => shoes.filter(shoe => shoe.isActive), [shoes]);
@@ -16,6 +38,72 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
     onSelectShoe(shoeId);
     setModalVisible(false);
   };
+
+  const styles = StyleSheet.create({
+    card: {
+      padding: theme.spacing.md,
+    },
+    label: {
+      fontSize: 16, // Consider theme.typography.subtitle1.fontSize
+      fontWeight: '600', // Consider theme.typography.subtitle1.fontWeight
+      marginBottom: theme.spacing.sm,
+      color: theme.colors.text.primary,
+    },
+    selector: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: theme.spacing.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.borderRadius.md,
+      backgroundColor: theme.colors.surface,
+    },
+    selectorText: {
+      fontSize: 16, // Consider theme.typography.body1.fontSize
+      color: theme.colors.text.primary,
+    },
+    arrow: {
+      fontSize: 12, // Consider theme.typography.caption.fontSize
+      color: theme.colors.text.secondary,
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: theme.colors.backdrop || 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.background,
+      borderTopLeftRadius: theme.borderRadius.lg,
+      borderTopRightRadius: theme.borderRadius.lg,
+      padding: theme.spacing.lg,
+      maxHeight: '60%', // This could be a theme variable too if needed
+    },
+    modalTitle: {
+      fontSize: 20, // Consider theme.typography.h5.fontSize
+      fontWeight: 'bold', // Consider theme.typography.h5.fontWeight
+      marginBottom: theme.spacing.lg,
+      textAlign: 'center',
+      color: theme.colors.text.primary, // Added this, was missing color
+    },
+    shoeItem: {
+      paddingVertical: theme.spacing.md,
+    },
+    shoeName: {
+      fontSize: 18, // Consider theme.typography.subtitle1.fontSize
+      fontWeight: '500',
+      color: theme.colors.text.primary, // Added this, was missing color
+    },
+    shoeBrand: {
+      fontSize: 14, // Consider theme.typography.body2.fontSize
+      color: theme.colors.text.secondary,
+      marginTop: theme.spacing.xxs,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.border,
+    },
+  });
 
   return (
     <>
@@ -42,84 +130,25 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
               data={activeShoes}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.shoeItem} onPress={() => handleSelectShoe(item.id)}>
-                  <Text style={styles.shoeName}>{item.name}</Text>
-                  <Text style={styles.shoeBrand}>{item.brand}</Text>
-                </TouchableOpacity>
+                <ShoeSelectItem
+                  item={item}
+                  onPress={() => handleSelectShoe(item.id)}
+                  styles={{ // Pass only necessary styles
+                    shoeItem: styles.shoeItem,
+                    shoeName: styles.shoeName,
+                    shoeBrand: styles.shoeBrand,
+                  }}
+                />
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
             />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} type="outline" />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} variant="outline" />
           </View>
         </View>
       </Modal>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    padding: 15,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  selector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-  },
-  selectorText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  arrow: {
-    fontSize: 12,
-    color: '#666',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '60%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  shoeItem: {
-    paddingVertical: 15,
-  },
-  shoeName: {
-    fontSize: 18,
-    fontWeight: '500',
-  },
-  shoeBrand: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#eee',
-  },
-});
 
 ShoeSelector.propTypes = {
   selectedShoeId: PropTypes.string,

@@ -4,18 +4,17 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Alert,
   TextInput,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../stores/useStore';
 import { format, parseISO } from 'date-fns';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import StatsCard from '../components/StatsCard';
 import Button from '../components/ui/Button';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
 const ShoeDetailScreen = ({ route, navigation }) => {
   const { shoeId } = route.params;
@@ -244,6 +243,17 @@ const ShoeDetailScreen = ({ route, navigation }) => {
   );
 };
 
+ShoeDetailScreen.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      shoeId: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -272,7 +282,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.1)', // Consider theme.colors.surface or similar
+    backgroundColor: theme.colors.surfaceVariant || theme.colors.surface, // Using theme color
     marginBottom: 12,
   },
   statusDot: {
@@ -289,7 +299,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.05)', // Consider theme.colors.surface or similar
+    backgroundColor: theme.colors.surface || theme.colors.background, // Using theme color (surface is often slightly off-white)
     width: '100%',
   },
   reasonLabel: {

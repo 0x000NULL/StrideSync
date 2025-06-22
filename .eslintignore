@@ -1,0 +1,8 @@
+# Ignore generated coverage reports
+coverage/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore build outputs
+# Add other build output directories if any, e.g., build/, dist/

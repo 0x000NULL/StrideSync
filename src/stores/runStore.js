@@ -2,14 +2,7 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
   isWithinInterval,
-  parseISO,
 } from 'date-fns';
 import { haversineDistance } from '../utils/unitUtils';
 
@@ -20,25 +13,6 @@ export const calculatePace = (distance, duration) => {
   const minutes = Math.floor(paceInSeconds / 60);
   const seconds = Math.round(paceInSeconds % 60);
   return { minutes, seconds };
-};
-
-// Helper function to calculate time period statistics
-const calculatePeriodStats = (runs, startDate, endDate) => {
-  const periodRuns = runs.filter(run => {
-    const runDate = new Date(run.startTime);
-    return isWithinInterval(runDate, { start: startDate, end: endDate });
-  });
-
-  const totalDistance = periodRuns.reduce((sum, run) => sum + (run.distance || 0), 0);
-  const totalDuration = periodRuns.reduce((sum, run) => sum + (run.duration || 0), 0);
-  const totalRuns = periodRuns.length;
-
-  return {
-    totalDistance,
-    totalDuration,
-    averagePace: calculatePace(totalDistance, totalDuration),
-    totalRuns,
-  };
 };
 
 export const createRunStore = (set, get) => ({
@@ -284,28 +258,7 @@ export const createRunStore = (set, get) => ({
     set({ currentRun: null });
   },
 
-  // CRUD operations for saved runs
-  addRun: run => {
-    const timestamp = new Date().toISOString();
-    const newRun = {
-      ...run,
-      id: uuidv4(),
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
-
-    set(state => ({
-      runs: [newRun, ...state.runs],
-    }));
-
-    return newRun.id;
-  },
-
-  deleteRun: id => {
-    set(state => ({
-      runs: state.runs.filter(run => run.id !== id),
-    }));
-  },
+  // CRUD operations for saved runs (duplicates removed, keeping original definitions)
 
   // Sync helper: called by Redux slice when it saves a run
   syncRunFromRedux: runData => {

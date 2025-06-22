@@ -6,15 +6,12 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
-  SectionList,
   ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../stores/useStore';
-import { format } from 'date-fns';
 import StatsCard from '../components/StatsCard';
 import ShoeListItem from '../components/ShoeListItem';
 import FilterModal from '../components/FilterModal';
@@ -22,6 +19,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
 const ShoeListScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -32,7 +30,6 @@ const ShoeListScreen = ({ navigation }) => {
   const loadShoes = useStore(state => state.loadShoes);
   const getShoesWithStats = useStore(state => state.getShoesWithStats);
   const getShoesNeedingReplacement = useStore(state => state.getShoesNeedingReplacement);
-  const getShoesByActivity = useStore(state => state.getShoesByActivity);
 
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('active'); // 'all', 'active', 'retired', 'needsReplacement'
@@ -41,18 +38,20 @@ const ShoeListScreen = ({ navigation }) => {
 
   // Load shoes on focus
   // Set up header right button
+  const headerRightCallback = React.useCallback(() => (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('RetiredShoesReport')}
+      style={styles.headerRightButton}
+    >
+      <MaterialIcons name="history" size={24} color={theme.colors.primary} />
+    </TouchableOpacity>
+  ), [navigation, theme.colors.primary, styles.headerRightButton]);
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('RetiredShoesReport')}
-          style={{ marginRight: 16 }}
-        >
-          <MaterialIcons name="history" size={24} color={theme.colors.primary} />
-        </TouchableOpacity>
-      ),
+      headerRight: headerRightCallback,
     });
-  }, [navigation, theme]);
+  }, [navigation, headerRightCallback]);
 
   useFocusEffect(
     useCallback(() => {
@@ -113,7 +112,7 @@ const ShoeListScreen = ({ navigation }) => {
           return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
       }
     });
-  }, [filter, sortBy, shoes, loading]);
+  }, [filter, sortBy, shoes, loading, getShoesWithStats, getShoesNeedingReplacement]);
 
   const stats = React.useMemo(() => {
     const activeShoes = getShoesWithStats().filter(shoe => shoe.isActive);
@@ -131,7 +130,7 @@ const ShoeListScreen = ({ navigation }) => {
       averageDistance,
       shoesNeedingReplacement: getShoesNeedingReplacement().length,
     };
-  }, [shoes]);
+  }, [shoes, getShoesWithStats, getShoesNeedingReplacement]);
 
   const renderShoeItem = useCallback(
     ({ item }) => (
@@ -280,6 +279,12 @@ const ShoeListScreen = ({ navigation }) => {
     filterChipTextActive: {
       color: theme.colors.primary,
     },
+    headerRightButton: { // Added for header button
+      marginRight: theme.spacing.md,
+    },
+    flexGrow1: { // Added for FlatList contentContainerStyle
+      flexGrow: 1,
+    },
   });
 
   const renderFilterModal = () => (
@@ -403,7 +408,7 @@ const ShoeListScreen = ({ navigation }) => {
           data={filteredShoes}
           renderItem={renderShoeItem}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.flexGrow1}
           ListEmptyComponent={renderEmptyState}
           refreshControl={
             <RefreshControl
@@ -420,6 +425,13 @@ const ShoeListScreen = ({ navigation }) => {
       {renderFilterModal()}
     </View>
   );
+};
+
+ShoeListScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    setOptions: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 export default ShoeListScreen;

@@ -69,9 +69,9 @@ const SettingsScreen = () => {
       flex: 1,
       marginRight: theme.spacing.md,
     },
-    button: {
-      marginTop: 10,
-    },
+    // button: { // Unused style
+    //   marginTop: 10,
+    // },
     versionText: {
       ...theme.typography.caption,
       color: theme.colors.text.secondary,
@@ -112,7 +112,7 @@ const SettingsScreen = () => {
             />
           </View>
           <View style={styles.settingItem}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.unitContainer}>
               <Text style={styles.unitLabel}>Distance Units</Text>
               <SegmentedControl
                 values={['Kilometers', 'Miles']}
@@ -128,12 +128,12 @@ const SettingsScreen = () => {
                 style={[styles.segmentedControl, styles.unitContainer]}
                 tintColor={theme.colors.primary}
                 fontStyle={{ color: theme.colors.text.primary }}
-                activeFontStyle={{ color: '#fff' }}
+                activeFontStyle={{ color: theme.colors.onPrimary || theme.colors.text.light }}
               />
             </View>
           </View>
           <View style={styles.settingItem}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.unitContainer}>
               <Text style={styles.unitLabel}>Temperature Units</Text>
               <SegmentedControl
                 values={['Celsius', 'Fahrenheit']}
@@ -150,7 +150,7 @@ const SettingsScreen = () => {
                 style={[styles.segmentedControl, styles.unitContainer]}
                 tintColor={theme.colors.primary}
                 fontStyle={{ color: theme.colors.text.primary }}
-                activeFontStyle={{ color: '#fff' }}
+                activeFontStyle={{ color: theme.colors.onPrimary || theme.colors.text.light }}
               />
             </View>
           </View>

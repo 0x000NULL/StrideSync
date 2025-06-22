@@ -73,6 +73,9 @@ const getStyles = theme =>
       marginTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.md,
     },
+    flex1: { // Added style for flex: 1
+      flex: 1,
+    },
   });
 
 const RunDetailScreen = ({ route }) => {
@@ -83,7 +86,7 @@ const RunDetailScreen = ({ route }) => {
   const run = getRunById ? getRunById(runId) : null;
   const theme = useTheme();
   const styles = getStyles(theme);
-  const { formatDistance, distanceUnit, fromKilometers } = useUnits(); // Call useUnits
+  const { formatDistance, distanceUnit } = useUnits(); // Call useUnits
 
   // Constants for conversion
   const KM_TO_MI = 0.621371; // Defined in unitUtils.js, duplicating for direct use here if needed, or ensure it's accessible.
@@ -215,13 +218,13 @@ const RunDetailScreen = ({ route }) => {
           title="Edit"
           onPress={() => Alert.alert('Edit', 'Edit functionality coming soon!')}
           variant="outline"
-          style={{ flex: 1, marginRight: theme.spacing.sm }}
+          style={[styles.flex1, { marginRight: theme.spacing.sm }]}
         />
         <Button
           title="Delete"
           onPress={handleDelete}
           variant="danger"
-          style={{ flex: 1, marginLeft: theme.spacing.sm }}
+          style={[styles.flex1, { marginLeft: theme.spacing.sm }]}
         />
       </View>
     </ScrollView>

@@ -1,15 +1,13 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 // MaterialIcons is mocked in jest-setup.js
 // import { MaterialIcons } from '@expo/vector-icons';
 import Button from '../../../src/components/ui/Button';
-import { useTheme } from '../../../src/theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 describe('Button Component', () => {
   const mockOnPress = jest.fn();
   const defaultTitle = 'Press Me';
-
-  const getThemeForTest = () => useTheme(); // Helper if needed for style checks
 
   beforeEach(() => {
     mockOnPress.mockClear();
@@ -137,6 +135,9 @@ describe('Button Component', () => {
     it('renders a custom React element as icon', () => {
       const { Text } = require('react-native');
       const CustomIconComponent = props => <Text testID="custom-icon-actual">{props.name}</Text>;
+      CustomIconComponent.propTypes = {
+        name: PropTypes.string.isRequired,
+      };
       CustomIconComponent.displayName = 'CustomIcon';
 
       const { getByTestId, getByText } = render(

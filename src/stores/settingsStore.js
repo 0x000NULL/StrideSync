@@ -51,8 +51,6 @@ export const createSettingsStore = (set, get) => ({
     }));
 
     // Apply any side effects
-    const newSettings = { ...get().settings, ...updates };
-
     // Example: If theme changes, you might want to update the app theme here
     if (updates.theme) {
       // Apply theme changes (implementation depends on your theming solution)
