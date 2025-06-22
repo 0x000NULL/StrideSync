@@ -5,6 +5,7 @@ import { useTheme } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import * as runSliceActions from '../../stores/run_tracking/runSlice';
 import * as Location from 'expo-location';
+import { useUnits } from '../../hooks/useUnits'; // Import useUnits
 
 // Import extracted components
 import RunMapView from '../../components/run_tracking/RunMapView';
@@ -26,28 +27,43 @@ const BatteryOptimizationIndicator = ({ isActive }) => {
   );
 };
 
-const LapsDisplay = ({ laps }) => {
+const LapsDisplay = ({ laps, unitUtils }) => { // Accept unitUtils
   const { colors } = useTheme();
+  const { formatDistance, distanceUnit, fromKilometers } = unitUtils;
 
   if (!laps || laps.length === 0) return null;
 
   return (
     <View style={[styles.lapsContainer, { backgroundColor: colors.surface }]}>
       <Text style={[styles.lapsHeader, { color: colors.text.primary }]}>Laps</Text>
-      {laps.map((lap, index) => {
-        const lapPace = lap.distance > 0 ? lap.duration / 60 / lap.distance : 0;
-        const paceMinutes = Math.floor(lapPace);
-        const paceSeconds = Math.round((lapPace - paceMinutes) * 60);
+      {laps.map((lap, index) => { // lap.distance is in km
+        const displayLapDistance = formatDistance(lap.distance);
+        const currentDistanceUnitLabel = distanceUnit === 'mi' ? 'min/mi' : 'min/km';
+        let lapPaceText = '--:--';
+
+        if (lap.distance > 0 && lap.duration > 0) {
+          let distanceForPaceCalc = lap.distance; // km
+          if (distanceUnit === 'mi') {
+            distanceForPaceCalc = fromKilometers(lap.distance, 'mi');
+          }
+
+          if (distanceForPaceCalc > 0) {
+            const lapPaceValue = lap.duration / 60 / distanceForPaceCalc;
+            const paceMinutes = Math.floor(lapPaceValue);
+            const paceSeconds = Math.round((lapPaceValue - paceMinutes) * 60);
+            lapPaceText = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+          }
+        }
 
         return (
           <View key={index} style={[styles.lapItem, { borderBottomColor: colors.border }]}>
             <Text style={{ color: colors.text.secondary }}>Lap {index + 1}</Text>
-            <Text style={{ color: colors.text.primary }}>{lap.distance.toFixed(2)} km</Text>
+            <Text style={{ color: colors.text.primary }}>{displayLapDistance.formatted}</Text>
             <Text style={{ color: colors.text.primary }}>
               {new Date(lap.duration * 1000).toISOString().substr(11, 8)}
             </Text>
             <Text style={{ color: colors.text.primary }}>
-              {paceMinutes}:{paceSeconds.toString().padStart(2, '0')} /km
+              {lapPaceText} {currentDistanceUnitLabel}
             </Text>
           </View>
         );
@@ -58,6 +74,7 @@ const LapsDisplay = ({ laps }) => {
 
 const ActiveRunScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const unitUtils = useUnits(); // Call useUnits here
   // Try to get data from Redux first (used heavily in unit tests). Fallback to Zustand store when Redux not available.
   let currentRun = undefined;
   let runStatus;
@@ -259,7 +276,7 @@ const ActiveRunScreen = ({ navigation }) => {
         onStop={handleStopRun}
         isPaused={currentRun.isPaused || runStatus === 'paused'}
       />
-      <LapsDisplay laps={currentRun.laps} />
+      <LapsDisplay laps={currentRun.laps} unitUtils={unitUtils} />
       <BatteryOptimizationIndicator isActive={true} />
       {__DEV__ && (
         <View style={[styles.debugInfo, { backgroundColor: colors.border }]}>

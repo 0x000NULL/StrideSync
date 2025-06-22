@@ -3,16 +3,23 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
-import { formatDistance, formatPace } from '../utils/formatters';
+// import { formatDistance as oldFormatDistance, formatPace as oldFormatPace } from '../utils/formatters'; // Keep if other parts still use them
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
+
+// KM_TO_MI for pace conversion if not exposed by useUnits directly for this calculation
+const KM_TO_MI = 0.621371;
+
 
 const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
   const theme = useTheme();
+  const { formatDistance, distanceUnit } = useUnits(); // Get unit functions
+
   const {
     id,
     name,
     brand,
     model,
-    maxDistance = 800, // in km
+    maxDistance = 800, // This is always in km (base unit for storage)
     purchaseDate,
     isActive = true,
     imageUrl = null,
@@ -303,14 +310,25 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
 
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {stats.totalDistance ? formatDistance(stats.totalDistance) : '--'}
+                  {/* Assuming stats.totalDistance is in km */}
+                  {stats.totalDistance !== undefined ? formatDistance(stats.totalDistance).formatted : '--'}
                 </Text>
                 <Text style={styles.statLabel}>Total</Text>
               </View>
 
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {stats.averagePace ? formatPace(stats.averagePace) : '--'}
+                  {/* Assuming stats.averagePace is in seconds/km */}
+                  {() => {
+                    if (!stats.averagePace || stats.averagePace <= 0) return '--:--';
+                    let paceInSecondsPreferredUnit = stats.averagePace;
+                    if (distanceUnit === 'mi') {
+                      paceInSecondsPreferredUnit = stats.averagePace / KM_TO_MI;
+                    }
+                    const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
+                    const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
+                    return `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')} ${distanceUnit === 'mi' ? 'min/mi' : 'min/km'}`;
+                  }()}
                 </Text>
                 <Text style={styles.statLabel}>Avg. Pace</Text>
               </View>
@@ -320,8 +338,10 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
             <View style={styles.progressContainer}>
               <View style={styles.progressHeader}>
                 <Text style={styles.distance}>
-                  {formatDistance(stats.totalDistance || 0)} of{' '}
-                  {maxDistance ? `${maxDistance} km` : '∞'}
+                  {/* Assuming stats.totalDistance is in km */}
+                  {formatDistance(stats.totalDistance || 0).formatted} of{' '}
+                  {/* maxDistance is in km, format it */}
+                  {maxDistance ? formatDistance(maxDistance).formatted : '∞'}
                 </Text>
                 <Text style={[styles.distance, { color: statusColor }]}>
                   {Math.round(progress)}%
