@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../ui/Card';
 import LoadingIndicator from '../ui/LoadingIndicator';
+import PropTypes from 'prop-types';
 
 const GPSStatusIndicator = ({ gpsStatus }) => {
   const getStatusStyle = () => {
@@ -66,5 +67,9 @@ const styles = StyleSheet.create({
     color: '#e74c3c', // Red
   },
 });
+
+GPSStatusIndicator.propTypes = {
+  gpsStatus: PropTypes.oneOf(['good', 'poor', 'searching']).isRequired,
+};
 
 export default GPSStatusIndicator;

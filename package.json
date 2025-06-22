@@ -1,6 +1,6 @@
 {
   "name": "StrideSync",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -59,7 +59,7 @@
     "@react-native-community/eslint-config": "^3.2.0",
     "@testing-library/react-native": "^13.2.0",
     "@types/jest": "^30.0.0",
-    "babel-preset-expo": "^13.2.1",
+    "babel-preset-expo": "~13.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.0",

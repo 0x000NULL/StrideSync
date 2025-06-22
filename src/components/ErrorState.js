@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 /**
  * A component to display when there's an error loading data
@@ -78,3 +79,19 @@ const ErrorState = ({
 };
 
 export default React.memo(ErrorState);
+
+ErrorState.propTypes = {
+  icon: PropTypes.string,
+  title: PropTypes.string,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Error)]),
+  actionLabel: PropTypes.string,
+  onRetry: PropTypes.func,
+};
+
+ErrorState.defaultProps = {
+  icon: 'error-outline',
+  title: 'Something went wrong',
+  message: "We couldn't load the data. Please try again.",
+  actionLabel: 'Try Again',
+  onRetry: undefined,
+};

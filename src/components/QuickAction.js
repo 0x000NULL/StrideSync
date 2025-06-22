@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 const QuickAction = ({ icon, label, onPress, color }) => {
   const theme = useTheme();
@@ -38,6 +39,18 @@ const QuickAction = ({ icon, label, onPress, color }) => {
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
+};
+
+QuickAction.propTypes = {
+  icon: PropTypes.element.isRequired,
+  label: PropTypes.string.isRequired,
+  onPress: PropTypes.func,
+  color: PropTypes.string,
+};
+
+QuickAction.defaultProps = {
+  onPress: () => {},
+  color: undefined,
 };
 
 export default QuickAction;

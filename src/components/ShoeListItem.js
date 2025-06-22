@@ -5,10 +5,11 @@ import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
 // import { formatDistance as oldFormatDistance, formatPace as oldFormatPace } from '../utils/formatters'; // Keep if other parts still use them
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import { useStore } from '../stores/useStore';
+import PropTypes from 'prop-types';
 
 // KM_TO_MI for pace conversion if not exposed by useUnits directly for this calculation
 const KM_TO_MI = 0.621371;
-
 
 const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
   const theme = useTheme();
@@ -25,7 +26,8 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
     imageUrl = null,
     stats = {},
     progress = 0,
-    remainingDistance = null,
+    // remainingDistance removed since unused for now
+    retirementDate,
   } = shoe;
 
   // Calculate status color based on usage percentage
@@ -45,15 +47,15 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
 
   const statusDescription = useMemo(() => {
     if (!isActive) {
-      if (shoe.retirementDate) {
-        return `Retired on ${new Date(shoe.retirementDate).toLocaleDateString()}`;
+      if (retirementDate) {
+        return `Retired on ${new Date(retirementDate).toLocaleDateString()}`;
       }
       return 'Retired';
     }
     if (progress >= 90) return 'Consider replacing soon';
     if (progress >= 70) return 'Monitor usage';
     return 'In good condition';
-  }, [progress, isActive, shoe.retirementDate]);
+  }, [progress, isActive, retirementDate]);
 
   // Format dates
   const formattedPurchaseDate = useMemo(() => {
@@ -311,7 +313,9 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {/* Assuming stats.totalDistance is in km */}
-                  {stats.totalDistance !== undefined ? formatDistance(stats.totalDistance).formatted : '--'}
+                  {stats.totalDistance !== undefined
+                    ? formatDistance(stats.totalDistance).formatted
+                    : '--'}
                 </Text>
                 <Text style={styles.statLabel}>Total</Text>
               </View>
@@ -319,7 +323,7 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {/* Assuming stats.averagePace is in seconds/km */}
-                  {() => {
+                  {(() => {
                     if (!stats.averagePace || stats.averagePace <= 0) return '--:--';
                     let paceInSecondsPreferredUnit = stats.averagePace;
                     if (distanceUnit === 'mi') {
@@ -328,7 +332,7 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
                     const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
                     const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
                     return `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')} ${distanceUnit === 'mi' ? 'min/mi' : 'min/km'}`;
-                  }()}
+                  })()}
                 </Text>
                 <Text style={styles.statLabel}>Avg. Pace</Text>
               </View>
@@ -367,6 +371,29 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
       {showDivider && <View style={styles.divider} />}
     </Card>
   );
+};
+
+ShoeListItem.propTypes = {
+  shoe: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    brand: PropTypes.string,
+    model: PropTypes.string,
+    maxDistance: PropTypes.number,
+    purchaseDate: PropTypes.string,
+    isActive: PropTypes.bool,
+    imageUrl: PropTypes.string,
+    stats: PropTypes.object,
+    progress: PropTypes.number,
+    retirementDate: PropTypes.string,
+  }).isRequired,
+  onPress: PropTypes.func,
+  showDivider: PropTypes.bool,
+};
+
+ShoeListItem.defaultProps = {
+  onPress: () => {},
+  showDivider: true,
 };
 
 export default ShoeListItem;

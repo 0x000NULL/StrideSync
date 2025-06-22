@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 const Card = ({ children, onPress, style }) => {
   const theme = useTheme();
@@ -32,6 +33,17 @@ const Card = ({ children, onPress, style }) => {
   }
 
   return <View style={[cardStyles.container, style]}>{children}</View>;
+};
+
+Card.propTypes = {
+  children: PropTypes.node.isRequired,
+  onPress: PropTypes.func,
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
+Card.defaultProps = {
+  onPress: undefined,
+  style: {},
 };
 
 export default Card;

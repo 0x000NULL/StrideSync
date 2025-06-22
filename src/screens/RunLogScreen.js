@@ -27,7 +27,6 @@ import { useUnits } from '../hooks/useUnits'; // Import useUnits
 // KM_TO_MI for pace conversion, assuming it's not directly available from useUnits easily for this scope
 const KM_TO_MI = 0.621371;
 
-
 // Date range options
 const DATE_RANGES = [
   { id: 'all', label: 'All Time' },
@@ -224,7 +223,8 @@ const RunLogScreen = ({ navigation }) => {
   }, [filteredRuns]);
 
   // Format run data for display
-  const formatRunItem = run => { // run.distance is in km, run.pace is in seconds per km
+  const formatRunItem = run => {
+    // run.distance is in km, run.pace is in seconds per km
     const runDate = parseISO(run.startTime);
     const shoe = run.shoeId ? getShoeById(run.shoeId) : null;
 
@@ -711,13 +711,18 @@ const RunLogScreen = ({ navigation }) => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
                     const numericValue = parseFloat(text);
                     if (isNaN(numericValue) && text !== '' && text !== '.') {
-                        // allow clearing or starting with decimal
-                        setFilters({ ...filters, minDistance: '' });
-                        return;
+                      // allow clearing or starting with decimal
+                      setFilters({ ...filters, minDistance: '' });
+                      return;
                     }
                     setFilters({
                       ...filters,
-                      minDistance: text === '' ? '' : distanceUnit === 'mi' ? toKilometers(numericValue, 'mi').toString() : numericValue.toString(),
+                      minDistance:
+                        text === ''
+                          ? ''
+                          : distanceUnit === 'mi'
+                            ? toKilometers(numericValue, 'mi').toString()
+                            : numericValue.toString(),
                     });
                   }
                 }}
@@ -732,7 +737,7 @@ const RunLogScreen = ({ navigation }) => {
                 style={styles.input}
                 placeholder={`Max distance (${distanceUnit})`}
                 placeholderTextColor={theme.colors.text.secondary}
-                 value={
+                value={
                   filters.maxDistance
                     ? distanceUnit === 'mi'
                       ? fromKilometers(parseFloat(filters.maxDistance), 'mi').toFixed(2)
@@ -742,13 +747,18 @@ const RunLogScreen = ({ navigation }) => {
                 onChangeText={text => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
                     const numericValue = parseFloat(text);
-                     if (isNaN(numericValue) && text !== '' && text !== '.') {
-                        setFilters({ ...filters, maxDistance: '' });
-                        return;
+                    if (isNaN(numericValue) && text !== '' && text !== '.') {
+                      setFilters({ ...filters, maxDistance: '' });
+                      return;
                     }
                     setFilters({
                       ...filters,
-                      maxDistance: text === '' ? '' : distanceUnit === 'mi' ? toKilometers(numericValue, 'mi').toString() : numericValue.toString(),
+                      maxDistance:
+                        text === ''
+                          ? ''
+                          : distanceUnit === 'mi'
+                            ? toKilometers(numericValue, 'mi').toString()
+                            : numericValue.toString(),
                     });
                   }
                 }}

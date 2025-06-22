@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialIcons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 
 const Input = forwardRef(
   (
@@ -193,3 +194,38 @@ const Input = forwardRef(
 );
 
 export default Input;
+
+Input.propTypes = {
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChangeText: PropTypes.func.isRequired,
+  secureTextEntry: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  helperText: PropTypes.string,
+  disabled: PropTypes.bool,
+  multiline: PropTypes.bool,
+  numberOfLines: PropTypes.number,
+  leftIcon: PropTypes.element,
+  rightIcon: PropTypes.element,
+  onRightIconPress: PropTypes.func,
+  inputStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  containerStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
+Input.defaultProps = {
+  label: undefined,
+  placeholder: undefined,
+  value: '',
+  secureTextEntry: false,
+  error: null,
+  helperText: null,
+  disabled: false,
+  multiline: false,
+  numberOfLines: 1,
+  leftIcon: null,
+  rightIcon: null,
+  onRightIconPress: undefined,
+  inputStyle: {},
+  containerStyle: {},
+};

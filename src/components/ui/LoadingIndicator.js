@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 const LoadingIndicator = ({
   size = 'large',
@@ -43,6 +44,24 @@ const LoadingIndicator = ({
       {text && <Text style={styles.text}>{text}</Text>}
     </View>
   );
+};
+
+LoadingIndicator.propTypes = {
+  size: PropTypes.oneOfType([PropTypes.oneOf(['small', 'large']), PropTypes.number]),
+  color: PropTypes.string,
+  text: PropTypes.string,
+  fullScreen: PropTypes.bool,
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  textStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
+LoadingIndicator.defaultProps = {
+  size: 'large',
+  color: undefined,
+  text: undefined,
+  fullScreen: false,
+  style: {},
+  textStyle: {},
 };
 
 export default LoadingIndicator;

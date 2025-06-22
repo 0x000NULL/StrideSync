@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 /**
  * A component to display when a list is empty
@@ -78,3 +79,18 @@ const EmptyState = ({ icon, title, message, action }) => {
 };
 
 export default React.memo(EmptyState);
+
+EmptyState.propTypes = {
+  icon: PropTypes.string,
+  title: PropTypes.string.isRequired,
+  message: PropTypes.string.isRequired,
+  action: PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    onPress: PropTypes.func.isRequired,
+  }),
+};
+
+EmptyState.defaultProps = {
+  icon: undefined,
+  action: undefined,
+};

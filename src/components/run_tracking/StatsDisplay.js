@@ -3,8 +3,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { formatDuration } from '../../utils/formatters';
 import { useTheme } from '@react-navigation/native';
 import { useUnits } from '../../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
-const StatsDisplay = ({ distance = 0, duration = 0 }) => { // distance is always in km
+const StatsDisplay = ({ distance = 0, duration = 0 }) => {
+  // distance is always in km
   const { colors } = useTheme();
   const { formatDistance, distanceUnit, fromKilometers } = useUnits();
 
@@ -51,5 +53,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+StatsDisplay.propTypes = {
+  distance: PropTypes.number,
+  duration: PropTypes.number,
+};
+
+StatsDisplay.defaultProps = {
+  distance: 0,
+  duration: 0,
+};
 
 export default StatsDisplay;

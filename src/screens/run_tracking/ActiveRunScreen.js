@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as runSliceActions from '../../stores/run_tracking/runSlice';
 import * as Location from 'expo-location';
 import { useUnits } from '../../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
 // Import extracted components
 import RunMapView from '../../components/run_tracking/RunMapView';
@@ -27,7 +28,8 @@ const BatteryOptimizationIndicator = ({ isActive }) => {
   );
 };
 
-const LapsDisplay = ({ laps, unitUtils }) => { // Accept unitUtils
+const LapsDisplay = ({ laps, unitUtils }) => {
+  // Accept unitUtils
   const { colors } = useTheme();
   const { formatDistance, distanceUnit, fromKilometers } = unitUtils;
 
@@ -36,7 +38,8 @@ const LapsDisplay = ({ laps, unitUtils }) => { // Accept unitUtils
   return (
     <View style={[styles.lapsContainer, { backgroundColor: colors.surface }]}>
       <Text style={[styles.lapsHeader, { color: colors.text.primary }]}>Laps</Text>
-      {laps.map((lap, index) => { // lap.distance is in km
+      {laps.map((lap, index) => {
+        // lap.distance is in km
         const displayLapDistance = formatDistance(lap.distance);
         const currentDistanceUnitLabel = distanceUnit === 'mi' ? 'min/mi' : 'min/km';
         let lapPaceText = '--:--';
@@ -76,7 +79,7 @@ const ActiveRunScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const unitUtils = useUnits(); // Call useUnits here
   // Try to get data from Redux first (used heavily in unit tests). Fallback to Zustand store when Redux not available.
-  let currentRun = undefined;
+  let currentRun;
   let runStatus;
   let isTracking;
   const dispatch = useDispatch?.();
@@ -116,7 +119,10 @@ const ActiveRunScreen = ({ navigation }) => {
   useEffect(() => {
     let timer;
     const shouldRunTimer =
-      currentRun && !currentRun.isPaused && (runStatus === 'active' || runStatus === undefined) && isTracking !== false;
+      currentRun &&
+      !currentRun.isPaused &&
+      (runStatus === 'active' || runStatus === undefined) &&
+      isTracking !== false;
 
     if (shouldRunTimer) {
       const skippedTickCountRef = { current: 0 };
@@ -334,5 +340,34 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
+BatteryOptimizationIndicator.propTypes = {
+  isActive: PropTypes.bool.isRequired,
+};
+
+LapsDisplay.propTypes = {
+  laps: PropTypes.arrayOf(
+    PropTypes.shape({
+      distance: PropTypes.number.isRequired,
+      duration: PropTypes.number.isRequired,
+    })
+  ),
+  unitUtils: PropTypes.shape({
+    formatDistance: PropTypes.func.isRequired,
+    distanceUnit: PropTypes.string.isRequired,
+    fromKilometers: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
+LapsDisplay.defaultProps = {
+  laps: [],
+};
+
+ActiveRunScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 export default ActiveRunScreen;

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useTheme } from '@react-navigation/native';
+import PropTypes from 'prop-types';
 
 const RunMapView = ({ path }) => {
   const { colors } = useTheme();
@@ -139,5 +140,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+RunMapView.propTypes = {
+  path: PropTypes.arrayOf(
+    PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired,
+    })
+  ),
+};
+
+RunMapView.defaultProps = {
+  path: [],
+};
 
 export default RunMapView;

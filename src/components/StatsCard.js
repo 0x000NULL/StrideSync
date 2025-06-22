@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
+import PropTypes from 'prop-types';
 
 /**
  * A card component to display a single statistic with an optional icon
@@ -131,3 +132,23 @@ const StatsCard = ({
 };
 
 export default React.memo(StatsCard);
+
+StatsCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  unit: PropTypes.string,
+  icon: PropTypes.string,
+  color: PropTypes.string,
+  iconType: PropTypes.oneOf(['material', 'material-community']),
+  description: PropTypes.string,
+  small: PropTypes.bool,
+};
+
+StatsCard.defaultProps = {
+  unit: undefined,
+  icon: undefined,
+  color: undefined,
+  iconType: 'material',
+  description: undefined,
+  small: false,
+};

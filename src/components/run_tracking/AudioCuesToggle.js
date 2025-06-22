@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 import Card from '../ui/Card';
+import PropTypes from 'prop-types';
 
 const AudioCuesToggle = ({ audioCuesEnabled, onToggleAudioCues }) => {
   return (
@@ -34,5 +35,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+
+AudioCuesToggle.propTypes = {
+  audioCuesEnabled: PropTypes.bool.isRequired,
+  onToggleAudioCues: PropTypes.func.isRequired,
+};
 
 export default AudioCuesToggle;

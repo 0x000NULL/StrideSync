@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { saveRun, cancelActiveRun, setSelectedRunId } from '../../stores/run_tracking/runSlice';
+import PropTypes from 'prop-types';
 
 // Import newly extracted components
 import RunDetailsForm from '../../components/run_tracking/save_run/RunDetailsForm';
@@ -167,5 +168,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
+SaveRunScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 export default SaveRunScreen;

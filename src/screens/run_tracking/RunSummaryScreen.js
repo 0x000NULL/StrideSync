@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useStore } from '../../stores/useStore';
 import { useUnits } from '../../hooks/useUnits';
 import { formatDuration } from '../../utils/formatters';
+import PropTypes from 'prop-types';
 
 // Reusable Components
 import Card from '../../components/ui/Card';
@@ -46,6 +47,17 @@ const StatsGrid = ({ run }) => {
   );
 };
 
+StatsGrid.propTypes = {
+  run: PropTypes.shape({
+    distance: PropTypes.number,
+    duration: PropTypes.number,
+    elevationGain: PropTypes.number,
+    elevationLoss: PropTypes.number,
+    caloriesBurned: PropTypes.number,
+    notes: PropTypes.string,
+  }).isRequired,
+};
+
 const PlaceholderCard = ({ title, text }) => (
   <Card>
     <Text style={styles.cardTitle}>{title}</Text>
@@ -54,6 +66,11 @@ const PlaceholderCard = ({ title, text }) => (
     </View>
   </Card>
 );
+
+PlaceholderCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+};
 
 const RunSummaryScreen = () => {
   const navigation = useNavigation();

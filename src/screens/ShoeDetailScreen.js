@@ -155,17 +155,21 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         />
         <StatsCard title="Runs" value={shoeWithDetails.totalRuns || 0} icon="repeat" />
         {/* Ensure maxDistance is on shoeWithDetails */}
-        {shoeWithDetails.maxDistance > 0 && (() => {
-          const remainingDistance = Math.max(0, shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0));
-          return (
-            <StatsCard
-              title="Remaining"
-              value={formatDistance(remainingDistance).formatted}
-              subtitle={`of ${formatDistance(shoeWithDetails.maxDistance).formatted}`}
-              icon="timeline"
-            />
-          );
-        })()}
+        {shoeWithDetails.maxDistance > 0 &&
+          (() => {
+            const remainingDistance = Math.max(
+              0,
+              shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0)
+            );
+            return (
+              <StatsCard
+                title="Remaining"
+                value={formatDistance(remainingDistance).formatted}
+                subtitle={`of ${formatDistance(shoeWithDetails.maxDistance).formatted}`}
+                icon="timeline"
+              />
+            );
+          })()}
       </View>
 
       {/* Logic using shoeWithDetails.isActive */}

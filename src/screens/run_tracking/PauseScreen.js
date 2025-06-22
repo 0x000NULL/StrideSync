@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, TextInput, ScrollView, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { resumeRun, cancelActiveRun, updateRun } from '../../stores/run_tracking/runSlice'; // Assuming cancelActiveRun handles discard
+import PropTypes from 'prop-types';
 
 // Helper to format duration (seconds to HH:MM:SS) - Duplicated from ActiveRunScreen, consider moving to utils
 const formatDuration = totalSeconds => {
@@ -209,5 +210,30 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
+
+RunStatsSummary.propTypes = {
+  distance: PropTypes.number.isRequired,
+  duration: PropTypes.number.isRequired,
+  pace: PropTypes.number.isRequired,
+};
+
+NoteInput.propTypes = {
+  notes: PropTypes.string.isRequired,
+  onNotesChange: PropTypes.func.isRequired,
+};
+
+ActionButtons.propTypes = {
+  onResume: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onDiscard: PropTypes.func.isRequired,
+};
+
+PauseScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
+    reset: PropTypes.func,
+  }).isRequired,
+};
 
 export default PauseScreen;

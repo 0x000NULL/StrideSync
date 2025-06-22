@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import PropTypes from 'prop-types';
 
 const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
   const effortOptions = [1, 2, 3, 4, 5];
@@ -96,5 +97,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+EffortMoodSelector.propTypes = {
+  effort: PropTypes.number.isRequired,
+  mood: PropTypes.string.isRequired,
+  onEffortChange: PropTypes.func.isRequired,
+  onMoodChange: PropTypes.func.isRequired,
+};
 
 export default EffortMoodSelector;

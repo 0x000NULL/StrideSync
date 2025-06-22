@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 /**
  * A skeleton loading component that shows placeholder content
@@ -145,3 +146,15 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
 };
 
 export default React.memo(LoadingSkeleton);
+
+LoadingSkeleton.propTypes = {
+  count: PropTypes.number,
+  variant: PropTypes.oneOf(['card', 'list', 'text']),
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
+LoadingSkeleton.defaultProps = {
+  count: 3,
+  variant: 'card',
+  style: {},
+};

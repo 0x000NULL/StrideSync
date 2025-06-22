@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
+import PropTypes from 'prop-types';
 
 const RunDetailsForm = ({ name, notes, onNameChange, onNotesChange }) => (
   <View style={styles.formSection}>
@@ -44,5 +45,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+RunDetailsForm.propTypes = {
+  name: PropTypes.string,
+  notes: PropTypes.string,
+  onNameChange: PropTypes.func.isRequired,
+  onNotesChange: PropTypes.func.isRequired,
+};
+
+RunDetailsForm.defaultProps = {
+  name: '',
+  notes: '',
+};
 
 export default RunDetailsForm;

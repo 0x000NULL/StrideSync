@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
 import Button from '../ui/Button'; // Assuming a segmented control or button group for type
+import PropTypes from 'prop-types';
 
 const GoalInput = ({ goal, onGoalChange }) => {
   const goalTypes = ['open', 'distance', 'time'];
@@ -70,5 +71,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
+GoalInput.propTypes = {
+  goal: PropTypes.shape({
+    type: PropTypes.oneOf(['open', 'distance', 'time']).isRequired,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+  onGoalChange: PropTypes.func.isRequired,
+};
 
 export default GoalInput;

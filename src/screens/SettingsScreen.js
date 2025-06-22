@@ -116,7 +116,9 @@ const SettingsScreen = () => {
               <Text style={styles.unitLabel}>Distance Units</Text>
               <SegmentedControl
                 values={['Kilometers', 'Miles']}
-                selectedIndex={['Kilometers', 'Miles'].indexOf(distanceUnit === 'km' ? 'Kilometers' : 'Miles')}
+                selectedIndex={['Kilometers', 'Miles'].indexOf(
+                  distanceUnit === 'km' ? 'Kilometers' : 'Miles'
+                )}
                 onChange={event => {
                   updateSettings({
                     distanceUnit: event.nativeEvent.selectedSegmentIndex === 0 ? 'km' : 'mi',
@@ -135,10 +137,13 @@ const SettingsScreen = () => {
               <Text style={styles.unitLabel}>Temperature Units</Text>
               <SegmentedControl
                 values={['Celsius', 'Fahrenheit']}
-                selectedIndex={['Celsius', 'Fahrenheit'].indexOf(temperatureUnit === 'celsius' ? 'Celsius' : 'Fahrenheit')}
+                selectedIndex={['Celsius', 'Fahrenheit'].indexOf(
+                  temperatureUnit === 'celsius' ? 'Celsius' : 'Fahrenheit'
+                )}
                 onChange={event => {
                   updateSettings({
-                    temperatureUnit: event.nativeEvent.selectedSegmentIndex === 0 ? 'celsius' : 'fahrenheit',
+                    temperatureUnit:
+                      event.nativeEvent.selectedSegmentIndex === 0 ? 'celsius' : 'fahrenheit',
                   });
                 }}
                 appearance={theme.dark ? 'dark' : 'light'}

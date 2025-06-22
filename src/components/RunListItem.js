@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
 // KM_TO_MI for pace conversion
 const KM_TO_MI = 0.621371;
@@ -102,15 +103,6 @@ const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider 
       color: theme.colors.text.secondary,
       marginLeft: theme.spacing.xs,
     },
-    duration: {
-      ...theme.typography.h4,
-      color: theme.colors.text.primary,
-      marginBottom: theme.spacing.xxs,
-    },
-    pace: {
-      ...theme.typography.body,
-      color: theme.colors.text.secondary,
-    },
     divider: {
       height: 1,
       backgroundColor: theme.colors.border,
@@ -148,6 +140,24 @@ const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider 
       {showDivider && <View style={styles.divider} />}
     </Card>
   );
+};
+
+RunListItem.propTypes = {
+  id: PropTypes.string.isRequired,
+  date: PropTypes.string.isRequired,
+  distance: PropTypes.number,
+  duration: PropTypes.number,
+  pace: PropTypes.number,
+  onPress: PropTypes.func,
+  showDivider: PropTypes.bool,
+};
+
+RunListItem.defaultProps = {
+  distance: 0,
+  duration: 0,
+  pace: 0,
+  onPress: () => {},
+  showDivider: true,
 };
 
 export default RunListItem;

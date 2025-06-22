@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import PropTypes from 'prop-types';
 
 const WeatherSelector = ({ weather, onWeatherChange }) => {
   const weatherOptions = ['Sunny', 'Cloudy', 'Rainy', 'Windy', 'Snowy'];
@@ -63,5 +64,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+WeatherSelector.propTypes = {
+  weather: PropTypes.string.isRequired,
+  onWeatherChange: PropTypes.func.isRequired,
+};
 
 export default WeatherSelector;

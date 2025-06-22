@@ -8,6 +8,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import RunMapView from '../components/run_tracking/RunMapView';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
 
 // Helper to format duration (seconds) to HH:MM:SS or MM:SS
 const formatDuration = seconds => {
@@ -225,6 +226,14 @@ const RunDetailScreen = ({ route }) => {
       </View>
     </ScrollView>
   );
+};
+
+RunDetailScreen.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      runId: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
 };
 
 export default RunDetailScreen;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Button from '../ui/Button'; // Import the custom Button
+import PropTypes from 'prop-types';
 
 const ControlButtons = ({ onPause, onLap, onStop, isPaused }) => (
   <View style={styles.controlButtons}>
@@ -24,5 +25,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
+
+ControlButtons.propTypes = {
+  onPause: PropTypes.func.isRequired,
+  onLap: PropTypes.func.isRequired,
+  onStop: PropTypes.func.isRequired,
+  isPaused: PropTypes.bool,
+};
+
+ControlButtons.defaultProps = {
+  isPaused: false,
+};
 
 export default ControlButtons;

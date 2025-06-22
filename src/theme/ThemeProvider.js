@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { theme as baseTheme } from './theme';
 import { useStoreContext } from '../providers/StoreProvider';
+import PropTypes from 'prop-types';
 
 // Create light and dark theme variants
 const lightTheme = {
@@ -65,6 +66,10 @@ export const ThemeProvider = ({ children }) => {
   }, [currentTheme]);
 
   return <ThemeContext.Provider value={currentTheme}>{children}</ThemeContext.Provider>;
+};
+
+ThemeProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ThemeProvider;

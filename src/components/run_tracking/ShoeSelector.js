@@ -4,6 +4,7 @@ import { useStore } from '../../stores/useStore';
 import { shallow } from 'zustand/shallow';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import PropTypes from 'prop-types';
 
 const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -119,5 +120,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
 });
+
+ShoeSelector.propTypes = {
+  selectedShoeId: PropTypes.string,
+  onSelectShoe: PropTypes.func.isRequired,
+};
+
+ShoeSelector.defaultProps = {
+  selectedShoeId: null,
+};
 
 export default ShoeSelector;

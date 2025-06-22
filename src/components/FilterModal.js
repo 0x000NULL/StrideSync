@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
+import PropTypes from 'prop-types';
 
 /**
  * A modal component for filtering and sorting options
@@ -164,6 +165,26 @@ const FilterModal = ({
       </View>
     </Modal>
   );
+};
+
+FilterModal.propTypes = {
+  visible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
+  selected: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+};
+
+FilterModal.defaultProps = {
+  title: 'Filter & Sort',
+  options: [],
+  selected: undefined,
 };
 
 export default React.memo(FilterModal);

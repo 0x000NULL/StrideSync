@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import PropTypes from 'prop-types';
 
 const RunTypeSelector = ({ runType, onSelectRunType }) => {
   return (
@@ -45,5 +46,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
 });
+
+RunTypeSelector.propTypes = {
+  runType: PropTypes.oneOf(['outdoor', 'indoor']).isRequired,
+  onSelectRunType: PropTypes.func.isRequired,
+};
 
 export default RunTypeSelector;

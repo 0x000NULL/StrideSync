@@ -184,7 +184,8 @@ const HomeScreen = ({ navigation }) => {
     },
   });
 
-  const renderRunItem = run => { // run.distance is in km, run.pace is in seconds per km
+  const renderRunItem = run => {
+    // run.distance is in km, run.pace is in seconds per km
     const formattedDistance = formatDistance(run.distance || 0); // .value, .unit, .formatted
 
     let displayPace = '--:--';
