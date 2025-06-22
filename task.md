@@ -95,9 +95,10 @@
     - [x] Remove debugging `console.log` statements
     - [x] Ensure UI consistency with the global theme
 - [ ] Run details view
-  - [ ] Run statistics
-  - [ ] Map view with route
-  - [ ] Edit/delete run
+  - [x] Enhance UI using `Card` components for better layout
+  - [x] Display detailed run statistics (pace, elevation, splits, etc.)
+  - [x] Integrate `RunMapView` to display the run route with polyline and markers
+  - [x] Implement edit and delete functionality with confirmation
 - [x] Shoe management
   - [x] Shoe list with retirement status
   - [x] Add/edit shoe with retirement options
