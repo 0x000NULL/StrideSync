@@ -184,12 +184,26 @@ const HomeScreen = ({ navigation }) => {
     },
   });
 
-  const renderRunItem = run => {
-    const formattedDistance = formatDistance(run.distance || 0);
-    const formattedPace =
-      run.pace && run.distance
-        ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')}/${formattedDistance.unit}`
-        : '--:--';
+  const renderRunItem = run => { // run.distance is in km, run.pace is in seconds per km
+    const formattedDistance = formatDistance(run.distance || 0); // .value, .unit, .formatted
+
+    let displayPace = '--:--';
+    // Assuming run.pace is total seconds per km, as per models/runData.js
+    const totalSecondsPerKm = run.pace;
+
+    if (totalSecondsPerKm > 0 && run.distance > 0) {
+      let paceInSecondsPreferredUnit = totalSecondsPerKm;
+      if (formattedDistance.unit === 'mi') {
+        // Convert pace from sec/km to sec/mile
+        // 1 km = 0.621371 miles. X sec/km * (1 km / 0.621371 mi) = X / 0.621371 sec/mi
+        const KM_TO_MI = 0.621371; // Duplicating constant, consider centralizing if used more
+        paceInSecondsPreferredUnit = totalSecondsPerKm / KM_TO_MI;
+      }
+      const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
+      const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
+      displayPace = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+    }
+    displayPace = `${displayPace}/${formattedDistance.unit}`;
 
     return (
       <TouchableOpacity

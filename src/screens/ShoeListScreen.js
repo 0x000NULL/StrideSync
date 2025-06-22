@@ -21,9 +21,11 @@ import FilterModal from '../components/FilterModal';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
 
 const ShoeListScreen = ({ navigation }) => {
   const theme = useTheme();
+  const { formatDistance } = useUnits(); // Get formatDistance
   const shoes = useStore(state => state.shoes);
   const loading = useStore(state => state.isLoading);
   const error = useStore(state => state.error);
@@ -339,7 +341,7 @@ const ShoeListScreen = ({ navigation }) => {
         >
           <StatsCard
             title="Total Distance"
-            value={`${stats.totalDistance.toFixed(1)} km`}
+            value={formatDistance(stats.totalDistance).formatted} // Use formatDistance
             icon="directions-run"
             color={theme.colors.primary}
           />

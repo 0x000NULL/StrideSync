@@ -22,6 +22,11 @@ import { format, subDays, subMonths, subYears, parseISO } from 'date-fns';
 import { useRunStore } from '../stores/useStore';
 import { useShoeStore } from '../stores/useStore';
 import { Ionicons } from '@expo/vector-icons';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
+
+// KM_TO_MI for pace conversion, assuming it's not directly available from useUnits easily for this scope
+const KM_TO_MI = 0.621371;
+
 
 // Date range options
 const DATE_RANGES = [
@@ -45,6 +50,7 @@ const SORT_OPTIONS = [
 
 const RunLogScreen = ({ navigation }) => {
   const theme = useTheme();
+  const { distanceUnit, formatDistance, toKilometers, fromKilometers } = useUnits();
 
   // Get data from stores
   const { runs, isLoading, error, loadRuns, getFilteredRuns, deleteRun } = useRunStore();
@@ -218,18 +224,34 @@ const RunLogScreen = ({ navigation }) => {
   }, [filteredRuns]);
 
   // Format run data for display
-  const formatRunItem = run => {
+  const formatRunItem = run => { // run.distance is in km, run.pace is in seconds per km
     const runDate = parseISO(run.startTime);
     const shoe = run.shoeId ? getShoeById(run.shoeId) : null;
+
+    const displayDistance = formatDistance(run.distance); // Uses user's preference
+
+    let displayPace = '--:--';
+    const currentPaceUnitLabel = distanceUnit === 'mi' ? 'min/mi' : 'min/km';
+    const totalSecondsPerKm = run.pace; // Assuming run.pace is total seconds/km from models/runData.js
+
+    if (totalSecondsPerKm > 0) {
+      let paceInSecondsPreferredUnit = totalSecondsPerKm;
+      if (distanceUnit === 'mi') {
+        paceInSecondsPreferredUnit = totalSecondsPerKm / KM_TO_MI;
+      }
+      const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
+      const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
+      displayPace = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')} ${currentPaceUnitLabel}`;
+    } else {
+      displayPace = `--:-- ${currentPaceUnitLabel}`;
+    }
 
     return {
       ...run,
       formattedDate: format(runDate, 'MMM d, yyyy'),
       formattedTime: format(runDate, 'h:mm a'),
-      formattedDistance: `${run.distance.toFixed(2)} km`,
-      formattedPace: run.pace
-        ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')} min/km`
-        : '--:--',
+      formattedDistance: displayDistance.formatted, // Use formatted distance
+      formattedPace: displayPace, // Use calculated displayPace
       shoeName: shoe?.name || 'No Shoe',
       onPress: () => navigation.navigate('RunDetails', { runId: run.id }),
     };
@@ -616,8 +638,8 @@ const RunLogScreen = ({ navigation }) => {
     setFilters(prev => ({
       ...prev,
       dateRange: 'all',
-      minDistance: '',
-      maxDistance: '',
+      minDistance: '', // These will store values in km
+      maxDistance: '', // These will store values in km
       shoeId: null,
     }));
   };
@@ -672,41 +694,68 @@ const RunLogScreen = ({ navigation }) => {
               </TouchableOpacity>
             ))}
 
-            <Text style={styles.sectionTitle}>Distance (km)</Text>
+            <Text style={styles.sectionTitle}>Distance ({distanceUnit})</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Min distance"
+                placeholder={`Min distance (${distanceUnit})`}
                 placeholderTextColor={theme.colors.text.secondary}
-                value={filters.minDistance}
+                value={
+                  filters.minDistance
+                    ? distanceUnit === 'mi'
+                      ? fromKilometers(parseFloat(filters.minDistance), 'mi').toFixed(2)
+                      : filters.minDistance
+                    : ''
+                }
                 onChangeText={text => {
-                  // Only allow numbers and decimal points
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
-                    setFilters({ ...filters, minDistance: text });
+                    const numericValue = parseFloat(text);
+                    if (isNaN(numericValue) && text !== '' && text !== '.') {
+                        // allow clearing or starting with decimal
+                        setFilters({ ...filters, minDistance: '' });
+                        return;
+                    }
+                    setFilters({
+                      ...filters,
+                      minDistance: text === '' ? '' : distanceUnit === 'mi' ? toKilometers(numericValue, 'mi').toString() : numericValue.toString(),
+                    });
                   }
                 }}
                 keyboardType="numeric"
                 returnKeyType="done"
               />
-              <Text style={styles.inputSuffix}>km</Text>
+              <Text style={styles.inputSuffix}>{distanceUnit}</Text>
             </View>
 
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Max distance"
+                placeholder={`Max distance (${distanceUnit})`}
                 placeholderTextColor={theme.colors.text.secondary}
-                value={filters.maxDistance}
+                 value={
+                  filters.maxDistance
+                    ? distanceUnit === 'mi'
+                      ? fromKilometers(parseFloat(filters.maxDistance), 'mi').toFixed(2)
+                      : filters.maxDistance
+                    : ''
+                }
                 onChangeText={text => {
-                  // Only allow numbers and decimal points
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
-                    setFilters({ ...filters, maxDistance: text });
+                    const numericValue = parseFloat(text);
+                     if (isNaN(numericValue) && text !== '' && text !== '.') {
+                        setFilters({ ...filters, maxDistance: '' });
+                        return;
+                    }
+                    setFilters({
+                      ...filters,
+                      maxDistance: text === '' ? '' : distanceUnit === 'mi' ? toKilometers(numericValue, 'mi').toString() : numericValue.toString(),
+                    });
                   }
                 }}
                 keyboardType="numeric"
                 returnKeyType="done"
               />
-              <Text style={styles.inputSuffix}>km</Text>
+              <Text style={styles.inputSuffix}>{distanceUnit}</Text>
             </View>
 
             {activeShoes.length > 0 && (
@@ -958,7 +1007,13 @@ const RunLogScreen = ({ navigation }) => {
 
             {filters.minDistance && (
               <View style={styles.activeFilterPill}>
-                <Text style={styles.activeFilterText}>≥{filters.minDistance}km</Text>
+                <Text style={styles.activeFilterText}>
+                  ≥
+                  {distanceUnit === 'mi'
+                    ? fromKilometers(parseFloat(filters.minDistance), 'mi').toFixed(1)
+                    : parseFloat(filters.minDistance).toFixed(1)}
+                  {distanceUnit}
+                </Text>
                 <TouchableOpacity onPress={() => setFilters({ ...filters, minDistance: '' })}>
                   <Ionicons name="close" size={16} color={theme.colors.primary} />
                 </TouchableOpacity>
@@ -967,7 +1022,13 @@ const RunLogScreen = ({ navigation }) => {
 
             {filters.maxDistance && (
               <View style={styles.activeFilterPill}>
-                <Text style={styles.activeFilterText}>≤{filters.maxDistance}km</Text>
+                <Text style={styles.activeFilterText}>
+                  ≤
+                  {distanceUnit === 'mi'
+                    ? fromKilometers(parseFloat(filters.maxDistance), 'mi').toFixed(1)
+                    : parseFloat(filters.maxDistance).toFixed(1)}
+                  {distanceUnit}
+                </Text>
                 <TouchableOpacity onPress={() => setFilters({ ...filters, maxDistance: '' })}>
                   <Ionicons name="close" size={16} color={theme.colors.primary} />
                 </TouchableOpacity>

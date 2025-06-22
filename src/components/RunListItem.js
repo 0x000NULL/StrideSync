@@ -3,9 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
+
+// KM_TO_MI for pace conversion
+const KM_TO_MI = 0.621371;
 
 const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider = true }) => {
+  // distance is in km, pace is in seconds per km
   const theme = useTheme();
+  const { formatDistance, distanceUnit } = useUnits();
 
   const formatDate = dateString => {
     const dateObj = new Date(dateString);
@@ -32,6 +38,24 @@ const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider 
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  // Format pace (seconds per km) based on unit preference
+  let displayPace = '--:--';
+  const currentDistanceUnitLabel = distanceUnit === 'mi' ? '/mi' : '/km';
+
+  if (pace > 0) {
+    let paceInSecondsPreferredUnit = pace; // pace is assumed to be seconds per km
+    if (distanceUnit === 'mi') {
+      // Convert pace from sec/km to sec/mile
+      paceInSecondsPreferredUnit = pace / KM_TO_MI;
+    }
+    const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
+    const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
+    displayPace = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+  }
+  displayPace = `${displayPace} ${currentDistanceUnitLabel}`;
+
+  const displayDistance = distance ? formatDistance(distance) : { formatted: '-- --' };
 
   const styles = StyleSheet.create({
     container: {
@@ -100,7 +124,7 @@ const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider 
         <View style={styles.content}>
           <View style={styles.leftSection}>
             <Text style={styles.date}>{formatDate(date)}</Text>
-            <Text style={styles.distance}>{distance ? `${distance} km` : '--'}</Text>
+            <Text style={styles.distance}>{displayDistance.formatted}</Text>
             <View style={styles.details}>
               <View style={styles.detailItem}>
                 <MaterialIcons name="timer" size={16} color={theme.colors.text.secondary} />
@@ -108,10 +132,10 @@ const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider 
                   {duration ? formatDuration(duration) : '--:--'}
                 </Text>
               </View>
-              {pace && (
+              {pace > 0 && ( // Only show pace if available
                 <View style={styles.detailItem}>
                   <MaterialIcons name="speed" size={16} color={theme.colors.text.secondary} />
-                  <Text style={styles.detailText}>{pace} /km</Text>
+                  <Text style={styles.detailText}>{displayPace}</Text>
                 </View>
               )}
             </View>

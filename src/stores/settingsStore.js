@@ -96,37 +96,7 @@ export const createSettingsStore = (set, get) => ({
     return get().settings;
   },
 
-  // Helper methods
-  getFormattedPace: paceInSeconds => {
-    const { distanceUnit } = get().settings;
-    const unitDisplay = distanceUnit === 'km' ? '/km' : '/mi';
-
-    if (!paceInSeconds) return `--:--${unitDisplay}`;
-
-    const minutes = Math.floor(paceInSeconds / 60);
-    const seconds = Math.floor(paceInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}${unitDisplay}`;
-  },
-
-  convertDistance: (value, toUnit = null) => {
-    const { distanceUnit } = get().settings;
-    const targetUnit = toUnit || distanceUnit;
-
-    if (distanceUnit === targetUnit) return value;
-
-    // Convert between km and mi
-    if (distanceUnit === 'km' && targetUnit === 'mi') {
-      return value * 0.621371; // km to mi
-    } else if (distanceUnit === 'mi' && targetUnit === 'km') {
-      return value * 1.60934; // mi to km
-    }
-
-    return value;
-  },
-
-  formatDistance: (value, unit = null) => {
-    const { distanceUnit } = get().settings;
-    const displayUnit = unit || distanceUnit;
-    return `${value.toFixed(2)} ${displayUnit}`;
-  },
+  // Helper methods (getFormattedPace, convertDistance, formatDistance) were found to be unused
+  // or redundant with useUnits/unitUtils.js and have been removed to avoid confusion and ensure
+  // unit handling consistency as per UNITS_README.md.
 });

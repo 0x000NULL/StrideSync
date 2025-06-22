@@ -7,9 +7,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Card from '../components/ui/Card';
 import StatsCard from '../components/StatsCard';
 import ShoeListItem from '../components/ShoeListItem';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
 
 const RetiredShoesReportScreen = ({ navigation }) => {
   const theme = useTheme();
+  const { formatDistance } = useUnits(); // Call useUnits
   const shoes = useStore(state => state.shoes);
   const getShoeStats = useStore(state => state.getShoeStats);
 
@@ -91,7 +93,7 @@ const RetiredShoesReportScreen = ({ navigation }) => {
           />
           <StatsCard
             title="Total Distance"
-            value={`${stats.totalDistance.toFixed(0)} km`}
+            value={formatDistance(stats.totalDistance).formatted}
             icon="timeline"
             size="small"
           />
@@ -106,7 +108,7 @@ const RetiredShoesReportScreen = ({ navigation }) => {
           />
           <StatsCard
             title="Avg. Distance"
-            value={`${stats.averageDistance} km`}
+            value={formatDistance(stats.averageDistance).formatted}
             icon="trending-up"
             size="small"
           />

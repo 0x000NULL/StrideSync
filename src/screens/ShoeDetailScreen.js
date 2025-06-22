@@ -15,10 +15,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import StatsCard from '../components/StatsCard';
 import Button from '../components/ui/Button';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
 
 const ShoeDetailScreen = ({ route, navigation }) => {
   const { shoeId } = route.params;
   const theme = useTheme();
+  const { formatDistance } = useUnits(); // Call useUnits
   const [retirementReason, setRetirementReason] = useState('');
   const [showRetirementForm, setShowRetirementForm] = useState(false);
 
@@ -148,19 +150,22 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         {/* CHANGED: Access stats properties directly from shoeWithDetails */}
         <StatsCard
           title="Total Distance"
-          value={`${(shoeWithDetails.totalDistance || 0).toFixed(1)} km`}
+          value={formatDistance(shoeWithDetails.totalDistance || 0).formatted}
           icon="directions-run"
         />
         <StatsCard title="Runs" value={shoeWithDetails.totalRuns || 0} icon="repeat" />
         {/* Ensure maxDistance is on shoeWithDetails */}
-        {shoeWithDetails.maxDistance > 0 && (
-          <StatsCard
-            title="Remaining"
-            value={`${Math.max(0, shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0)).toFixed(1)} km`}
-            subtitle={`of ${shoeWithDetails.maxDistance} km`}
-            icon="timeline"
-          />
-        )}
+        {shoeWithDetails.maxDistance > 0 && (() => {
+          const remainingDistance = Math.max(0, shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0));
+          return (
+            <StatsCard
+              title="Remaining"
+              value={formatDistance(remainingDistance).formatted}
+              subtitle={`of ${formatDistance(shoeWithDetails.maxDistance).formatted}`}
+              icon="timeline"
+            />
+          );
+        })()}
       </View>
 
       {/* Logic using shoeWithDetails.isActive */}
@@ -216,7 +221,7 @@ const ShoeDetailScreen = ({ route, navigation }) => {
               Max Distance:
             </Text>
             <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-              {shoeWithDetails.maxDistance} km
+              {formatDistance(shoeWithDetails.maxDistance).formatted}
             </Text>
           </View>
         )}

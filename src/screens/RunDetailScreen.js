@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import RunMapView from '../components/run_tracking/RunMapView';
+import { useUnits } from '../hooks/useUnits'; // Import useUnits
 
 // Helper to format duration (seconds) to HH:MM:SS or MM:SS
 const formatDuration = seconds => {
@@ -81,6 +82,10 @@ const RunDetailScreen = ({ route }) => {
   const run = getRunById ? getRunById(runId) : null;
   const theme = useTheme();
   const styles = getStyles(theme);
+  const { formatDistance, distanceUnit, fromKilometers } = useUnits(); // Call useUnits
+
+  // Constants for conversion
+  const KM_TO_MI = 0.621371; // Defined in unitUtils.js, duplicating for direct use here if needed, or ensure it's accessible.
 
   const handleDelete = () => {
     Alert.alert(
@@ -112,12 +117,38 @@ const RunDetailScreen = ({ route }) => {
   const runDate = run.startTime ? parseISO(run.startTime) : null;
   const formattedDate = runDate ? format(runDate, 'MMMM d, yyyy') : 'Unknown date';
   const formattedTime = runDate ? format(runDate, 'h:mm a') : '';
-  const formattedDistance = run.distance ? `${run.distance.toFixed(2)} km` : '-- km';
+
+  // Use formatDistance from useUnits for distance display
+  const displayDistance = run.distance ? formatDistance(run.distance) : { formatted: '-- --' }; // run.distance is in km
+
   const formattedDuration = formatDuration(run.duration);
-  const formattedPace =
-    run.pace && (run.pace.minutes || run.pace.seconds)
-      ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')} min/km`
-      : '--:--';
+
+  // Adjust pace calculation and display
+  let displayPace = '--:--';
+  const currentDistanceUnitLabel = distanceUnit === 'mi' ? 'min/mi' : 'min/km';
+
+  // Assuming run.pace is total seconds per kilometer as per models/runData.js
+  // If run.pace is an object like { minutes, seconds }, need to convert to total seconds first.
+  // For this example, let's assume run.pace IS total seconds per km.
+  // If run.pace is an object { minutes: M, seconds: S }, then:
+  // const totalSecondsPerKm = run.pace ? (run.pace.minutes * 60) + run.pace.seconds : 0;
+
+  // Let's stick to the definition in `models/runData.js`: `pace - Seconds per kilometer`
+  const totalSecondsPerKm = run.pace;
+
+  if (totalSecondsPerKm > 0) {
+    let paceInSecondsPreferredUnit = totalSecondsPerKm;
+    if (distanceUnit === 'mi') {
+      // Convert pace from sec/km to sec/mile
+      // 1 km = 0.621371 miles
+      // X sec/km * (1 km / 0.621371 mi) = X / 0.621371 sec/mi
+      paceInSecondsPreferredUnit = totalSecondsPerKm / KM_TO_MI;
+    }
+    const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
+    const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
+    displayPace = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+  }
+  displayPace = `${displayPace} ${currentDistanceUnitLabel}`;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -142,7 +173,7 @@ const RunDetailScreen = ({ route }) => {
         </View>
         <View style={styles.rowBetween}>
           <Text style={styles.label}>Distance</Text>
-          <Text style={styles.value}>{formattedDistance}</Text>
+          <Text style={styles.value}>{displayDistance.formatted}</Text>
         </View>
         <View style={styles.rowBetween}>
           <Text style={styles.label}>Duration</Text>
@@ -150,7 +181,7 @@ const RunDetailScreen = ({ route }) => {
         </View>
         <View style={styles.rowBetween}>
           <Text style={styles.label}>Average Pace</Text>
-          <Text style={styles.value}>{formattedPace}</Text>
+          <Text style={styles.value}>{displayPace}</Text>
         </View>
         {run.elevationGain > 0 && (
           <View style={styles.rowBetween}>
