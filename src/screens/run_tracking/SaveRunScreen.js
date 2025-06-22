@@ -57,7 +57,7 @@ const SaveRunScreen = ({ navigation }) => {
       weather: { ...(currentRun.weather || {}), condition: weather },
       effort,
       mood,
-      distance: (currentRun.finalDistance || currentRun.distance || 0) * 1000,
+      distance: currentRun.finalDistance ?? currentRun.distance ?? 0,
       duration: currentRun.finalDuration || currentRun.duration || 0,
       status: 'completed',
       endTime: currentRun.endTime || Date.now(),
