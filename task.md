@@ -86,7 +86,14 @@
     - [x] Implement logic to check and display personal records (PRs)
     - [x] Integrate with the `useUnits` hook to display user-preferred units
     - [x] Align UI with the global theme and use reusable `Card` and `Button` components
-  - [ ] Save run screen
+  - [x] Save run screen
+    - [x] Replace `ShoeSelectorPlaceholder` with `ShoeSelector` component
+    - [x] Integrate `ShoeSelector` with `shoeStore` to display and save the selected shoe
+    - [x] Implement shoe selection via modal
+    - [x] Extract inline components (`RunDetailsForm`, `WeatherSelector`, `EffortMoodSelector`) into their own files
+    - [x] Replace placeholder weather and effort/mood selectors with improved UI controls
+    - [x] Remove debugging `console.log` statements
+    - [x] Ensure UI consistency with the global theme
 - [ ] Run details view
   - [ ] Run statistics
   - [ ] Map view with route
