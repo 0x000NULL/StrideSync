@@ -9,13 +9,13 @@ export const formatDistance = (distanceInKm, unitPreference) => {
     return {
       value: miles,
       unit: 'mi',
-      formatted: `${miles.toFixed(1)} mi`,
+      formatted: `${miles.toFixed(2)} mi`,
     };
   }
   return {
     value: distanceInKm,
     unit: 'km',
-    formatted: `${distanceInKm.toFixed(1)} km`,
+    formatted: `${distanceInKm.toFixed(2)} km`,
   };
 };
 
