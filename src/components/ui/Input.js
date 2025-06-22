@@ -110,11 +110,11 @@ const Input = forwardRef(
       if (!icon) return null;
 
       const iconSize = 20;
-      const containerStyle =
+      const iconContainerStyle = // Renamed from containerStyle
         position === 'left' ? styles.leftIconContainer : styles.rightIconContainer;
 
       return (
-        <View style={containerStyle}>
+        <View style={iconContainerStyle}>
           {React.cloneElement(icon, {
             size: iconSize,
             style: [styles.icon, icon.props.style],

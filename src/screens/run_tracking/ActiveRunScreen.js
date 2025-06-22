@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { useStore } from '../../stores/useStore';
 import { useTheme } from '@react-navigation/native';
@@ -78,32 +78,28 @@ const LapsDisplay = ({ laps, unitUtils }) => {
 const ActiveRunScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const unitUtils = useUnits(); // Call useUnits here
-  // Try to get data from Redux first (used heavily in unit tests). Fallback to Zustand store when Redux not available.
-  let currentRun;
-  let runStatus;
-  let isTracking;
-  const dispatch = useDispatch?.();
 
-  try {
-    currentRun = useSelector(state => state?.run?.currentRun);
-    runStatus = useSelector(state => state?.run?.runStatus);
-    isTracking = useSelector(state => state?.run?.isTracking);
-  } catch (_) {
-    // ignore
-  }
+  // Hooks must be called at the top level
+  const dispatch = useDispatch(); // Assuming useDispatch is always available or its absence handled differently
 
-  // If Redux does not provide currentRun, runStatus, or isTracking (null or undefined), fall back to Zustand
+  // Redux state selectors - called unconditionally
+  // Added optional chaining for safety if state.run might not exist.
+  const reduxCurrentRun = useSelector(state => state?.run?.currentRun);
+  const reduxRunStatus = useSelector(state => state?.run?.runStatus);
+  const reduxIsTracking = useSelector(state => state?.run?.isTracking);
+
+  // Zustand state selectors - called unconditionally
   const zustandCurrentRun = useStore(state => state.currentRun);
   const zustandRunStatus = useStore(state => state.runStatus);
   const zustandIsTracking = useStore(state => state.isTracking);
   const zustandAddLap = useStore(state => state.addLap);
   const zustandAddLocationPoint = useStore(state => state.addLocationPoint);
 
-  currentRun = currentRun ?? zustandCurrentRun;
-  runStatus = runStatus ?? zustandRunStatus;
-  isTracking = isTracking ?? zustandIsTracking;
+  // Combine Redux and Zustand states. Redux takes precedence if available.
+  const currentRun = reduxCurrentRun ?? zustandCurrentRun;
+  const runStatus = reduxRunStatus ?? zustandRunStatus;
+  const isTracking = reduxIsTracking ?? zustandIsTracking;
 
-  // Zustand action fallbacks (for production)
   const zustandPauseRun = useStore(state => state.pauseRun);
   const zustandResumeRun = useStore(state => state.resumeRun);
   const zustandSaveRun = useStore(state => state.saveRun);
@@ -114,7 +110,7 @@ const ActiveRunScreen = ({ navigation }) => {
   useEffect(() => {
     // Reset elapsed when run changes
     setElapsedSeconds(currentRun?.duration || 0);
-  }, [currentRun?.id, currentRun?.duration]);
+  }, [currentRun]); // Added currentRun as dependency
 
   useEffect(() => {
     let timer;
@@ -245,14 +241,15 @@ const ActiveRunScreen = ({ navigation }) => {
     return () => {
       subscription?.remove();
     };
-  }, [runStatus]);
+  }, [runStatus, dispatch, zustandAddLocationPoint]); // Added dispatch and zustandAddLocationPoint
 
   if (!currentRun) {
     return (
       <View
         style={[
           styles.container,
-          { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' },
+          styles.containerCentered, // Applied new style
+          { backgroundColor: colors.background },
         ]}
       >
         <Text style={[styles.noRunText, { color: colors.text.primary }]}>No active run found</Text>
@@ -339,6 +336,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
   },
+  containerCentered: { // Added for the !currentRun case
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 BatteryOptimizationIndicator.propTypes = {

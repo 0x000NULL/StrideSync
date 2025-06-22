@@ -13,8 +13,10 @@ import GPSStatusIndicator from '../../components/run_tracking/GPSStatusIndicator
 import GoalInput from '../../components/run_tracking/GoalInput';
 import AudioCuesToggle from '../../components/run_tracking/AudioCuesToggle';
 import Button from '../../components/ui/Button';
+import { useTheme } from '../../theme/ThemeProvider';
 
 const PreRunScreen = () => {
+  const theme = useTheme();
   const navigation = useNavigation();
   const beginRunTracking = useStore(state => state.beginRunTracking);
   const dispatch = useDispatch?.();
@@ -63,7 +65,7 @@ const PreRunScreen = () => {
     return () => {
       locationSubscription?.remove();
     };
-  }, [runType, startGpsTracking]);
+  }, [runType, startGpsTracking, locationSubscription]); // Added locationSubscription
 
   const handleStartRun = () => {
     if (runType === 'outdoor' && gpsStatus !== 'good') {
@@ -119,17 +121,18 @@ const PreRunScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
+    padding: theme.spacing.md, // Use theme spacing
+    backgroundColor: theme.colors.background, // Use theme background
   },
   title: {
-    fontSize: 28,
+    fontSize: 28, // Consider theme.typography.h1.fontSize
     fontWeight: 'bold',
-    marginVertical: 20,
+    marginVertical: theme.spacing.lg, // Use theme spacing
     textAlign: 'center',
+    color: theme.colors.text.primary, // Use theme text color
   },
   startButtonContainer: {
-    margin: 20,
+    margin: theme.spacing.lg, // Use theme spacing
   },
 });
 

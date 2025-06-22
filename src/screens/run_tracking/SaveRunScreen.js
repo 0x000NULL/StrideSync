@@ -9,8 +9,10 @@ import RunDetailsForm from '../../components/run_tracking/save_run/RunDetailsFor
 import WeatherSelector from '../../components/run_tracking/save_run/WeatherSelector';
 import EffortMoodSelector from '../../components/run_tracking/save_run/EffortMoodSelector';
 import ShoeSelector from '../../components/run_tracking/ShoeSelector';
+import { useTheme } from '../../theme/ThemeProvider';
 
 const SaveRunScreen = ({ navigation }) => {
+  const theme = useTheme();
   const dispatch = useDispatch();
   // Changed to use useStore hook from Zustand
   const currentRun = useSelector(state => state.run.currentRun);
@@ -132,8 +134,8 @@ const SaveRunScreen = ({ navigation }) => {
       />
 
       <View style={styles.actionButtons}>
-        <Button title="Save Run" onPress={handleSaveRun} color="green" />
-        <Button title="Discard Run" onPress={handleDiscard} color="red" />
+        <Button title="Save Run" onPress={handleSaveRun} variant="success" />
+        <Button title="Discard Run" onPress={handleDiscard} variant="danger" />
       </View>
     </ScrollView>
   );
@@ -142,30 +144,32 @@ const SaveRunScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: theme.colors.background, // Use theme background
   },
   containerCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: theme.spacing.lg, // Use theme spacing
+    backgroundColor: theme.colors.background, // Use theme background for consistency
   },
   title: {
-    fontSize: 24,
+    fontSize: 24, // Consider theme.typography.h2.fontSize
     fontWeight: 'bold',
     textAlign: 'center',
-    paddingVertical: 20,
+    paddingVertical: theme.spacing.lg, // Use theme spacing
+    color: theme.colors.text.primary, // Use theme text color
   },
-  formSection: {
-    marginHorizontal: 15,
-    marginVertical: 8,
+  formSection: { // This style is also used by a View wrapping ShoeSelector
+    marginHorizontal: theme.spacing.md,
+    marginVertical: theme.spacing.sm,
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 20,
-    marginHorizontal: 15,
-    marginTop: 10,
+    paddingVertical: theme.spacing.lg,
+    marginHorizontal: theme.spacing.md,
+    marginTop: theme.spacing.sm,
   },
 });
 

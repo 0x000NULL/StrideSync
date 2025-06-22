@@ -3,8 +3,32 @@ import { View, Text, StyleSheet } from 'react-native';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import PropTypes from 'prop-types';
+import { useTheme } from '../../theme/ThemeProvider';
 
 const RunTypeSelector = ({ runType, onSelectRunType }) => {
+  const theme = useTheme();
+
+  const styles = StyleSheet.create({
+    card: {
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    label: {
+      fontSize: 16, // Consider theme.typography.subtitle1.fontSize
+      fontWeight: '600', // Consider theme.typography.subtitle1.fontWeight
+      marginBottom: theme.spacing.sm,
+      color: theme.colors.text.primary, // Using theme color
+    },
+    buttonGroup: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    button: {
+      flex: 1,
+      marginHorizontal: theme.spacing.xs,
+    },
+  });
+
   return (
     <Card style={styles.card}>
       <Text style={styles.label}>Run Type</Text>
@@ -12,40 +36,19 @@ const RunTypeSelector = ({ runType, onSelectRunType }) => {
         <Button
           title="Outdoor"
           onPress={() => onSelectRunType('outdoor')}
-          type={runType === 'outdoor' ? 'primary' : 'outline'}
+          variant={runType === 'outdoor' ? 'primary' : 'outline'} // Changed 'type' prop to 'variant'
           style={styles.button}
         />
         <Button
           title="Indoor"
           onPress={() => onSelectRunType('indoor')}
-          type={runType === 'indoor' ? 'primary' : 'outline'}
+          variant={runType === 'indoor' ? 'primary' : 'outline'} // Changed 'type' prop to 'variant'
           style={styles.button}
         />
       </View>
     </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    padding: 15,
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-});
 
 RunTypeSelector.propTypes = {
   runType: PropTypes.oneOf(['outdoor', 'indoor']).isRequired,

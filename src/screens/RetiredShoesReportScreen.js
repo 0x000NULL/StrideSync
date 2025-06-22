@@ -1,13 +1,31 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../stores/useStore';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { parseISO, differenceInDays } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import Card from '../components/ui/Card';
 import StatsCard from '../components/StatsCard';
 import ShoeListItem from '../components/ShoeListItem';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
+import PropTypes from 'prop-types';
+
+// Memoized ItemSeparatorComponent
+const ReportDivider = React.memo(({ style }) => <View style={style} />);
+ReportDivider.propTypes = {
+  style: PropTypes.object.isRequired,
+};
+ReportDivider.displayName = 'ReportDivider';
+
+// Memoized renderItem component
+const RetiredShoeListItem = React.memo(({ item, onPressItem }) => (
+  <ShoeListItem shoe={item} onPress={() => onPressItem(item.id)} showDivider={false} />
+));
+RetiredShoeListItem.propTypes = {
+  item: PropTypes.object.isRequired, // More specific shape can be added if ShoeListItem's proptypes are available
+  onPressItem: PropTypes.func.isRequired,
+};
+RetiredShoeListItem.displayName = 'RetiredShoeListItem';
 
 const RetiredShoesReportScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -34,8 +52,8 @@ const RetiredShoesReportScreen = ({ navigation }) => {
     }
 
     const totalDistance = retiredShoes.reduce((sum, shoe) => {
-      const stats = getShoeStats(shoe.id);
-      return sum + (stats?.totalDistance || 0);
+      const shoeStats = getShoeStats(shoe.id); // Renamed from stats
+      return sum + (shoeStats?.totalDistance || 0);
     }, 0);
 
     const totalLifespan = retiredShoes.reduce((sum, shoe) => {
@@ -52,13 +70,17 @@ const RetiredShoesReportScreen = ({ navigation }) => {
     };
   }, [retiredShoes, getShoeStats]);
 
-  const handleShoePress = shoeId => {
+  const handleShoePress = React.useCallback(shoeId => {
     navigation.navigate('ShoeDetail', { shoeId });
-  };
+  }, [navigation]);
 
-  const renderShoeItem = ({ item }) => (
-    <ShoeListItem shoe={item} onPress={() => handleShoePress(item.id)} showDivider={false} />
-  );
+  const renderRetiredShoeListItem = React.useCallback(({ item }) => (
+    <RetiredShoeListItem item={item} onPressItem={handleShoePress} />
+  ), [handleShoePress]);
+
+  const renderDivider = React.useCallback(() => (
+    <ReportDivider style={[styles.divider, { backgroundColor: theme.colors.border }]} />
+  ), [theme.colors.border, styles.divider]);
 
   if (retiredShoes.length === 0) {
     return (
@@ -121,17 +143,21 @@ const RetiredShoesReportScreen = ({ navigation }) => {
           <Card style={styles.shoesCard}>
             <FlatList
               data={retiredShoes}
-              renderItem={renderShoeItem}
+              renderItem={renderRetiredShoeListItem}
               keyExtractor={item => item.id}
-              ItemSeparatorComponent={() => (
-                <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-              )}
+              ItemSeparatorComponent={renderDivider}
             />
           </Card>
         </View>
       </ScrollView>
     </View>
   );
+};
+
+RetiredShoesReportScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({

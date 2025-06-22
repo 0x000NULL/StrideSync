@@ -105,20 +105,20 @@ export const backupData = async () => {
 
 /**
  * Restore app data from backup
- * @param {Object} backupData - Backup data to restore
+ * @param {Object} dataToRestore - Backup data to restore
  */
-export const restoreData = async backupData => {
+export const restoreData = async dataToRestore => {
   try {
-    if (!backupData || typeof backupData !== 'object') {
+    if (!dataToRestore || typeof dataToRestore !== 'object') {
       throw new Error('Invalid backup data');
     }
 
     await Promise.all([
-      saveData(STORAGE_KEYS.RUNS, backupData.runs || []),
-      saveData(STORAGE_KEYS.SHOES, backupData.shoes || []),
-      saveData(STORAGE_KEYS.SHOE_USAGE, backupData.shoeUsage || {}),
-      saveData(STORAGE_KEYS.SETTINGS, backupData.settings || {}),
-      saveData(STORAGE_KEYS.VERSION, backupData.version || DATA_VERSION),
+      saveData(STORAGE_KEYS.RUNS, dataToRestore.runs || []),
+      saveData(STORAGE_KEYS.SHOES, dataToRestore.shoes || []),
+      saveData(STORAGE_KEYS.SHOE_USAGE, dataToRestore.shoeUsage || {}),
+      saveData(STORAGE_KEYS.SETTINGS, dataToRestore.settings || {}),
+      saveData(STORAGE_KEYS.VERSION, dataToRestore.version || DATA_VERSION),
     ]);
 
     return true;

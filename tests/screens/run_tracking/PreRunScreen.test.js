@@ -1,13 +1,14 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import PreRunScreen from '../../../src/screens/run_tracking/PreRunScreen';
 import { useStore } from '../../../src/stores/useStore';
 import * as Location from 'expo-location';
+import PropTypes from 'prop-types';
 
 // Mock child components and external libraries
 jest.mock('../../../src/components/run_tracking/ShoeSelector', () => {
   const { View, Text, TouchableOpacity } = require('react-native');
-  return ({ selectedShoeId, onSelectShoe }) => (
+  const MockShoeSelector = ({ selectedShoeId, onSelectShoe }) => (
     <View>
       <Text>Shoe Selector</Text>
       <TouchableOpacity onPress={() => onSelectShoe('shoe_123')} testID="shoe-selector">
@@ -15,6 +16,12 @@ jest.mock('../../../src/components/run_tracking/ShoeSelector', () => {
       </TouchableOpacity>
     </View>
   );
+  MockShoeSelector.propTypes = {
+    selectedShoeId: PropTypes.string,
+    onSelectShoe: PropTypes.func.isRequired,
+  };
+  MockShoeSelector.displayName = 'MockShoeSelector';
+  return MockShoeSelector;
 });
 
 jest.mock('expo-location');

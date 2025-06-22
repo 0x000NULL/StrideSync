@@ -57,16 +57,6 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
     return 'In good condition';
   }, [progress, isActive, retirementDate]);
 
-  // Format dates
-  const formattedPurchaseDate = useMemo(() => {
-    if (!purchaseDate) return '--';
-    return new Date(purchaseDate).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }, [purchaseDate]);
-
   const lastRunDate = useMemo(() => {
     if (!stats.lastRun) return 'Never used';
     const date = new Date(stats.lastRun);
@@ -227,9 +217,9 @@ const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
       marginHorizontal: theme.spacing.md,
       marginBottom: theme.spacing.sm,
     },
-    reactivateIcon: {
-      marginRight: 6,
-    },
+    // reactivateIcon: { // Unused style removed
+    //   marginRight: 6,
+    // },
     reactivateText: {
       fontSize: 14,
       fontWeight: '500',

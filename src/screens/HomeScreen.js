@@ -8,6 +8,7 @@ import QuickAction from '../components/QuickAction';
 import Card from '../components/ui/Card';
 import { useStore } from '../stores';
 import { useUnits } from '../hooks/useUnits';
+import PropTypes from 'prop-types';
 
 const HomeScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -188,7 +189,7 @@ const HomeScreen = ({ navigation }) => {
     // run.distance is in km, run.pace is in seconds per km
     const formattedDistance = formatDistance(run.distance || 0); // .value, .unit, .formatted
 
-    let displayPace = '--:--';
+    let displayPaceValue = '--:--';
     // Assuming run.pace is total seconds per km, as per models/runData.js
     const totalSecondsPerKm = run.pace;
 
@@ -202,9 +203,9 @@ const HomeScreen = ({ navigation }) => {
       }
       const paceMinutes = Math.floor(paceInSecondsPreferredUnit / 60);
       const paceSeconds = Math.round(paceInSecondsPreferredUnit % 60);
-      displayPace = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+      displayPaceValue = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
     }
-    displayPace = `${displayPace}/${formattedDistance.unit}`;
+    const displayPace = `${displayPaceValue}/${formattedDistance.unit}`;
 
     return (
       <TouchableOpacity
@@ -219,7 +220,7 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={styles.runDetails}>
-          <Text style={styles.runPace}>{formattedPace}</Text>
+          <Text style={styles.runPace}>{displayPace}</Text>
           <Text style={styles.runDuration}>
             {run.duration ? formatDuration(run.duration) : '--:--'}
           </Text>
@@ -328,6 +329,12 @@ const HomeScreen = ({ navigation }) => {
       </ScrollView>
     </SafeAreaView>
   );
+};
+
+HomeScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 export default HomeScreen;

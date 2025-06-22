@@ -39,7 +39,7 @@ const EditShoeScreen = () => {
 
     const maxDistanceValue = currentShoe.maxDistance ? String(currentShoe.maxDistance) : '';
     if (maxDistance !== maxDistanceValue) setMaxDistance(maxDistanceValue);
-  }, [currentShoe, navigation]);
+  }, [currentShoe, navigation, name, brand, model, purchaseDate, maxDistance]);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -104,6 +104,9 @@ const EditShoeScreen = () => {
       marginTop: theme.spacing.lg,
       flexDirection: 'row',
       justifyContent: 'space-around',
+    },
+    flex1: { // Added style for flex: 1
+      flex: 1,
     },
   });
 
@@ -174,13 +177,13 @@ const EditShoeScreen = () => {
               title="Cancel"
               onPress={() => navigation.goBack()}
               variant="outline"
-              style={{ flex: 1, marginRight: theme.spacing.sm || 8 }}
+              style={[styles.flex1, { marginRight: theme.spacing.sm || 8 }]}
             />
             <Button
               title="Save Changes"
               onPress={handleSave}
               variant="primary"
-              style={{ flex: 1, marginLeft: theme.spacing.sm || 8 }}
+              style={[styles.flex1, { marginLeft: theme.spacing.sm || 8 }]}
             />
           </View>
         </View>

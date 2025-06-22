@@ -36,7 +36,7 @@ const FilterModal = ({
   const styles = StyleSheet.create({
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: theme.colors.backdrop || 'rgba(0, 0, 0, 0.5)', // Fallback for safety
       justifyContent: 'flex-end',
     },
     modalContent: {
@@ -71,7 +71,7 @@ const FilterModal = ({
       padding: theme.spacing.sm,
       alignItems: 'center',
       borderBottomWidth: 2,
-      borderBottomColor: 'transparent',
+      borderBottomColor: theme.colors.transparent || 'transparent', // Fallback for safety
     },
     tabActive: {
       borderBottomColor: theme.colors.primary,

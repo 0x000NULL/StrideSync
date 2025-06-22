@@ -71,7 +71,7 @@ const RunMapView = ({ path }) => {
 
   if (!hasLocationPermission) {
     return (
-      <View style={[styles.mapView, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.mapView, styles.mapViewNoPermission]}>
         <Text style={{ color: colors.text.secondary }}>
           Location permission is required to track your run
         </Text>
@@ -123,6 +123,10 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
+  mapViewNoPermission: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   recenterButton: {
     position: 'absolute',
     bottom: 20,
@@ -131,7 +135,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 20,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: colors.black || colors.text.dark, // Using theme color
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

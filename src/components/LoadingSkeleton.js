@@ -28,10 +28,10 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
             <View style={styles.content}>
               <View style={[styles.line, { backgroundColor: theme.colors.surface }]} />
               <View
-                style={[styles.line, { width: '80%', backgroundColor: theme.colors.surface }]}
+                style={[styles.line, styles.lineWidth80, { backgroundColor: theme.colors.surface }]}
               />
               <View
-                style={[styles.line, { width: '60%', backgroundColor: theme.colors.surface }]}
+                style={[styles.line, styles.lineWidth60, { backgroundColor: theme.colors.surface }]}
               />
             </View>
           </View>
@@ -47,7 +47,7 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
             <View style={styles.listContent}>
               <View style={[styles.line, { backgroundColor: theme.colors.surface }]} />
               <View
-                style={[styles.line, { width: '70%', backgroundColor: theme.colors.surface }]}
+                style={[styles.line, styles.lineWidth70, { backgroundColor: theme.colors.surface }]}
               />
             </View>
           </View>
@@ -58,10 +58,10 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
           <View key={index} style={[styles.textContainer, style]}>
             <View style={[styles.line, { backgroundColor: theme.colors.surfaceVariant }]} />
             <View
-              style={[styles.line, { width: '90%', backgroundColor: theme.colors.surfaceVariant }]}
+              style={[styles.line, styles.lineWidth90, { backgroundColor: theme.colors.surfaceVariant }]}
             />
             <View
-              style={[styles.line, { width: '80%', backgroundColor: theme.colors.surfaceVariant }]}
+              style={[styles.line, styles.lineWidth80, { backgroundColor: theme.colors.surfaceVariant }]}
             />
           </View>
         );
@@ -113,6 +113,10 @@ const LoadingSkeleton = ({ count = 3, variant = 'card', style }) => {
       marginBottom: 8,
       width: '100%',
     },
+    lineWidth80: { width: '80%' },
+    lineWidth60: { width: '60%' },
+    lineWidth70: { width: '70%' },
+    lineWidth90: { width: '90%' },
 
     // List variant styles
     listItem: {

@@ -1,10 +1,68 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
+import { useTheme } from '../../../theme/ThemeProvider';
 
 const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
+  const theme = useTheme();
   const effortOptions = [1, 2, 3, 4, 5];
   const moodOptions = ['Great', 'Good', 'Okay', 'Bad'];
+
+  const styles = StyleSheet.create({
+    formSection: {
+      backgroundColor: theme.colors.card,
+      marginHorizontal: theme.spacing.md,
+      marginVertical: theme.spacing.sm,
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      elevation: 1, // Consider platform-specific shadow or remove if not essential
+    },
+    sectionTitle: {
+      fontSize: 18, // Consider theme.typography.h6.fontSize
+      fontWeight: '600', // Consider theme.typography.h6.fontWeight
+      marginBottom: theme.spacing.sm,
+      color: theme.colors.text.primary, // Added color
+    },
+    label: {
+      fontSize: 14, // Consider theme.typography.subtitle2.fontSize
+      color: theme.colors.text.secondary,
+      marginBottom: theme.spacing.sm,
+    },
+    buttonGroup: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: theme.spacing.md,
+    },
+    button: {
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'center',
+    },
+    effortButton: {
+      width: '18%', // 5 buttons
+    },
+    moodButton: {
+      width: '23%', // 4 buttons
+    },
+    selectedEffortButton: { // Assuming 'coral' maps to 'error' for 'Hard' effort
+      backgroundColor: theme.colors.error,
+      borderColor: theme.colors.error,
+    },
+    selectedMoodButton: { // Assuming 'limegreen' maps to 'success' for 'Great/Good' mood
+      backgroundColor: theme.colors.success,
+      borderColor: theme.colors.success,
+    },
+    buttonText: {
+      fontSize: 14, // Consider theme.typography.button.fontSize
+      color: theme.colors.text.primary,
+    },
+    selectedButtonText: {
+      color: theme.colors.text.light, // Or theme.colors.onError / theme.colors.onSuccess
+      fontWeight: 'bold',
+    },
+  });
 
   return (
     <View style={styles.formSection}>
@@ -42,61 +100,6 @@ const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  formSection: {
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    marginVertical: 8,
-    padding: 15,
-    borderRadius: 8,
-    elevation: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  label: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  button: {
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    alignItems: 'center',
-  },
-  effortButton: {
-    width: '18%', // 5 buttons
-  },
-  moodButton: {
-    width: '23%', // 4 buttons
-  },
-  selectedEffortButton: {
-    backgroundColor: 'coral',
-    borderColor: 'coral',
-  },
-  selectedMoodButton: {
-    backgroundColor: 'limegreen',
-    borderColor: 'limegreen',
-  },
-  buttonText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  selectedButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 EffortMoodSelector.propTypes = {
   effort: PropTypes.number.isRequired,

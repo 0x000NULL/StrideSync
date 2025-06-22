@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   RefreshControl,
-  ActivityIndicator,
   TouchableOpacity,
   Modal,
   TextInput,
@@ -18,9 +17,9 @@ import {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { useTheme } from '../theme/ThemeProvider';
-import { format, subDays, subMonths, subYears, parseISO } from 'date-fns';
-import { useRunStore } from '../stores/useStore';
-import { useShoeStore } from '../stores/useStore';
+import { format, parseISO } from 'date-fns';
+import { useRunStore, useShoeStore } from '../stores/useStore'; // Consolidated
+import PropTypes from 'prop-types';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
 
@@ -52,14 +51,15 @@ const RunLogScreen = ({ navigation }) => {
   const { distanceUnit, formatDistance, toKilometers, fromKilometers } = useUnits();
 
   // Get data from stores
-  const { runs, isLoading, error, loadRuns, getFilteredRuns, deleteRun } = useRunStore();
-  const { shoes, getShoeById } = useShoeStore();
+  const { runs, isLoading, error, loadRuns, getFilteredRuns } = useRunStore();
+  const { shoes: allShoes, getShoeById } = useShoeStore(); // Renamed shoes to allShoes to avoid conflict
+
+  // Calculate active shoes for the filter modal
+  const activeShoes = useMemo(() => allShoes.filter(shoe => shoe.isActive), [allShoes]);
 
   // State
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [refreshY] = useState(new Animated.Value(0));
-  const [refreshScale] = useState(new Animated.Value(1));
   const [refreshRotation] = useState(new Animated.Value(0));
   const [initialLoadError, setInitialLoadError] = useState(false);
   const [filters, setFilters] = useState({
@@ -113,7 +113,7 @@ const RunLogScreen = ({ navigation }) => {
   // Load runs on mount
   useEffect(() => {
     loadInitialData();
-  }, []);
+  }, [loadInitialData]); // Added loadInitialData
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -170,7 +170,7 @@ const RunLogScreen = ({ navigation }) => {
 
   // Custom refresh control component
   const CustomRefreshControl = useCallback(
-    ({ refreshing, onRefresh, ...props }) => {
+    ({ isRefreshing, onPullToRefresh, ...props }) => { // Renamed props
       const spin = refreshRotation.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
@@ -178,23 +178,20 @@ const RunLogScreen = ({ navigation }) => {
 
       return (
         <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
+          refreshing={isRefreshing}
+          onRefresh={onPullToRefresh}
           colors={[theme.colors.primary]}
           tintColor={theme.colors.primary}
           progressViewOffset={Platform.OS === 'android' ? 20 : 0}
           progressBackgroundColor={theme.colors.background}
-          title={refreshing ? 'Refreshing...' : 'Pull to refresh'}
+          title={isRefreshing ? 'Refreshing...' : 'Pull to refresh'}
           titleColor={theme.colors.text.secondary}
           {...props}
         >
           <Animated.View
             style={[
-              {
-                transform: [{ rotate: spin }],
-                alignSelf: 'center',
-                marginVertical: 8,
-              },
+              styles.refreshIconContainer, // Applied new style
+              { transform: [{ rotate: spin }] },
             ]}
           >
             <Ionicons name="refresh" size={24} color={theme.colors.primary} />
@@ -204,23 +201,6 @@ const RunLogScreen = ({ navigation }) => {
     },
     [refreshRotation, theme.colors]
   );
-
-  // Apply filters and sorting
-  const filterOptions = {
-    dateRange: filters.dateRange,
-    minDistance: filters.minDistance ? parseFloat(filters.minDistance) : undefined,
-    maxDistance: filters.maxDistance ? parseFloat(filters.maxDistance) : undefined,
-    shoeId: filters.shoeId,
-  };
-
-  const sortOptions = {
-    field: sortBy.split('-')[0],
-    order: sortBy.split('-')[1],
-  };
-
-  const displayedRuns = useMemo(() => {
-    return filteredRuns;
-  }, [filteredRuns]);
 
   // Format run data for display
   const formatRunItem = run => {
@@ -359,12 +339,12 @@ const RunLogScreen = ({ navigation }) => {
       textAlign: 'center',
       marginBottom: theme.spacing.md,
     },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: theme.spacing.xl,
-    },
+    // loadingContainer: { // This is a duplicate key and also unused. The one above is used by SkeletonLoader.
+    //   flex: 1,
+    //   justifyContent: 'center',
+    //   alignItems: 'center',
+    //   padding: theme.spacing.xl,
+    // },
     // Skeleton styles
     skeleton: {
       backgroundColor: theme.colors.surface,
@@ -393,18 +373,18 @@ const RunLogScreen = ({ navigation }) => {
       borderRadius: 4,
       marginBottom: 2,
     },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: theme.spacing.xl,
-    },
-    loadingText: {
-      ...theme.typography.body,
-      color: theme.colors.text.secondary,
-      marginTop: theme.spacing.md,
-      textAlign: 'center',
-    },
+    // loadingContainer: { // Unused style, also a duplicate key
+    //   flex: 1,
+    //   justifyContent: 'center',
+    //   alignItems: 'center',
+    //   padding: theme.spacing.xl,
+    // },
+    // loadingText: { // Unused style
+    //   ...theme.typography.body,
+    //   color: theme.colors.text.secondary,
+    //   marginTop: theme.spacing.md,
+    //   textAlign: 'center',
+    // },
     errorContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -478,7 +458,7 @@ const RunLogScreen = ({ navigation }) => {
     // Filter Modal Styles
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: theme.colors.backdrop || 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'flex-end',
     },
     modalContent: {
@@ -555,6 +535,45 @@ const RunLogScreen = ({ navigation }) => {
       ...theme.typography.button,
       color: theme.colors.onPrimary,
     },
+    // Styles for inline fixes
+    refreshIconContainer: {
+      alignSelf: 'center',
+      marginVertical: theme.spacing.sm, // Assuming 8 is sm
+    },
+    skeletonWidth40: { width: '40%' },
+    skeletonWidth20: { width: '20%' },
+    skeletonWidth70: { width: '70%' },
+    skeletonWidth60: { width: '60%' },
+    skeletonWidth50: { width: '50%' },
+    skeletonMarginTopXs: { marginTop: theme.spacing.xs }, // Assuming 4 is xs
+    skeletonMarginTopSm: { marginTop: theme.spacing.sm }, // Assuming 8 is sm
+    modalContentMaxHeight: {
+      maxHeight: Platform.OS === 'ios' ? '80%' : '90%',
+    },
+    flex1: { flex: 1 },
+    flex2: { flex: 2 },
+    rowSpaceBetween: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    retryButtonWithBorder: { // For the specific retry button that had inline border
+      borderWidth: 1,
+      // Note: backgroundColor and borderColor are already handled by being inside retryButton style
+    },
+    rowAlignCenter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    marginLeftAuto: {
+      marginLeft: 'auto',
+    },
+    emptyStateIcon: {
+      marginBottom: theme.spacing.md, // Assuming 16 is md
+      opacity: 0.5,
+    },
+    marginTopLg: {
+      marginTop: theme.spacing.lg, // Assuming 24 is lg
+    },
   });
 
   // Skeleton loader component
@@ -562,21 +581,21 @@ const RunLogScreen = ({ navigation }) => {
     ({ style }) => (
       <View style={[styles.skeleton, style]}>
         <View style={styles.skeletonHeader}>
-          <View style={[styles.skeletonText, { width: '40%' }]} />
-          <View style={[styles.skeletonText, { width: '20%' }]} />
+          <View style={[styles.skeletonText, styles.skeletonWidth40]} />
+          <View style={[styles.skeletonText, styles.skeletonWidth20]} />
         </View>
         <View style={styles.skeletonDetails}>
           {[1, 2, 3].map(i => (
             <View key={i} style={styles.skeletonDetailItem}>
-              <View style={[styles.skeletonText, { width: '70%' }]} />
-              <View style={[styles.skeletonText, { width: '60%', marginTop: 4 }]} />
+              <View style={[styles.skeletonText, styles.skeletonWidth70]} />
+              <View style={[styles.skeletonText, styles.skeletonWidth60, styles.skeletonMarginTopXs]} />
             </View>
           ))}
         </View>
-        <View style={[styles.skeletonText, { width: '50%', marginTop: 8 }]} />
+        <View style={[styles.skeletonText, styles.skeletonWidth50, styles.skeletonMarginTopSm]} />
       </View>
     ),
-    []
+    [styles] // Added styles to dependency array
   );
 
   const renderRunItem = ({ item }) => {
@@ -667,7 +686,7 @@ const RunLogScreen = ({ navigation }) => {
       onRequestClose={() => setShowFilters(false)}
     >
       <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { maxHeight: Platform.OS === 'ios' ? '80%' : '90%' }]}>
+        <View style={[styles.modalContent, styles.modalContentMaxHeight]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Filter & Sort</Text>
             <TouchableOpacity style={styles.closeButton} onPress={() => setShowFilters(false)}>
@@ -773,7 +792,7 @@ const RunLogScreen = ({ navigation }) => {
                 <Text style={styles.sectionTitle}>Shoe</Text>
                 <View style={[styles.option, filters.shoeId === null && styles.optionSelected]}>
                   <TouchableOpacity
-                    style={{ flex: 1 }}
+                    style={styles.flex1}
                     onPress={() => setFilters({ ...filters, shoeId: null })}
                   >
                     <Text
@@ -792,7 +811,7 @@ const RunLogScreen = ({ navigation }) => {
                     style={[styles.option, filters.shoeId === shoe.id && styles.optionSelected]}
                   >
                     <TouchableOpacity
-                      style={{ flex: 1 }}
+                      style={styles.flex1}
                       onPress={() => setFilters({ ...filters, shoeId: shoe.id })}
                     >
                       <Text
@@ -824,14 +843,14 @@ const RunLogScreen = ({ navigation }) => {
               </TouchableOpacity>
             ))}
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={styles.rowSpaceBetween}>
               <TouchableOpacity
                 style={[
                   styles.applyButton,
+                  styles.flex1,
                   {
                     backgroundColor: theme.colors.surface,
                     marginRight: theme.spacing.sm,
-                    flex: 1,
                   },
                 ]}
                 onPress={resetFilters}
@@ -839,7 +858,7 @@ const RunLogScreen = ({ navigation }) => {
                 <Text style={[styles.applyButtonText, { color: theme.colors.primary }]}>Reset</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.applyButton, { flex: 2 }]} onPress={applyFilters}>
+              <TouchableOpacity style={[styles.applyButton, styles.flex2]} onPress={applyFilters}>
                 <Text style={styles.applyButtonText}>Apply Filters</Text>
               </TouchableOpacity>
             </View>
@@ -918,9 +937,9 @@ const RunLogScreen = ({ navigation }) => {
         <TouchableOpacity
           style={[
             styles.retryButton,
+            styles.retryButtonWithBorder, // Applied new style
             {
               backgroundColor: theme.colors.surface,
-              borderWidth: 1,
               borderColor: theme.colors.primary,
             },
           ]}
@@ -937,7 +956,7 @@ const RunLogScreen = ({ navigation }) => {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Run Log</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={styles.rowAlignCenter}>
             <TouchableOpacity
               style={[styles.filterButton, { marginRight: theme.spacing.sm }]}
               onPress={() => searchInputRef.current.focus()}
@@ -1056,7 +1075,7 @@ const RunLogScreen = ({ navigation }) => {
               </View>
             )}
 
-            <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={resetFilters}>
+            <TouchableOpacity style={styles.marginLeftAuto} onPress={resetFilters}>
               <Text style={styles.clearAllButton}>Clear All</Text>
             </TouchableOpacity>
           </View>
@@ -1067,7 +1086,7 @@ const RunLogScreen = ({ navigation }) => {
             data={filteredRuns}
             renderItem={renderRunItem}
             keyExtractor={item => item.id}
-            refreshControl={<CustomRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={<CustomRefreshControl isRefreshing={refreshing} onPullToRefresh={onRefresh} />}
             contentContainerStyle={{ paddingBottom: theme.spacing.lg }}
           />
         ) : (
@@ -1076,13 +1095,13 @@ const RunLogScreen = ({ navigation }) => {
               name="footsteps"
               size={64}
               color={theme.colors.text.secondary}
-              style={{ marginBottom: 16, opacity: 0.5 }}
+              style={styles.emptyStateIcon}
             />
             <Text style={styles.emptyText}>No runs recorded yet.</Text>
             <Text style={styles.emptyText}>Start your first run to see it here!</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('NewRun')}
-              style={[styles.applyButton, { marginTop: 24 }]}
+              style={[styles.applyButton, styles.marginTopLg]}
             >
               <Text style={styles.applyButtonText}>Start a Run</Text>
             </TouchableOpacity>
@@ -1093,6 +1112,12 @@ const RunLogScreen = ({ navigation }) => {
       {renderFilterModal()}
     </View>
   );
+};
+
+RunLogScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 export default RunLogScreen;

@@ -154,14 +154,14 @@ const RunSummaryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5', // A slightly lighter grey
+    backgroundColor: colors.background,
   },
   containerCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: colors.background,
   },
   contentContainer: {
     paddingHorizontal: 15,
@@ -171,13 +171,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingVertical: 20,
-    color: '#1c1c1e',
+    color: colors.text, // Primary text color from navigation theme
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: colors.text, // Primary text color
   },
   placeholderContent: {
     justifyContent: 'center',
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.border, // Using border for a lighter gray text, or colors.text and adjust opacity
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -196,22 +196,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e8e8',
+    borderBottomColor: colors.border,
   },
   statLabel: {
     fontSize: 16,
-    color: '#444',
+    color: colors.text,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#222',
+    color: colors.text,
     maxWidth: '60%', // For notes or long values
     textAlign: 'right',
   },
   errorText: {
     fontSize: 18,
-    color: 'red',
+    color: 'red', // Navigation themes don't typically have an 'error' color. Keeping literal red.
     textAlign: 'center',
     marginBottom: 10,
   },

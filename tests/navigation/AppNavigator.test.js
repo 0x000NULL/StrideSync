@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from '../../src/navigation/AppNavigator';
 import { View, Text, TouchableOpacity } from 'react-native'; // Import common elements once
+import PropTypes from 'prop-types';
 
 // --- Helper to create simple mock screen components ---
 const createMockScreenComponent = (displayName, testID, navigationProp = false) => {
@@ -21,6 +22,11 @@ const createMockScreenComponent = (displayName, testID, navigationProp = false) 
       )}
     </View>
   );
+  MockComponent.propTypes = {
+    navigation: PropTypes.shape({
+      navigate: PropTypes.func,
+    }),
+  };
   MockComponent.displayName = displayName;
   return MockComponent;
 };
@@ -90,10 +96,22 @@ jest.mock('../../src/theme/ThemeProvider', () => {
     ThemeProvider: ({ children }) => <>{children}</>,
   };
 });
+// Assign propTypes to the ThemeProvider mock
+const ThemeProviderMock = jest.requireMock('../../src/theme/ThemeProvider').ThemeProvider;
+ThemeProviderMock.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+
 jest.mock('../../src/providers/StoreProvider', () => ({
   StoreProvider: jest.fn(({ children }) => <>{children}</>),
   useStoreContext: jest.fn(() => ({ settings: {} })),
 }));
+// Assign propTypes to the StoreProvider mock
+const StoreProviderMock = jest.requireMock('../../src/providers/StoreProvider').StoreProvider;
+StoreProviderMock.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 describe('AppNavigator', () => {
   const renderNavigator = () => {

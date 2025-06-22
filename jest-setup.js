@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 import { Platform } from 'react-native';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 // Force Platform.OS to 'ios' for all tests.
 // This relies on jest-expo preset having already set up a basic Platform object.
@@ -10,7 +12,6 @@ Platform.isTesting = true;
 // Platform.isTV = false;  // Let's only set what's usually there.
 
 // Ensure Platform.select is a robust mock that uses the forced OS.
-const originalSelect = Platform.select;
 Platform.select = jest.fn(specs => {
   if (Platform.OS === 'ios' && specs.ios !== undefined) {
     return specs.ios;
@@ -168,13 +169,18 @@ jest.mock('react-redux', () => ({
 jest.mock('@react-navigation/elements', () => {
   const actualElements = jest.requireActual('@react-navigation/elements');
   const { View } = require('react-native');
+  const MockHeader = props => (
+    <View testID="mock-header">
+      {typeof props.headerTitle === 'function' ? props.headerTitle({}) : props.title}
+    </View>
+  );
+  MockHeader.propTypes = {
+    headerTitle: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
+    title: PropTypes.string,
+  };
   return {
     ...actualElements,
-    Header: props => (
-      <View testID="mock-header">
-        {typeof props.headerTitle === 'function' ? props.headerTitle({}) : props.title}
-      </View>
-    ),
+    Header: MockHeader,
     // You might need to mock other components from @react-navigation/elements
     // such as HeaderBackButton, etc., if they are used directly or cause issues.
   };
@@ -276,13 +282,20 @@ jest.mock('react-native-safe-area-context', () => {
     );
   };
 
+  MockSafeAreaProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+
   return {
     ...ActualSafeAreaContext, // Spread actual exports
     SafeAreaProvider: MockSafeAreaProvider, // Use our mock provider
     SafeAreaConsumer: ({ children }) => children(mockSafeAreaInsets),
-    SafeAreaView: jest.fn(({ children }) => {
-      const { View } = require('react-native'); // Require View inside the factory
-      return <View>{children}</View>;
+    SafeAreaView: jest.fn(props => {
+      const { View } = require('react-native');
+      const MockSafeAreaView = ({ children }) => <View>{children}</View>;
+      MockSafeAreaView.propTypes = { children: PropTypes.node };
+      MockSafeAreaView.displayName = 'MockSafeAreaView';
+      return <MockSafeAreaView {...props} />;
     }),
     useSafeAreaInsets: jest.fn(() => mockSafeAreaInsets),
     useSafeAreaFrame: jest.fn(() => mockSafeAreaFrame),
@@ -379,6 +392,11 @@ jest.mock('@expo/vector-icons', () => {
       {name}
     </Text>
   );
+  MockMaterialIcons.propTypes = {
+    name: PropTypes.string.isRequired,
+    style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    testID: PropTypes.string,
+  };
   MockMaterialIcons.displayName = 'MockMaterialIcons';
   return {
     MaterialIcons: MockMaterialIcons,
@@ -417,6 +435,11 @@ jest.mock('@react-navigation/native-stack', () => {
   return {
     createNativeStackNavigator: jest.fn(() => {
       const Navigator = ({ children }) => <>{children}</>;
+      Navigator.propTypes = {
+        children: PropTypes.node.isRequired,
+      };
+      Navigator.displayName = 'MockNativeStackNavigator.Navigator';
+
       const Screen = ({ component: Component, name, children }) => {
         const navigation = {
           navigate: mockNavigateFn,
@@ -425,10 +448,18 @@ jest.mock('@react-navigation/native-stack', () => {
         };
         if (Component) {
           const Comp = Component;
+          // PropType for navigation on Comp would be needed if Comp was defined here with PropTypes
           return <Comp navigation={navigation} />;
         }
         return <>{children}</>;
       };
+      Screen.propTypes = {
+        component: PropTypes.elementType,
+        name: PropTypes.string.isRequired,
+        children: PropTypes.node,
+      };
+      Screen.displayName = 'MockNativeStackNavigator.Screen';
+
       return { Navigator, Screen };
     }),
   };

@@ -16,17 +16,22 @@ StoreProvider.propTypes = {
 
 export const useStoreContext = () => {
   // Try to get the store from React context first
-  const context = React.useContext(StoreContext);
+  const contextValue = React.useContext(StoreContext);
+  // Always call useStore at the top level
+  const globalStore = useStore();
 
   // In cases (e.g., unit tests) where components are rendered without being wrapped
-  // in a StoreProvider, `context` will be undefined. To make components and tests
+  // in a StoreProvider, `contextValue` will be undefined. To make components and tests
   // more resilient, fall back to the global Zustand store instance. This mirrors
   // the store that StoreProvider would normally supply, while avoiding the need
   // for every test to explicitly wrap components in the provider.
 
-  if (context === undefined) {
-    return useStore();
+  if (contextValue === undefined) {
+    // This typically means the component is not wrapped in StoreProvider.
+    // Fallback to the global store instance.
+    return globalStore;
   }
 
-  return context;
+  // Return the context-provided store if available
+  return contextValue;
 };

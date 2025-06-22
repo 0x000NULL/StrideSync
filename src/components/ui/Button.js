@@ -162,6 +162,9 @@ const Button = ({
     iconOnly: {
       padding: theme.spacing.sm,
     },
+    iconMarginZero: { // Added for iconOnly case
+      margin: 0,
+    },
     loadingContainer: {
       position: 'absolute',
       left: 0,
@@ -189,7 +192,7 @@ const Button = ({
           style={[
             iconPosition === 'left' && styles.iconLeft,
             iconPosition === 'right' && styles.iconRight,
-            isIconOnly && { margin: 0 },
+            isIconOnly && styles.iconMarginZero,
           ]}
         />
       );
@@ -202,7 +205,7 @@ const Button = ({
       style: [
         iconPosition === 'left' && styles.iconLeft,
         iconPosition === 'right' && styles.iconRight,
-        isIconOnly && { margin: 0 },
+        isIconOnly && styles.iconMarginZero,
         icon.props?.style, // Preserve any existing styles
       ],
     });

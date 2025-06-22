@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 
 const MinimalShoeListScreen = ({ navigation }) => {
   // Mock data for testing
@@ -31,6 +32,12 @@ const MinimalShoeListScreen = ({ navigation }) => {
       </TouchableOpacity>
     </View>
   );
+};
+
+MinimalShoeListScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({

@@ -145,7 +145,6 @@ describe('formatters', () => {
       // Depending on JS engine. For consistency, perhaps the function should check validity.
       // Current implementation relies on Date constructor and toLocaleDateString.
       // Let's test with a clearly invalid string.
-      const invalidDate = new Date('not a date');
       // The behavior of toLocaleDateString for invalid dates is implementation-defined.
       // Some might return "Invalid Date", others might throw or return something else.
       // For this test, we'll just ensure it doesn't crash and returns a string.
