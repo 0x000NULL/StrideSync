@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native';
 import { useStore } from '../../stores/useStore';
-import { Card } from '../ui/Card';
+import { shallow } from 'zustand/shallow';
+import Card from '../ui/Card';
 import Button from '../ui/Button';
 
 const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const shoes = useStore((state) => state.shoes.filter(shoe => shoe.isActive));
-  const selectedShoe = shoes.find(shoe => shoe.id === selectedShoeId);
+  const shoes = useStore(state => state.shoes, shallow);
+  const activeShoes = useMemo(() => shoes.filter(shoe => shoe.isActive), [shoes]);
+  const selectedShoe = activeShoes.find(shoe => shoe.id === selectedShoeId);
 
-  const handleSelectShoe = (shoeId) => {
+  const handleSelectShoe = shoeId => {
     onSelectShoe(shoeId);
     setModalVisible(false);
   };
@@ -36,13 +38,10 @@ const ShoeSelector = ({ selectedShoeId, onSelectShoe }) => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select a Shoe</Text>
             <FlatList
-              data={shoes}
-              keyExtractor={(item) => item.id}
+              data={activeShoes}
+              keyExtractor={item => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.shoeItem}
-                  onPress={() => handleSelectShoe(item.id)}
-                >
+                <TouchableOpacity style={styles.shoeItem} onPress={() => handleSelectShoe(item.id)}>
                   <Text style={styles.shoeName}>{item.name}</Text>
                   <Text style={styles.shoeBrand}>{item.brand}</Text>
                 </TouchableOpacity>
@@ -121,4 +120,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShoeSelector; 
+export default ShoeSelector;

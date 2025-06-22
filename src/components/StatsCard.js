@@ -27,7 +27,7 @@ const StatsCard = ({
   small = false,
 }) => {
   const theme = useTheme();
-  
+
   const styles = StyleSheet.create({
     container: {
       minWidth: small ? 100 : 120,
@@ -89,13 +89,13 @@ const StatsCard = ({
 
   const renderIcon = () => {
     if (!icon) return null;
-    
+
     const iconProps = {
       name: icon,
       size: small ? 18 : 24,
       color: color || theme.colors.primary,
     };
-    
+
     return (
       <View style={styles.iconContainer}>
         {iconType === 'material-community' ? (

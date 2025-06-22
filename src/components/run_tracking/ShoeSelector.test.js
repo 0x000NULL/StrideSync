@@ -3,8 +3,10 @@ import { render, fireEvent } from '@testing-library/react-native';
 import ShoeSelector from './ShoeSelector';
 import { useStore } from '../../stores/useStore';
 
-// Mock the store
-jest.mock('../../stores/useStore');
+// Mock the store with a selector-aware jest.fn
+jest.mock('../../stores/useStore', () => ({
+  useStore: jest.fn(),
+}));
 
 const mockShoes = [
   { id: 'shoe_1', name: 'Cloudstratus', brand: 'On', isActive: true },
@@ -14,8 +16,10 @@ const mockShoes = [
 
 describe('ShoeSelector', () => {
   beforeEach(() => {
-    useStore.mockReturnValue({
-      shoes: mockShoes.filter(s => s.isActive),
+    // Make the mock behave like Zustand's selector hook
+    useStore.mockImplementation(selector => {
+      const state = { shoes: mockShoes };
+      return selector ? selector(state) : state;
     });
   });
 
@@ -36,7 +40,7 @@ describe('ShoeSelector', () => {
 
     expect(queryByText('Select a Shoe')).toBeTruthy();
     fireEvent.press(getByText('Select a Shoe'));
-    
+
     // After pressing, modal with title "Select a Shoe" should be visible.
     // The test environment might not render the modal content in the same way,
     // so we check for an element inside the modal.
@@ -44,8 +48,10 @@ describe('ShoeSelector', () => {
   });
 
   it('displays a list of active shoes in the modal', () => {
-    const { getByText, getAllByRole } = render(<ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />);
-    
+    const { getByText, getAllByRole } = render(
+      <ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />
+    );
+
     fireEvent.press(getByText('Select a Shoe'));
 
     // Check for active shoes
@@ -54,18 +60,22 @@ describe('ShoeSelector', () => {
   });
 
   it('does not display inactive shoes', () => {
-    const { getByText, queryByText } = render(<ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />);
+    const { getByText, queryByText } = render(
+      <ShoeSelector selectedShoeId={null} onSelectShoe={() => {}} />
+    );
     fireEvent.press(getByText('Select a Shoe'));
     expect(queryByText('Pegasus 38')).toBeNull();
   });
 
   it('calls onSelectShoe with the correct shoe id when a shoe is selected', () => {
     const onSelectShoeMock = jest.fn();
-    const { getByText } = render(<ShoeSelector selectedShoeId={null} onSelectShoe={onSelectShoeMock} />);
-    
+    const { getByText } = render(
+      <ShoeSelector selectedShoeId={null} onSelectShoe={onSelectShoeMock} />
+    );
+
     fireEvent.press(getByText('Select a Shoe'));
     fireEvent.press(getByText('Endorphin Speed 2'));
 
     expect(onSelectShoeMock).toHaveBeenCalledWith('shoe_2');
   });
-}); 
+});

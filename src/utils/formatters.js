@@ -6,7 +6,7 @@
  */
 export const formatDistance = (meters, withUnit = true) => {
   if (meters === null || meters === undefined) return '--';
-  
+
   const km = meters / 1000;
   if (km >= 1) {
     return `${km.toFixed(1)}${withUnit ? ' km' : ''}`;
@@ -19,9 +19,9 @@ export const formatDistance = (meters, withUnit = true) => {
  * @param {number} secondsPerKm - Pace in seconds per kilometer
  * @returns {string} Formatted pace string (e.g., "4:30 /km")
  */
-export const formatPace = (secondsPerKm) => {
+export const formatPace = secondsPerKm => {
   if (!secondsPerKm || secondsPerKm <= 0) return '--:-- /km';
-  
+
   const minutes = Math.floor(secondsPerKm / 60);
   const seconds = Math.round(secondsPerKm % 60);
   return `${minutes}:${seconds.toString().padStart(2, '0')} /km`;
@@ -32,7 +32,7 @@ export const formatPace = (secondsPerKm) => {
  * @param {number} seconds - Duration in seconds
  * @returns {string} Formatted duration string (e.g., "1h 23m" or "45m 30s")
  */
-export const formatDuration = (totalSeconds) => {
+export const formatDuration = totalSeconds => {
   if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -45,40 +45,40 @@ export const formatDuration = (totalSeconds) => {
  * @param {Date|string} date - Date object or ISO date string
  * @returns {string} Relative time string
  */
-export const formatRelativeTime = (date) => {
+export const formatRelativeTime = date => {
   if (!date) return 'Never';
-  
+
   const now = new Date();
   const then = new Date(date);
   const diffInSeconds = Math.floor((now - then) / 1000);
-  
+
   if (diffInSeconds < 60) return 'Just now';
-  
+
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return `${diffInMinutes} min${diffInMinutes === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
     return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInWeeks = Math.floor(diffInDays / 7);
   if (diffInWeeks < 4) {
     return `${diffInWeeks} week${diffInWeeks === 1 ? '' : 's'} ago`;
   }
-  
+
   // For older dates, return the actual date
-  return then.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  return then.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };
 
@@ -87,14 +87,14 @@ export const formatRelativeTime = (date) => {
  * @param {Date|string} date - Date object or ISO date string
  * @returns {string} Formatted date string
  */
-export const formatShortDate = (date) => {
+export const formatShortDate = date => {
   if (!date) return '--';
-  
+
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };
 
@@ -103,9 +103,7 @@ export const formatShortDate = (date) => {
  * @param {number} num - The number to format
  * @returns {string} Formatted number string
  */
-export const formatWithPlus = (num) => {
+export const formatWithPlus = num => {
   if (num === null || num === undefined) return '--';
   return num > 0 ? `+${num}` : num.toString();
 };
-
-

@@ -1,5 +1,5 @@
 import { useStore } from '../../src/stores/useStore';
-import { act } from '@testing-library/react-hooks';
+import { act } from 'react-test-renderer';
 
 // Reset store before each test
 beforeEach(() => {
@@ -45,7 +45,7 @@ describe('runStore actions', () => {
       useStore.getState().updateRun(runId, updates);
     });
 
-    const updatedRun = useStore.getState().runs.find((r) => r.id === runId);
+    const updatedRun = useStore.getState().runs.find(r => r.id === runId);
     expect(updatedRun.distance).toBe(11);
     expect(updatedRun.notes).toBe('Felt great!');
     expect(updatedRun.updatedAt).not.toBe(updatedRun.createdAt);
@@ -59,13 +59,13 @@ describe('runStore actions', () => {
       run2Id = useStore.getState().addRun({ distance: 10, name: 'Run 2' });
     });
 
-    const initialRun2 = useStore.getState().runs.find((r) => r.id === run2Id);
+    const initialRun2 = useStore.getState().runs.find(r => r.id === run2Id);
 
     act(() => {
       useStore.getState().updateRun(run1Id, { name: 'Updated Run 1' });
     });
 
-    const postUpdateRun2 = useStore.getState().runs.find((r) => r.id === run2Id);
+    const postUpdateRun2 = useStore.getState().runs.find(r => r.id === run2Id);
     expect(postUpdateRun2).toEqual(initialRun2);
   });
 
@@ -84,7 +84,7 @@ describe('runStore actions', () => {
 
     const runs = useStore.getState().runs;
     expect(runs).toHaveLength(1);
-    expect(runs.find((r) => r.id === run1Id)).toBeUndefined();
+    expect(runs.find(r => r.id === run1Id)).toBeUndefined();
   });
 
   it('should clear all runs', () => {
@@ -101,4 +101,4 @@ describe('runStore actions', () => {
 
     expect(useStore.getState().runs).toHaveLength(0);
   });
-}); 
+});

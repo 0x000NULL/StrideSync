@@ -12,12 +12,12 @@ import RunMapView from '../../components/run_tracking/RunMapView';
 
 const StatsGrid = ({ run }) => {
   const { formatDistance } = useUnits();
-  
+
   const pace = useMemo(() => {
     if (run?.distance > 0 && run?.duration > 0) {
       // Pace is typically min/distance_unit
       const distance = formatDistance(run.distance / 1000).value; // distance in preferred unit
-      const paceValue = (run.duration / 60) / distance;
+      const paceValue = run.duration / 60 / distance;
       return `${paceValue.toFixed(2)} min/${formatDistance(1).unit}`;
     }
     return `--:-- min/${formatDistance(1).unit}`;
@@ -60,12 +60,10 @@ const RunSummaryScreen = () => {
   const route = useRoute();
 
   const routeRunId = route.params?.runId;
-  
-  const { runs, currentRun, runStatus } = useStore(state => ({
-    runs: state.runs,
-    currentRun: state.currentRun,
-    runStatus: state.runStatus, // Assuming runStatus exists in your store
-  }));
+
+  const runs = useStore(state => state.runs);
+  const currentRun = useStore(state => state.currentRun);
+  const runStatus = useStore(state => state.runStatus);
 
   const runToDisplayId = useMemo(() => {
     if (routeRunId) {
@@ -98,7 +96,7 @@ const RunSummaryScreen = () => {
     return (
       <View style={styles.containerCenter}>
         <Text style={styles.errorText}>Run details not found.</Text>
-        <Text style={styles.errorText}>ID: {runToDisplayId || "None"}</Text>
+        <Text style={styles.errorText}>ID: {runToDisplayId || 'None'}</Text>
         <Button title="Go Back" onPress={() => navigation.goBack()} />
       </View>
     );
@@ -112,10 +110,10 @@ const RunSummaryScreen = () => {
       <Text style={styles.title}>Run Summary</Text>
 
       <RunMapView path={routePath} />
-      
+
       <View style={styles.contentContainer}>
         <StatsGrid run={runDetails} />
-        <PlaceholderCard 
+        <PlaceholderCard
           title="Pace Chart"
           text="A chart showing your pace over the duration of the run will be displayed here."
         />
@@ -204,7 +202,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     paddingHorizontal: 15,
     paddingBottom: 20, //SafeArea
-  }
+  },
 });
 
 export default RunSummaryScreen;

@@ -1,13 +1,18 @@
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
-import { addLocationToCurrentRun, setError, setBackgroundTaskRegistered, setLocationUpdatesEnabled } from '../../stores/run_tracking/runSlice';
+import {
+  addLocationToCurrentRun,
+  setError,
+  setBackgroundTaskRegistered,
+  setLocationUpdatesEnabled,
+} from '../../stores/run_tracking/runSlice';
 
 export const LOCATION_TASK_NAME = 'background-location-task';
 
 // This reference will be set by the setup function called from your main app logic
 let storeRef = null;
 
-export const setStoreReference = (store) => {
+export const setStoreReference = store => {
   storeRef = store;
 };
 
@@ -44,7 +49,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
 });
 
 // 2. Function to register the background task
-export const registerBackgroundLocationTaskAsync = async (dispatch) => {
+export const registerBackgroundLocationTaskAsync = async dispatch => {
   try {
     // First, ensure permissions are granted. This should ideally be checked before calling this.
     const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
@@ -92,7 +97,7 @@ export const registerBackgroundLocationTaskAsync = async (dispatch) => {
 };
 
 // 3. Function to unregister the background task
-export const unregisterBackgroundLocationTaskAsync = async (dispatch) => {
+export const unregisterBackgroundLocationTaskAsync = async dispatch => {
   try {
     const isRegistered = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
     if (isRegistered) {

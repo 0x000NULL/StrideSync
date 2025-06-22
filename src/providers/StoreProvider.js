@@ -5,12 +5,8 @@ export const StoreContext = React.createContext();
 
 export const StoreProvider = ({ children }) => {
   const store = useStore();
-  
-  return (
-    <StoreContext.Provider value={store}>
-      {children}
-    </StoreContext.Provider>
-  );
+
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
 
 export const useStoreContext = () => {

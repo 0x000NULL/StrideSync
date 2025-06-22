@@ -9,32 +9,14 @@ const MinimalAddEditShoeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Shoe (Minimal)</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Brand"
-        value={brand}
-        onChangeText={setBrand}
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Model"
-        value={model}
-        onChangeText={setModel}
-      />
-      
-      <Button 
-        title="Save" 
-        onPress={() => console.log('Save pressed')} 
-      />
+
+      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+
+      <TextInput style={styles.input} placeholder="Brand" value={brand} onChangeText={setBrand} />
+
+      <TextInput style={styles.input} placeholder="Model" value={model} onChangeText={setModel} />
+
+      <Button title="Save" onPress={() => console.log('Save pressed')} />
     </View>
   );
 };

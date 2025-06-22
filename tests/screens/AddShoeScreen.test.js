@@ -5,7 +5,7 @@ import { Alert } from 'react-native';
 
 const mockAddShoe = jest.fn();
 jest.mock('../../src/stores/useStore', () => ({
-  useStore: (selector) => selector({ addShoe: mockAddShoe }),
+  useStore: selector => selector({ addShoe: mockAddShoe }),
 }));
 
 // alertSpy needs to be accessible in both beforeEach/afterEach and the tests themselves.
@@ -18,7 +18,8 @@ describe('AddShoeScreen', () => {
   });
 
   afterEach(() => {
-    if (alertSpy) { // Check if spy was created (it should always be in this setup)
+    if (alertSpy) {
+      // Check if spy was created (it should always be in this setup)
       alertSpy.mockRestore();
     }
   });
@@ -60,7 +61,10 @@ describe('AddShoeScreen', () => {
     const maxDistanceInput = getByPlaceholderText('e.g., 800');
     fireEvent.changeText(maxDistanceInput, 'abc');
     fireEvent.press(getByText('Save Shoe'));
-    expect(alertSpy).toHaveBeenCalledWith('Validation Error', 'Max distance must be a valid positive number.');
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Validation Error',
+      'Max distance must be a valid positive number.'
+    );
     expect(mockAddShoe).not.toHaveBeenCalled();
   });
 

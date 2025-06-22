@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { useStore } from '../../stores/useStore';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { beginRunTracking as reduxBeginRunTracking } from '../../stores/run_tracking/runSlice';
+import { v4 as uuidv4 } from 'uuid';
 
 import ShoeSelector from '../../components/run_tracking/ShoeSelector';
 import RunTypeSelector from '../../components/run_tracking/RunTypeSelector';
@@ -13,7 +16,8 @@ import Button from '../../components/ui/Button';
 
 const PreRunScreen = () => {
   const navigation = useNavigation();
-  const beginRunTracking = useStore((state) => state.beginRunTracking);
+  const beginRunTracking = useStore(state => state.beginRunTracking);
+  const dispatch = useDispatch?.();
 
   const [selectedShoeId, setSelectedShoeId] = useState(null);
   const [runType, setRunType] = useState('outdoor');
@@ -37,7 +41,7 @@ const PreRunScreen = () => {
         timeInterval: 1000,
         distanceInterval: 10,
       },
-      (location) => {
+      location => {
         if (location.coords.accuracy < 20) {
           setGpsStatus('good');
         } else {
@@ -68,13 +72,19 @@ const PreRunScreen = () => {
     }
 
     const runData = {
+      id: uuidv4(),
       shoeId: selectedShoeId,
       runType,
       goal,
       audioCuesEnabled,
+      startTime: Date.now(),
+      path: [],
     };
 
     beginRunTracking(runData);
+    if (dispatch) {
+      dispatch(reduxBeginRunTracking(runData));
+    }
     navigation.navigate('ActiveRun');
   };
 
@@ -88,7 +98,10 @@ const PreRunScreen = () => {
       {runType === 'outdoor' && <GPSStatusIndicator gpsStatus={gpsStatus} />}
 
       <GoalInput goal={goal} onGoalChange={setGoal} />
-      <AudioCuesToggle audioCuesEnabled={audioCuesEnabled} onToggleAudioCues={setAudioCuesEnabled} />
+      <AudioCuesToggle
+        audioCuesEnabled={audioCuesEnabled}
+        onToggleAudioCues={setAudioCuesEnabled}
+      />
 
       <View style={styles.startButtonContainer}>
         <Button

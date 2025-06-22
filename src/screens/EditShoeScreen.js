@@ -9,10 +9,8 @@ const EditShoeScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const theme = useTheme();
-  const { getShoeById, updateShoe } = useStore(state => ({
-    getShoeById: state.getShoeById,
-    updateShoe: state.updateShoe,
-  }));
+  const getShoeById = useStore(state => state.getShoeById);
+  const updateShoe = useStore(state => state.updateShoe);
 
   const shoeId = route.params?.shoeId;
   const currentShoe = getShoeById(shoeId);
@@ -24,17 +22,23 @@ const EditShoeScreen = () => {
   const [maxDistance, setMaxDistance] = useState('');
 
   useEffect(() => {
-    if (currentShoe) {
-      setName(currentShoe.name);
-      setBrand(currentShoe.brand || '');
-      setModel(currentShoe.model || '');
-      setPurchaseDate(currentShoe.purchaseDate || new Date().toISOString().split('T')[0]);
-      setMaxDistance(currentShoe.maxDistance ? String(currentShoe.maxDistance) : '');
-    } else {
+    if (!currentShoe) {
       // Handle case where shoe is not found, though this should ideally not happen if navigation is correct
       Alert.alert('Error', 'Shoe not found. Returning to the previous screen.');
       navigation.goBack();
+      return;
     }
+
+    // Only update form fields if they do not already match the current shoe values.
+    if (name !== currentShoe.name) setName(currentShoe.name);
+    if (brand !== (currentShoe.brand || '')) setBrand(currentShoe.brand || '');
+    if (model !== (currentShoe.model || '')) setModel(currentShoe.model || '');
+
+    const purchaseDateValue = currentShoe.purchaseDate || new Date().toISOString().split('T')[0];
+    if (purchaseDate !== purchaseDateValue) setPurchaseDate(purchaseDateValue);
+
+    const maxDistanceValue = currentShoe.maxDistance ? String(currentShoe.maxDistance) : '';
+    if (maxDistance !== maxDistanceValue) setMaxDistance(maxDistanceValue);
   }, [currentShoe, navigation]);
 
   const handleSave = () => {
@@ -170,13 +174,13 @@ const EditShoeScreen = () => {
               title="Cancel"
               onPress={() => navigation.goBack()}
               variant="outline"
-              style={{flex: 1, marginRight: theme.spacing.sm || 8}}
+              style={{ flex: 1, marginRight: theme.spacing.sm || 8 }}
             />
             <Button
               title="Save Changes"
               onPress={handleSave}
               variant="primary"
-              style={{flex: 1, marginLeft: theme.spacing.sm || 8}}
+              style={{ flex: 1, marginLeft: theme.spacing.sm || 8 }}
             />
           </View>
         </View>

@@ -9,14 +9,8 @@ import AddEditShoeScreen from '../screens/AddEditShoeScreen';
 const SimpleTest = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.text}>Simple Test Screen</Text>
-    <Button 
-      title="Go to Home" 
-      onPress={() => navigation.navigate('Home')} 
-    />
-    <Button 
-      title="Go to Shoe List" 
-      onPress={() => navigation.navigate('ShoeList')} 
-    />
+    <Button title="Go to Home" onPress={() => navigation.navigate('Home')} />
+    <Button title="Go to Shoe List" onPress={() => navigation.navigate('ShoeList')} />
   </View>
 );
 
@@ -24,7 +18,7 @@ const Stack = createNativeStackNavigator();
 
 const TestNavigator = () => {
   return (
-    <Stack.Navigator 
+    <Stack.Navigator
       initialRouteName="ShoeList"
       screenOptions={{
         headerStyle: {
@@ -36,15 +30,11 @@ const TestNavigator = () => {
         },
       }}
     >
-      <Stack.Screen 
-        name="ShoeList" 
-        component={ShoeListScreen} 
-        options={{ title: 'My Shoes' }} 
-      />
-      <Stack.Screen 
-        name="AddEditShoe" 
-        component={AddEditShoeScreen} 
-        options={{ title: 'Add Shoe' }} 
+      <Stack.Screen name="ShoeList" component={ShoeListScreen} options={{ title: 'My Shoes' }} />
+      <Stack.Screen
+        name="AddEditShoe"
+        component={AddEditShoeScreen}
+        options={{ title: 'Add Shoe' }}
       />
     </Stack.Navigator>
   );

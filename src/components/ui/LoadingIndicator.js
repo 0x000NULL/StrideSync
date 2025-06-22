@@ -11,14 +11,14 @@ const LoadingIndicator = ({
   textStyle,
 }) => {
   const theme = useTheme();
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: fullScreen ? 1 : undefined,
       justifyContent: 'center',
       alignItems: 'center',
       padding: fullScreen ? theme.spacing.xl : theme.spacing.md,
-      ...(fullScreen && { 
+      ...(fullScreen && {
         position: 'absolute',
         top: 0,
         left: 0,
@@ -39,15 +39,8 @@ const LoadingIndicator = ({
 
   return (
     <View style={[styles.container, style]}>
-      <ActivityIndicator 
-        size={size} 
-        color={color || theme.colors.primary} 
-      />
-      {text && (
-        <Text style={styles.text}>
-          {text}
-        </Text>
-      )}
+      <ActivityIndicator size={size} color={color || theme.colors.primary} />
+      {text && <Text style={styles.text}>{text}</Text>}
     </View>
   );
 };

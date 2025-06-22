@@ -15,7 +15,7 @@ import { useTheme } from '../theme/ThemeProvider';
  */
 const EmptyState = ({ icon, title, message, action }) => {
   const theme = useTheme();
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -58,9 +58,9 @@ const EmptyState = ({ icon, title, message, action }) => {
   return (
     <View style={styles.container}>
       {icon && (
-        <MaterialIcons 
-          name={icon} 
-          size={48} 
+        <MaterialIcons
+          name={icon}
+          size={48}
           color={theme.colors.text.secondary}
           style={styles.icon}
         />
@@ -68,18 +68,9 @@ const EmptyState = ({ icon, title, message, action }) => {
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
       {action && (
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={action.onPress}
-        >
-          <MaterialIcons 
-            name="refresh" 
-            size={20} 
-            color={theme.colors.text.light} 
-          />
-          <Text style={styles.actionButtonText}>
-            {action.label}
-          </Text>
+        <TouchableOpacity style={styles.actionButton} onPress={action.onPress}>
+          <MaterialIcons name="refresh" size={20} color={theme.colors.text.light} />
+          <Text style={styles.actionButtonText}>{action.label}</Text>
         </TouchableOpacity>
       )}
     </View>

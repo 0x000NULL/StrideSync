@@ -11,16 +11,16 @@ Platform.isTesting = true;
 
 // Ensure Platform.select is a robust mock that uses the forced OS.
 const originalSelect = Platform.select;
-Platform.select = jest.fn((specs) => {
+Platform.select = jest.fn(specs => {
   if (Platform.OS === 'ios' && specs.ios !== undefined) {
     return specs.ios;
   }
-  if (Platform.OS === 'android' && specs.android !== undefined) { // Should not hit if OS is 'ios'
+  if (Platform.OS === 'android' && specs.android !== undefined) {
+    // Should not hit if OS is 'ios'
     return specs.android;
   }
   return specs.default;
 });
-
 
 // Mock react-native-get-random-values
 jest.mock('react-native-get-random-values', () => ({
@@ -35,9 +35,9 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 // Mock react-native-maps
 jest.mock('react-native-maps', () => {
   const { View } = require('react-native');
-  const MockMapView = (props) => <View testID="mock-map-view" {...props} />;
-  const MockMarker = (props) => <View testID="mock-map-marker" {...props} />;
-  const MockPolyline = (props) => <View testID="mock-map-polyline" {...props} />;
+  const MockMapView = props => <View testID="mock-map-view" {...props} />;
+  const MockMarker = props => <View testID="mock-map-marker" {...props} />;
+  const MockPolyline = props => <View testID="mock-map-polyline" {...props} />;
   return {
     __esModule: true,
     default: MockMapView,
@@ -51,12 +51,14 @@ jest.mock('react-native-maps', () => {
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
   requestBackgroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
   startLocationUpdatesAsync: jest.fn(() => Promise.resolve()),
   stopLocationUpdatesAsync: jest.fn(() => Promise.resolve()),
   hasStartedLocationUpdatesAsync: jest.fn(() => Promise.resolve(false)), // Added this
   Accuracy: {
     BestForNavigation: 'best', // Ensure this matches usage if any
   },
+  watchPositionAsync: jest.fn(() => Promise.resolve({ remove: jest.fn() })),
   // Add other exports as needed by the app
 }));
 
@@ -101,6 +103,17 @@ jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
   return {
     ...actualNav,
+    useTheme: () => ({
+      colors: {
+        primary: '#007bff',
+        secondary: '#6c757d',
+        background: '#ffffff',
+        text: { primary: '#212529', secondary: '#6c757d', light: '#ffffff', dark: '#212529' },
+        border: '#ced4da',
+        surface: '#f8f9fa',
+        warning: '#ff9800',
+      },
+    }),
     useNavigation: () => ({
       navigate: mockNavigateFn,
       goBack: mockGoBackFn,
@@ -129,23 +142,25 @@ jest.mock('@react-navigation/native', () => {
 });
 
 // Mock react-redux for component tests (not for slice tests)
-const mockReduxDispatchFn = jest.fn((actionOrThunk) => {
+const mockReduxDispatchFn = jest.fn(actionOrThunk => {
   if (typeof actionOrThunk === 'function') {
-    return actionOrThunk(mockReduxDispatchFn, jest.fn(() => ({})), undefined);
+    return actionOrThunk(
+      mockReduxDispatchFn,
+      jest.fn(() => ({})),
+      undefined
+    );
   }
   return actionOrThunk;
 });
 jest.mock('react-redux', () => ({
   // Do not spread jest.requireActual if it causes ESM/CJS issues.
   // Provide only the mocks needed.
-  useSelector: jest.fn((selector) => selector({})),
+  useSelector: jest.fn(selector => selector({})),
   useDispatch: () => mockReduxDispatchFn,
   Provider: jest.fn(({ children }) => children), // Mock Provider if needed
 }));
 
-
 // --- End of Common Mocks ---
-
 
 // If you are using @react-navigation/stack or other navigators,
 // you might need to mock them as well, or parts of them.
@@ -155,7 +170,11 @@ jest.mock('@react-navigation/elements', () => {
   const { View } = require('react-native');
   return {
     ...actualElements,
-    Header: (props) => <View testID="mock-header">{typeof props.headerTitle === 'function' ? props.headerTitle({}) : props.title}</View>,
+    Header: props => (
+      <View testID="mock-header">
+        {typeof props.headerTitle === 'function' ? props.headerTitle({}) : props.title}
+      </View>
+    ),
     // You might need to mock other components from @react-navigation/elements
     // such as HeaderBackButton, etc., if they are used directly or cause issues.
   };
@@ -194,7 +213,7 @@ jest.mock('react-native-gesture-handler', () => {
     BorderlessButton: View,
     /* Other */
     FlatList: View, // Keep actual FlatList if possible, or a more functional mock
-    gestureHandlerRootHOC: (Component) => Component, // Pass through HOC
+    gestureHandlerRootHOC: Component => Component, // Pass through HOC
     // Directions: {}, // Keep actual Directions
   };
 });
@@ -214,7 +233,7 @@ jest.mock('@electric-sql/react', () => ({
 // Mock expo-sqlite
 jest.mock('expo-sqlite', () => ({
   openDatabase: jest.fn(() => ({
-    transaction: jest.fn(async (callback) => {
+    transaction: jest.fn(async callback => {
       const mockTx = {
         executeSql: jest.fn((sql, params, successCallback, errorCallback) => {
           if (successCallback) {
@@ -248,9 +267,13 @@ jest.mock('react-native-safe-area-context', () => {
     // Let's try providing a simple value via a new context, though this might not be what SafeAreaProviderCompat uses.
     // The key is that useSafeAreaInsets and useSafeAreaFrame are mocked.
     // The Provider mock itself is mostly for components that expect <SafeAreaProvider> in the tree.
-    return <ActualSafeAreaContext.SafeAreaProvider initialMetrics={{insets: mockSafeAreaInsets, frame: mockSafeAreaFrame}}>
-      {children}
-    </ActualSafeAreaContext.SafeAreaProvider>;
+    return (
+      <ActualSafeAreaContext.SafeAreaProvider
+        initialMetrics={{ insets: mockSafeAreaInsets, frame: mockSafeAreaFrame }}
+      >
+        {children}
+      </ActualSafeAreaContext.SafeAreaProvider>
+    );
   };
 
   return {
@@ -265,23 +288,27 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaFrame: jest.fn(() => mockSafeAreaFrame),
     // Provide other exports if used, e.g., initialWindowMetrics
     initialWindowMetrics: {
-        insets: mockSafeAreaInsets,
-        frame: mockSafeAreaFrame,
-    }
+      insets: mockSafeAreaInsets,
+      frame: mockSafeAreaFrame,
+    },
   };
 });
 
 // Mock victory-native
 jest.mock('victory-native', () => {
   const { View } = require('react-native');
-  return ({
-    VictoryBar: (props) => <View testID="mock-victory-bar" {...props} />,
-    VictoryChart: (props) => <View testID="mock-victory-chart" {...props}>{props.children}</View>,
-    VictoryLine: (props) => <View testID="mock-victory-line" {...props} />,
-    VictoryPie: (props) => <View testID="mock-victory-pie" {...props} />,
-    VictoryAxis: (props) => <View testID="mock-victory-axis" {...props} />,
+  return {
+    VictoryBar: props => <View testID="mock-victory-bar" {...props} />,
+    VictoryChart: props => (
+      <View testID="mock-victory-chart" {...props}>
+        {props.children}
+      </View>
+    ),
+    VictoryLine: props => <View testID="mock-victory-line" {...props} />,
+    VictoryPie: props => <View testID="mock-victory-pie" {...props} />,
+    VictoryAxis: props => <View testID="mock-victory-axis" {...props} />,
     // Add other Victory components used in your app
-  });
+  };
 });
 
 // Mock react-native-svg
@@ -301,47 +328,57 @@ jest.mock('react-native-svg', () => {
 // Mock @react-native-segmented-control/segmented-control
 jest.mock('@react-native-segmented-control/segmented-control', () => {
   const { View } = require('react-native');
-  return (props) => <View testID="mock-segmented-control" {...props} />;
+  return props => <View testID="mock-segmented-control" {...props} />;
 });
 
 // Mock ThemeProvider's useTheme hook
 jest.mock('./src/theme/ThemeProvider', () => {
-    const actualThemeProvider = jest.requireActual('./src/theme/ThemeProvider');
-    return {
-        ...actualThemeProvider, // Keep original exports like ThemeProvider component itself
-        useTheme: () => ({
-            colors: {
-                primary: '#007bff', // Example primary color
-                secondary: '#6c757d', // Example secondary color
-                background: '#ffffff',
-                text: { primary: '#212529', secondary: '#6c757d', hint: '#adb5bd', light: '#ffffff', dark: '#212529' },
-                border: '#ced4da',
-                surface: '#f8f9fa',
-                card: '#ffffff',
-                error: '#dc3545',
-                success: '#28a745',
-                // Ensure all colors actually used by components are provided
-            },
-            spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-            typography: {
-                h1: { fontSize: 32, fontWeight: 'bold' },
-                h2: { fontSize: 24, fontWeight: 'bold' },
-                h3: { fontSize: 20, fontWeight: 'bold' },
-                body: { fontSize: 16, fontWeight: 'normal' }, // Added fontWeight
-                label: { fontSize: 14, color: '#6c757d' },
-                // Ensure all typography styles used are provided
-            },
-            borderRadius: { sm: 4, md: 8, lg: 12 },
-            // Add any other theme properties used by components under test
-        }),
-    };
+  const actualThemeProvider = jest.requireActual('./src/theme/ThemeProvider');
+  return {
+    ...actualThemeProvider, // Keep original exports like ThemeProvider component itself
+    useTheme: () => ({
+      colors: {
+        primary: '#007bff', // Example primary color
+        secondary: '#6c757d', // Example secondary color
+        background: '#ffffff',
+        text: {
+          primary: '#212529',
+          secondary: '#6c757d',
+          hint: '#adb5bd',
+          light: '#ffffff',
+          dark: '#212529',
+        },
+        border: '#ced4da',
+        surface: '#f8f9fa',
+        card: '#ffffff',
+        error: '#dc3545',
+        success: '#28a745',
+        // Ensure all colors actually used by components are provided
+      },
+      spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+      typography: {
+        h1: { fontSize: 32, fontWeight: 'bold' },
+        h2: { fontSize: 24, fontWeight: 'bold' },
+        h3: { fontSize: 20, fontWeight: 'bold' },
+        body: { fontSize: 16, fontWeight: 'normal' }, // Added fontWeight
+        label: { fontSize: 14, color: '#6c757d' },
+        // Ensure all typography styles used are provided
+      },
+      borderRadius: { sm: 4, md: 8, lg: 12 },
+      // Add any other theme properties used by components under test
+    }),
+  };
 });
 
 // Mock @expo/vector-icons to provide a mock for MaterialIcons
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  const MockMaterialIcons = ({ name, style, testID }) => <Text testID={testID || `icon-${name}`} style={style}>{name}</Text>;
+  const MockMaterialIcons = ({ name, style, testID }) => (
+    <Text testID={testID || `icon-${name}`} style={style}>
+      {name}
+    </Text>
+  );
   MockMaterialIcons.displayName = 'MockMaterialIcons';
   return {
     MaterialIcons: MockMaterialIcons,
@@ -349,7 +386,6 @@ jest.mock('@expo/vector-icons', () => {
     // FontAwesome: jest.fn().mockReturnValue(null),
   };
 });
-
 
 // Global afterEach to clear all mocks
 // This is important to ensure tests are isolated.
@@ -374,3 +410,67 @@ afterEach(() => {
 // afterEach(() => {
 //   jest.clearAllTimers();
 // });
+
+// Mock @react-navigation/native-stack to avoid font errors
+jest.mock('@react-navigation/native-stack', () => {
+  const React = require('react');
+  return {
+    createNativeStackNavigator: jest.fn(() => {
+      const Navigator = ({ children }) => <>{children}</>;
+      const Screen = ({ component: Component, name, children }) => {
+        const navigation = {
+          navigate: mockNavigateFn,
+          goBack: mockGoBackFn,
+          reset: jest.fn(),
+        };
+        if (Component) {
+          const Comp = Component;
+          return <Comp navigation={navigation} />;
+        }
+        return <>{children}</>;
+      };
+      return { Navigator, Screen };
+    }),
+  };
+});
+
+// Robust mock for Zustand store used across multiple screens/tests
+const createMockZustandStore = () => {
+  const state = {
+    currentRun: null,
+    runs: [],
+    beginRunTracking: jest.fn(),
+    pauseRun: jest.fn(),
+    resumeRun: jest.fn(),
+    saveRun: jest.fn(),
+    addLap: jest.fn(),
+  };
+
+  const useStore = jest.fn(selector => {
+    if (typeof selector === 'function') {
+      return selector(state);
+    }
+    return state;
+  });
+
+  useStore.setState = partial => {
+    Object.assign(state, partial);
+  };
+  useStore.getState = () => state;
+  useStore.getInitialState = () => JSON.parse(JSON.stringify(state));
+
+  return { __esModule: true, useStore };
+};
+
+// Conditionally mock useStore: real implementation for tests targeting the store itself
+jest.mock('./src/stores/useStore', () => {
+  const caller = (expect.getState && expect.getState().testPath) || '';
+  if (
+    caller.includes('/tests/stores') ||
+    caller.includes('runStore.test') ||
+    caller.includes('shoeStore.test')
+  ) {
+    return jest.requireActual('./src/stores/useStore');
+  }
+  return createMockZustandStore();
+});

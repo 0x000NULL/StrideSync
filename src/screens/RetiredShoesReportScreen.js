@@ -12,7 +12,7 @@ const RetiredShoesReportScreen = ({ navigation }) => {
   const theme = useTheme();
   const shoes = useStore(state => state.shoes);
   const getShoeStats = useStore(state => state.getShoeStats);
-  
+
   // Filter and sort retired shoes
   const retiredShoes = useMemo(() => {
     return shoes
@@ -38,10 +38,7 @@ const RetiredShoesReportScreen = ({ navigation }) => {
 
     const totalLifespan = retiredShoes.reduce((sum, shoe) => {
       if (!shoe.purchaseDate || !shoe.retirementDate) return sum;
-      const lifespan = differenceInDays(
-        parseISO(shoe.retirementDate),
-        parseISO(shoe.purchaseDate)
-      );
+      const lifespan = differenceInDays(parseISO(shoe.retirementDate), parseISO(shoe.purchaseDate));
       return sum + Math.max(0, lifespan);
     }, 0);
 
@@ -53,26 +50,22 @@ const RetiredShoesReportScreen = ({ navigation }) => {
     };
   }, [retiredShoes, getShoeStats]);
 
-  const handleShoePress = (shoeId) => {
+  const handleShoePress = shoeId => {
     navigation.navigate('ShoeDetail', { shoeId });
   };
 
   const renderShoeItem = ({ item }) => (
-    <ShoeListItem 
-      shoe={item} 
-      onPress={() => handleShoePress(item.id)}
-      showDivider={false}
-    />
+    <ShoeListItem shoe={item} onPress={() => handleShoePress(item.id)} showDivider={false} />
   );
 
   if (retiredShoes.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.emptyContainer}>
-          <MaterialIcons 
-            name="directions-walk" 
-            size={48} 
-            color={theme.colors.textSecondary} 
+          <MaterialIcons
+            name="directions-walk"
+            size={48}
+            color={theme.colors.textSecondary}
             style={styles.emptyIcon}
           />
           <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
@@ -88,40 +81,37 @@ const RetiredShoesReportScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.statsRow}>
-          <StatsCard 
+          <StatsCard
             title="Total Shoes"
             value={stats.totalShoes}
             icon="directions-walk"
             size="small"
           />
-          <StatsCard 
+          <StatsCard
             title="Total Distance"
             value={`${stats.totalDistance.toFixed(0)} km`}
             icon="timeline"
             size="small"
           />
         </View>
-        
+
         <View style={styles.statsRow}>
-          <StatsCard 
+          <StatsCard
             title="Avg. Lifespan"
             value={`${stats.averageLifespan} days`}
             icon="event"
             size="small"
           />
-          <StatsCard 
+          <StatsCard
             title="Avg. Distance"
             value={`${stats.averageDistance} km`}
             icon="trending-up"
             size="small"
           />
         </View>
-        
+
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Retired Shoes ({retiredShoes.length})

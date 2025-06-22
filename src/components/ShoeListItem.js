@@ -5,13 +5,9 @@ import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
 import { formatDistance, formatPace } from '../utils/formatters';
 
-const ShoeListItem = ({ 
-  shoe,
-  onPress,
-  showDivider = true,
-}) => {
+const ShoeListItem = ({ shoe, onPress, showDivider = true }) => {
   const theme = useTheme();
-  const { 
+  const {
     id,
     name,
     brand,
@@ -22,7 +18,7 @@ const ShoeListItem = ({
     imageUrl = null,
     stats = {},
     progress = 0,
-    remainingDistance = null
+    remainingDistance = null,
   } = shoe;
 
   // Calculate status color based on usage percentage
@@ -32,14 +28,14 @@ const ShoeListItem = ({
     if (progress >= 70) return theme.colors.warning;
     return theme.colors.success;
   }, [progress, isActive, theme]);
-  
+
   const statusText = useMemo(() => {
     if (!isActive) return 'Retired';
     if (progress >= 90) return 'Replace Soon';
     if (progress >= 70) return 'Monitor';
     return 'Good';
   }, [progress, isActive]);
-  
+
   const statusDescription = useMemo(() => {
     if (!isActive) {
       if (shoe.retirementDate) {
@@ -55,10 +51,10 @@ const ShoeListItem = ({
   // Format dates
   const formattedPurchaseDate = useMemo(() => {
     if (!purchaseDate) return '--';
-    return new Date(purchaseDate).toLocaleDateString('en-US', { 
-      year: 'numeric', 
+    return new Date(purchaseDate).toLocaleDateString('en-US', {
+      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }, [purchaseDate]);
 
@@ -67,7 +63,7 @@ const ShoeListItem = ({
     const date = new Date(stats.lastRun);
     const now = new Date();
     const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
@@ -134,9 +130,7 @@ const ShoeListItem = ({
       paddingHorizontal: theme.spacing.sm,
       paddingVertical: 2,
       borderRadius: 12,
-      backgroundColor: isActive 
-        ? `${statusColor}20` 
-        : `${theme.colors.text.secondary}20`,
+      backgroundColor: isActive ? `${statusColor}20` : `${theme.colors.text.secondary}20`,
       minWidth: 80,
       justifyContent: 'center',
     },
@@ -233,7 +227,7 @@ const ShoeListItem = ({
     },
   });
 
-  const handleQuickReactivate = (e) => {
+  const handleQuickReactivate = e => {
     e.stopPropagation(); // Prevent triggering the parent onPress
     // Assuming we have access to the store's reactivateShoe function
     const { reactivateShoe } = useStore.getState();
@@ -242,28 +236,20 @@ const ShoeListItem = ({
 
   return (
     <Card style={styles.container}>
-      <TouchableOpacity 
-        style={styles.touchable}
-        onPress={onPress}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity style={styles.touchable} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.content}>
           <View style={styles.imageContainer}>
             {imageUrl ? (
-              <Image 
-                source={{ uri: imageUrl }} 
-                style={styles.image} 
-                resizeMode="contain"
-              />
+              <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="contain" />
             ) : (
-              <MaterialCommunityIcons 
-                name="shoe-sneaker" 
-                size={40} 
-                style={styles.placeholderIcon} 
+              <MaterialCommunityIcons
+                name="shoe-sneaker"
+                size={40}
+                style={styles.placeholderIcon}
               />
             )}
           </View>
-          
+
           <View style={styles.details}>
             <View style={styles.header}>
               <View style={styles.headerContent}>
@@ -272,19 +258,15 @@ const ShoeListItem = ({
                   <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>{brand}</Text>
                 </View>
                 {!isActive && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[
                       styles.reactivateButton,
-                      { backgroundColor: `${theme.colors.primary}15` }
+                      { backgroundColor: `${theme.colors.primary}15` },
                     ]}
                     onPress={handleQuickReactivate}
                     activeOpacity={0.7}
                   >
-                    <MaterialIcons 
-                      name="refresh" 
-                      size={16} 
-                      color={theme.colors.primary} 
-                    />
+                    <MaterialIcons name="refresh" size={16} color={theme.colors.primary} />
                     <Text style={[styles.reactivateText, { color: theme.colors.primary }]}>
                       Reactivate
                     </Text>
@@ -292,7 +274,7 @@ const ShoeListItem = ({
                 )}
               </View>
             </View>
-            
+
             <View style={styles.header}>
               <View style={styles.nameContainer}>
                 <Text style={styles.name} numberOfLines={1}>
@@ -302,36 +284,30 @@ const ShoeListItem = ({
                   {brand} {model && `• ${model}`}
                 </Text>
               </View>
-              
+
               <View style={styles.statusBadge}>
                 <View style={styles.statusDot} />
                 <View>
-                  <Text style={styles.statusText}>
-                    {statusText}
-                  </Text>
-                  <Text style={styles.statusDescription}>
-                    {statusDescription}
-                  </Text>
+                  <Text style={styles.statusText}>{statusText}</Text>
+                  <Text style={styles.statusDescription}>{statusDescription}</Text>
                 </View>
               </View>
             </View>
-            
+
             {/* Stats Row */}
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>
-                  {stats.totalRuns || '0'}
-                </Text>
+                <Text style={styles.statValue}>{stats.totalRuns || '0'}</Text>
                 <Text style={styles.statLabel}>Runs</Text>
               </View>
-              
+
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {stats.totalDistance ? formatDistance(stats.totalDistance) : '--'}
                 </Text>
                 <Text style={styles.statLabel}>Total</Text>
               </View>
-              
+
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
                   {stats.averagePace ? formatPace(stats.averagePace) : '--'}
@@ -339,12 +315,13 @@ const ShoeListItem = ({
                 <Text style={styles.statLabel}>Avg. Pace</Text>
               </View>
             </View>
-            
+
             {/* Progress Bar */}
             <View style={styles.progressContainer}>
               <View style={styles.progressHeader}>
                 <Text style={styles.distance}>
-                  {formatDistance(stats.totalDistance || 0)} of {maxDistance ? `${maxDistance} km` : '∞'}
+                  {formatDistance(stats.totalDistance || 0)} of{' '}
+                  {maxDistance ? `${maxDistance} km` : '∞'}
                 </Text>
                 <Text style={[styles.distance, { color: statusColor }]}>
                   {Math.round(progress)}%
@@ -353,22 +330,20 @@ const ShoeListItem = ({
               <View style={styles.progressBar}>
                 <View style={styles.progressFill} />
               </View>
-              
-              <Text style={styles.lastRun}>
-                Last run: {lastRunDate}
-              </Text>
+
+              <Text style={styles.lastRun}>Last run: {lastRunDate}</Text>
             </View>
           </View>
-          
-          <MaterialIcons 
-            name="chevron-right" 
-            size={24} 
+
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
             color={theme.colors.text.secondary}
             style={styles.rightIcon}
           />
         </View>
       </TouchableOpacity>
-      
+
       {showDivider && <View style={styles.divider} />}
     </Card>
   );

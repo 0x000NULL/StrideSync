@@ -9,20 +9,18 @@ import Button from '../components/ui/Button';
 import RunMapView from '../components/run_tracking/RunMapView';
 
 // Helper to format duration (seconds) to HH:MM:SS or MM:SS
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   if (!seconds) return '0:00';
   const hrs = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
   if (hrs > 0) {
-    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}`;
+    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-const getStyles = (theme) =>
+const getStyles = theme =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -78,10 +76,8 @@ const getStyles = (theme) =>
 const RunDetailScreen = ({ route }) => {
   const { runId } = route.params || {};
   const navigation = useNavigation();
-  const { getRunById, deleteRun } = useStore((state) => ({
-    getRunById: state.getRunById,
-    deleteRun: state.deleteRun,
-  }));
+  const getRunById = useStore(state => state.getRunById);
+  const deleteRun = useStore(state => state.deleteRun);
   const run = getRunById ? getRunById(runId) : null;
   const theme = useTheme();
   const styles = getStyles(theme);
@@ -200,4 +196,4 @@ const RunDetailScreen = ({ route }) => {
   );
 };
 
-export default RunDetailScreen; 
+export default RunDetailScreen;

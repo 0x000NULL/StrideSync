@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card } from '../ui/Card';
+import Card from '../ui/Card';
 import Input from '../ui/Input';
 import Button from '../ui/Button'; // Assuming a segmented control or button group for type
 
@@ -11,7 +11,7 @@ const GoalInput = ({ goal, onGoalChange }) => {
     <Card style={styles.card}>
       <Text style={styles.label}>Goal</Text>
       <View style={styles.typeSelector}>
-        {goalTypes.map((type) => (
+        {goalTypes.map(type => (
           <Button
             key={type}
             title={type.charAt(0).toUpperCase() + type.slice(1)}
@@ -21,16 +21,27 @@ const GoalInput = ({ goal, onGoalChange }) => {
           />
         ))}
       </View>
-      {goal.type !== 'open' && (
-        <Input
-          label={goal.type === 'distance' ? 'Distance (km)' : 'Time (minutes)'}
-          placeholder="Enter value"
-          value={goal.value}
-          onChangeText={(text) => onGoalChange({ ...goal, value: text })}
-          keyboardType="numeric"
-          containerStyle={styles.inputContainer}
-        />
-      )}
+      <Input
+        label={
+          goal.type === 'distance'
+            ? 'Distance (km)'
+            : goal.type === 'time'
+              ? 'Time (minutes)'
+              : 'Goal Value'
+        }
+        placeholder={
+          goal.type === 'distance'
+            ? 'Distance (km)'
+            : goal.type === 'time'
+              ? 'Time (minutes)'
+              : 'Type (e.g., distance, time)'
+        }
+        value={goal.value}
+        onChangeText={text => onGoalChange({ ...goal, value: text })}
+        keyboardType="numeric"
+        containerStyle={styles.inputContainer}
+        editable={goal.type !== 'open'}
+      />
     </Card>
   );
 };
@@ -60,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GoalInput; 
+export default GoalInput;

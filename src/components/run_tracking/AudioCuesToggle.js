@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
-import { Card } from '../ui/Card';
+import Card from '../ui/Card';
 
 const AudioCuesToggle = ({ audioCuesEnabled, onToggleAudioCues }) => {
   return (
@@ -35,4 +35,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AudioCuesToggle; 
+export default AudioCuesToggle;

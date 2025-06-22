@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { resumeRun, cancelActiveRun, updateRun } from '../../stores/run_tracking/runSlice'; // Assuming cancelActiveRun handles discard
 
 // Helper to format duration (seconds to HH:MM:SS) - Duplicated from ActiveRunScreen, consider moving to utils
-const formatDuration = (totalSeconds) => {
+const formatDuration = totalSeconds => {
   if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -63,7 +63,7 @@ const PauseScreen = ({ navigation }) => {
 
   const pace = useMemo(() => {
     if (distance > 0 && duration > 0) {
-      return (duration / 60) / distance; // min/km
+      return duration / 60 / distance; // min/km
     }
     return 0;
   }, [distance, duration]);
@@ -85,45 +85,46 @@ const PauseScreen = ({ navigation }) => {
 
   const handleDiscardRun = () => {
     Alert.alert(
-      "Discard Run",
-      "Are you sure you want to discard this run? All progress will be lost.",
+      'Discard Run',
+      'Are you sure you want to discard this run? All progress will be lost.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Discard",
+          text: 'Discard',
           onPress: () => {
             dispatch(cancelActiveRun()); // This thunk should handle unregistering tasks and then discardRun
             navigation.navigate('RunFlowNavigator', { screen: 'PreRun' }); // Navigate to a neutral screen
           },
-          style: "destructive"
+          style: 'destructive',
         },
       ]
     );
   };
 
   if (runStatus !== 'paused' && runStatus !== 'complete') {
-     // If the run is no longer paused (e.g., discarded from elsewhere, or resumed and quickly paused then stopped)
-     // it might be better to redirect.
-     useEffect(() => {
-        if (runStatus !== 'paused' && runStatus !== 'complete') {
-            console.log(`PauseScreen: Run status is ${runStatus}, navigating away.`);
-            navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
-        }
-     }, [runStatus, navigation]);
+    // If the run is no longer paused (e.g., discarded from elsewhere, or resumed and quickly paused then stopped)
+    // it might be better to redirect.
+    useEffect(() => {
+      if (runStatus !== 'paused' && runStatus !== 'complete') {
+        console.log(`PauseScreen: Run status is ${runStatus}, navigating away.`);
+        navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
+      }
+    }, [runStatus, navigation]);
 
-     return (
-        <View style={styles.container}><Text>Run is not paused. Redirecting...</Text></View>
-     );
+    return (
+      <View style={styles.container}>
+        <Text>Run is not paused. Redirecting...</Text>
+      </View>
+    );
   }
-
 
   if (!currentRun) {
     // This case should ideally not be reached if navigation is managed properly
     // (i.e., only navigate to PauseScreen if there's a pausable currentRun)
     useEffect(() => {
-        if (!currentRun) {
-            navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
-        }
+      if (!currentRun) {
+        navigation.navigate('RunFlowNavigator', { screen: 'PreRun' });
+      }
     }, [currentRun, navigation]);
     return (
       <View style={styles.container}>
@@ -131,7 +132,6 @@ const PauseScreen = ({ navigation }) => {
       </View>
     );
   }
-
 
   return (
     <ScrollView style={styles.container}>
@@ -142,7 +142,7 @@ const PauseScreen = ({ navigation }) => {
         onSave={handleSaveRun}
         onDiscard={handleDiscardRun}
       />
-       <View style={styles.debugInfo}>
+      <View style={styles.debugInfo}>
         <Text>Run Status: {runStatus}</Text>
         <Text>Run ID: {currentRun?.id}</Text>
         <Text>Stored Notes: {currentRun?.notes}</Text>
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     backgroundColor: '#eee',
     borderRadius: 5,
-  }
+  },
 });
 
 export default PauseScreen;

@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WeatherSelector; 
+export default WeatherSelector;

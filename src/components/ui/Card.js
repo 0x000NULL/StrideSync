@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 
 const Card = ({ children, onPress, style }) => {
   const theme = useTheme();
-  
+
   const cardStyles = StyleSheet.create({
     container: {
       backgroundColor: theme.colors.surface,
@@ -25,23 +25,13 @@ const Card = ({ children, onPress, style }) => {
 
   if (onPress) {
     return (
-      <TouchableOpacity 
-        onPress={onPress} 
-        style={[cardStyles.pressable, style]}
-        activeOpacity={0.7}
-      >
-        <View style={cardStyles.container}>
-          {children}
-        </View>
+      <TouchableOpacity onPress={onPress} style={[cardStyles.pressable, style]} activeOpacity={0.7}>
+        <View style={cardStyles.container}>{children}</View>
       </TouchableOpacity>
     );
   }
 
-  return (
-    <View style={[cardStyles.container, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[cardStyles.container, style]}>{children}</View>;
 };
 
 export default Card;

@@ -13,7 +13,7 @@ const Stack = createStackNavigator();
 
 const RunFlowNavigator = () => {
   const theme = useTheme();
-  
+
   const screenOptions = {
     headerStyle: {
       backgroundColor: theme.colors.background,
@@ -29,51 +29,48 @@ const RunFlowNavigator = () => {
   };
 
   return (
-    <Stack.Navigator 
-      screenOptions={screenOptions}
-      initialRouteName="PreRun"
-    >
-      <Stack.Screen 
-        name="PreRun" 
-        component={PreRunScreen} 
-        options={{ 
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName="PreRun">
+      <Stack.Screen
+        name="PreRun"
+        component={PreRunScreen}
+        options={{
           title: 'New Run',
           headerShown: false,
-        }} 
+        }}
       />
-      <Stack.Screen 
-        name="ActiveRun" 
-        component={ActiveRunScreen} 
-        options={{ 
+      <Stack.Screen
+        name="ActiveRun"
+        component={ActiveRunScreen}
+        options={{
           title: 'Run in Progress',
           headerShown: true,
           headerLeft: null, // Prevent going back to PreRun screen
           gestureEnabled: false, // Prevent swipe back
-        }} 
+        }}
       />
-      <Stack.Screen 
-        name="Pause" 
-        component={PauseScreen} 
-        options={{ 
+      <Stack.Screen
+        name="Pause"
+        component={PauseScreen}
+        options={{
           title: 'Run Paused',
           headerShown: true,
-        }} 
+        }}
       />
-      <Stack.Screen 
-        name="RunSummary" 
-        component={RunSummaryScreen} 
-        options={{ 
+      <Stack.Screen
+        name="RunSummary"
+        component={RunSummaryScreen}
+        options={{
           title: 'Run Summary',
           headerShown: true,
-        }} 
+        }}
       />
-      <Stack.Screen 
-        name="SaveRun" 
-        component={SaveRunScreen} 
-        options={{ 
+      <Stack.Screen
+        name="SaveRun"
+        component={SaveRunScreen}
+        options={{
           title: 'Save Run',
           headerShown: true,
-        }} 
+        }}
       />
     </Stack.Navigator>
   );

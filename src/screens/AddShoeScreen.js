@@ -144,13 +144,13 @@ const AddShoeScreen = () => {
               title="Cancel"
               onPress={() => navigation.goBack()}
               variant="outline"
-              style={{flex: 1, marginRight: theme.spacing.sm || 8}}
+              style={{ flex: 1, marginRight: theme.spacing.sm || 8 }}
             />
             <Button
               title="Save Shoe"
               onPress={handleSave}
               variant="primary"
-              style={{flex: 1, marginLeft: theme.spacing.sm || 8}}
+              style={{ flex: 1, marginLeft: theme.spacing.sm || 8 }}
             />
           </View>
         </View>

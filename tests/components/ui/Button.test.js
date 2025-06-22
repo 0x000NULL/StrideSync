@@ -88,16 +88,12 @@ describe('Button Component', () => {
     });
 
     it('renders small size correctly', () => {
-      const { getByText } = render(
-        <Button title="Small" onPress={mockOnPress} size="small" />
-      );
+      const { getByText } = render(<Button title="Small" onPress={mockOnPress} size="small" />);
       expect(getByText('Small')).toBeTruthy();
     });
 
     it('renders large size correctly', () => {
-      const { getByText } = render(
-        <Button title="Large" onPress={mockOnPress} size="large" />
-      );
+      const { getByText } = render(<Button title="Large" onPress={mockOnPress} size="large" />);
       expect(getByText('Large')).toBeTruthy();
     });
   });
@@ -140,11 +136,15 @@ describe('Button Component', () => {
 
     it('renders a custom React element as icon', () => {
       const { Text } = require('react-native');
-      const CustomIconComponent = (props) => <Text testID="custom-icon-actual">{props.name}</Text>;
-      CustomIconComponent.displayName = "CustomIcon";
+      const CustomIconComponent = props => <Text testID="custom-icon-actual">{props.name}</Text>;
+      CustomIconComponent.displayName = 'CustomIcon';
 
       const { getByTestId, getByText } = render(
-        <Button title="Custom Icon" onPress={mockOnPress} icon={<CustomIconComponent name="star" />} />
+        <Button
+          title="Custom Icon"
+          onPress={mockOnPress}
+          icon={<CustomIconComponent name="star" />}
+        />
       );
       expect(getByText('Custom Icon')).toBeTruthy();
       const customIconRendered = getByTestId('custom-icon-actual');
@@ -155,9 +155,7 @@ describe('Button Component', () => {
 
   it('applies fullWidth style when fullWidth is true', () => {
     const testID = `button-full-width`; // Assuming title is "Full Width"
-    const { getByTestId } = render(
-        <Button title="Full Width" onPress={mockOnPress} fullWidth />
-    );
+    const { getByTestId } = render(<Button title="Full Width" onPress={mockOnPress} fullWidth />);
     const button = getByTestId(testID);
     // Check for style.alignSelf might be too brittle.
     // We trust the component applies it if fullWidth is true.
@@ -169,12 +167,16 @@ describe('Button Component', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     render(<Button onPress={mockOnPress} title={undefined} />); // title is undefined
-    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('[Button] Button is missing required prop: title'));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[Button] Button is missing required prop: title')
+    );
 
     consoleErrorSpy.mockClear();
 
     render(<Button title="Test" onPress={undefined} />); // onPress is undefined
-    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('[Button] Button is missing required prop: onPress'));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[Button] Button is missing required prop: onPress')
+    );
 
     consoleErrorSpy.mockRestore();
   });

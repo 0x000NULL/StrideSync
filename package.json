@@ -1,6 +1,6 @@
 {
   "name": "StrideSync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -8,7 +8,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write \"**/*.{js,jsx,json}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,json}\"",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix"
   },
   "dependencies": {
     "@electric-sql/react": "^1.0.4",
@@ -23,7 +27,9 @@
     "date-fns": "^4.1.0",
     "expo": "~53.0.12",
     "expo-dev-client": "~5.2.1",
+    "expo-document-picker": "~13.1.6",
     "expo-location": "~18.1.5",
+    "expo-sharing": "~13.1.5",
     "expo-sqlite": "~15.2.12",
     "expo-status-bar": "~2.2.3",
     "expo-task-manager": "~13.1.5",
@@ -48,11 +54,20 @@
   },
   "devDependencies": {
     "@babel/core": "^7.27.4",
+    "@babel/eslint-parser": "^7.27.5",
     "@react-native-community/cli": "^18.0.0",
+    "@react-native-community/eslint-config": "^3.2.0",
     "@testing-library/react-native": "^13.2.0",
     "@types/jest": "^30.0.0",
+    "babel-preset-expo": "^13.2.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-native": "^5.0.0",
     "jest": "~29.7.0",
     "jest-expo": "~53.0.7",
+    "prettier": "^3.5.3",
     "react-test-renderer": "^19.0.0"
   },
   "private": true

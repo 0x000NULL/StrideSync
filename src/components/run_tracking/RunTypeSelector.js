@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card } from '../ui/Card';
+import Card from '../ui/Card';
 import Button from '../ui/Button';
 
 const RunTypeSelector = ({ runType, onSelectRunType }) => {
@@ -46,4 +46,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RunTypeSelector; 
+export default RunTypeSelector;

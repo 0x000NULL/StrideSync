@@ -1,0 +1,41 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '19.0.0'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: |
+          # Run ESLint and capture output
+          eslint_output=$(npx eslint . --ext .js,.jsx --format=stylish)
+          echo "$eslint_output"
+          
+          # Check if there are any errors (not just warnings)
+          if echo "$eslint_output" | grep -q "error"; then
+            echo "ESLint found errors. Please fix them before merging."
+            exit 1
+          fi
+          
+          # Print warning summary but don't fail
+          warnings=$(echo "$eslint_output" | grep -o "[0-9]* warnings" | head -1)
+          echo "ESLint found $warnings but no errors. Proceeding with the build."
+        
+      - name: Run Prettier Check
+        run: npx prettier --check "src/**/*.{js,jsx,json}" || echo "Prettier found formatting issues. Run 'npm run format' to fix." 

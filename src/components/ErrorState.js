@@ -12,15 +12,15 @@ import { useTheme } from '../theme/ThemeProvider';
  * @param {string} [props.actionLabel] - Label for the retry action button
  * @param {Function} [props.onRetry] - Function to call when retry is pressed
  */
-const ErrorState = ({ 
-  icon = 'error-outline', 
-  title = 'Something went wrong', 
-  message = 'We couldn\'t load the data. Please try again.',
+const ErrorState = ({
+  icon = 'error-outline',
+  title = 'Something went wrong',
+  message = "We couldn't load the data. Please try again.",
   actionLabel = 'Try Again',
-  onRetry 
+  onRetry,
 }) => {
   const theme = useTheme();
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -64,27 +64,13 @@ const ErrorState = ({
 
   return (
     <View style={styles.container}>
-      <MaterialIcons 
-        name={icon} 
-        size={48} 
-        color={theme.colors.error}
-        style={styles.icon}
-      />
+      <MaterialIcons name={icon} size={48} color={theme.colors.error} style={styles.icon} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{errorMessage}</Text>
       {onRetry && (
-        <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={onRetry}
-        >
-          <MaterialIcons 
-            name="refresh" 
-            size={20} 
-            color={theme.colors.text.light} 
-          />
-          <Text style={styles.retryButtonText}>
-            {actionLabel}
-          </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+          <MaterialIcons name="refresh" size={20} color={theme.colors.text.light} />
+          <Text style={styles.retryButtonText}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>

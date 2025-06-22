@@ -10,9 +10,9 @@ import * as DocumentPicker from 'expo-document-picker';
  * @param {Function} config - Zustand store config.
  * @returns {Function}
  */
-export const validationMiddleware = (config) => (set, get, api) => {
+export const validationMiddleware = config => (set, get, api) => {
   return config(
-    (args) => {
+    args => {
       // You can add validation logic here before setting the state.
       // For example, check if `args.runs` is an array.
       console.log('State is about to be updated:', args);
@@ -29,14 +29,14 @@ export const validationMiddleware = (config) => (set, get, api) => {
  * @param {object} migrations - An object where keys are version numbers and values are migration functions.
  * @returns {Function}
  */
-export const createMigrate = (migrations) => {
+export const createMigrate = migrations => {
   return (persistedState, version) => {
     if (!persistedState) {
       return;
     }
 
     const migrationKeys = Object.keys(migrations)
-      .map((v) => parseInt(v, 10))
+      .map(v => parseInt(v, 10))
       .sort((a, b) => a - b);
 
     let state = persistedState;
@@ -71,10 +71,7 @@ export const createBackupSlice = (set, get) => ({
           dialogTitle: 'Share or save your StrideSync backup',
         });
       } else {
-        Alert.alert(
-          'Backup Saved',
-          `Your backup has been saved to: ${fileUri}`
-        );
+        Alert.alert('Backup Saved', `Your backup has been saved to: ${fileUri}`);
       }
     } catch (error) {
       console.error('Failed to backup state:', error);
@@ -104,10 +101,7 @@ export const createBackupSlice = (set, get) => ({
               text: 'Restore',
               onPress: () => {
                 set(restoredState);
-                Alert.alert(
-                  'Restore Complete',
-                  'Your data has been successfully restored.'
-                );
+                Alert.alert('Restore Complete', 'Your data has been successfully restored.');
               },
               style: 'destructive',
             },
@@ -119,4 +113,4 @@ export const createBackupSlice = (set, get) => ({
       Alert.alert('Restore Failed', 'Could not read the backup file.');
     }
   },
-}); 
+});

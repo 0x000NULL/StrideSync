@@ -1,14 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  RefreshControl, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
   ActivityIndicator,
   SectionList,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -31,26 +31,22 @@ const ShoeListScreen = ({ navigation }) => {
   const getShoesWithStats = useStore(state => state.getShoesWithStats);
   const getShoesNeedingReplacement = useStore(state => state.getShoesNeedingReplacement);
   const getShoesByActivity = useStore(state => state.getShoesByActivity);
-  
+
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('active'); // 'all', 'active', 'retired', 'needsReplacement'
   const [sortBy, setSortBy] = useState('recent');
   const [showFilterModal, setShowFilterModal] = useState(false);
-  
+
   // Load shoes on focus
   // Set up header right button
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => navigation.navigate('RetiredShoesReport')}
           style={{ marginRight: 16 }}
         >
-          <MaterialIcons 
-            name="history" 
-            size={24} 
-            color={theme.colors.primary} 
-          />
+          <MaterialIcons name="history" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
       ),
     });
@@ -74,7 +70,7 @@ const ShoeListScreen = ({ navigation }) => {
   const filteredShoes = React.useMemo(() => {
     // Get shoes with their stats
     const shoesWithStats = getShoesWithStats();
-    
+
     // Apply filters
     let result = [];
     switch (filter) {
@@ -90,7 +86,7 @@ const ShoeListScreen = ({ navigation }) => {
       default:
         result = [...shoesWithStats];
     }
-    
+
     // Apply sorting
     return [...result].sort((a, b) => {
       switch (sortBy) {
@@ -119,12 +115,13 @@ const ShoeListScreen = ({ navigation }) => {
 
   const stats = React.useMemo(() => {
     const activeShoes = getShoesWithStats().filter(shoe => shoe.isActive);
-    const totalDistance = activeShoes.reduce((sum, shoe) => sum + (shoe.stats?.totalDistance || 0), 0);
+    const totalDistance = activeShoes.reduce(
+      (sum, shoe) => sum + (shoe.stats?.totalDistance || 0),
+      0
+    );
     const totalRuns = activeShoes.reduce((sum, shoe) => sum + (shoe.stats?.totalRuns || 0), 0);
-    const averageDistance = activeShoes.length > 0 
-      ? totalDistance / activeShoes.length 
-      : 0;
-    
+    const averageDistance = activeShoes.length > 0 ? totalDistance / activeShoes.length : 0;
+
     return {
       totalShoes: activeShoes.length,
       totalDistance,
@@ -134,39 +131,37 @@ const ShoeListScreen = ({ navigation }) => {
     };
   }, [shoes]);
 
-  const renderShoeItem = useCallback(({ item }) => (
-    <ShoeListItem 
-      shoe={item} 
-      onPress={() => navigation.navigate('ShoeDetail', { shoeId: item.id })}
-      showDivider={true}
-    />
-  ), [navigation]);
+  const renderShoeItem = useCallback(
+    ({ item }) => (
+      <ShoeListItem
+        shoe={item}
+        onPress={() => navigation.navigate('ShoeDetail', { shoeId: item.id })}
+        showDivider={true}
+      />
+    ),
+    [navigation]
+  );
 
   const renderEmptyState = () => {
     if (loading) {
       return <LoadingSkeleton count={3} />;
     }
-    
+
     if (error) {
-      return (
-        <ErrorState 
-          message="Failed to load shoes" 
-          onRetry={loadShoes} 
-        />
-      );
+      return <ErrorState message="Failed to load shoes" onRetry={loadShoes} />;
     }
-    
+
     // Check if we have shoes but they're all filtered out
     const hasShoes = shoes.length > 0;
     const hasActiveShoes = hasShoes && shoes.some(s => s.isActive);
     const hasRetiredShoes = hasShoes && shoes.some(s => !s.isActive);
-    
+
     let title = 'No shoes found';
     let message = 'Add your first pair of running shoes to get started';
     let showAction = true;
     let actionLabel = 'Add Shoe';
     let actionOnPress = () => navigation.navigate('AddShoe');
-    
+
     if (filter === 'retired') {
       title = 'No retired shoes';
       if (hasShoes && !hasRetiredShoes) {
@@ -179,8 +174,8 @@ const ShoeListScreen = ({ navigation }) => {
       }
     } else if (filter === 'needsReplacement') {
       title = 'No shoes need replacement';
-      message = hasActiveShoes 
-        ? 'All your active shoes are in good condition' 
+      message = hasActiveShoes
+        ? 'All your active shoes are in good condition'
         : 'No active shoes to monitor';
       showAction = !hasActiveShoes;
     } else if (filter === 'active') {
@@ -193,20 +188,24 @@ const ShoeListScreen = ({ navigation }) => {
         message = 'Track your running shoes to monitor their usage and condition';
       }
     }
-    
+
     return (
       <EmptyState
         icon={
-          filter === 'retired' ? 'history' : 
-          filter === 'needsReplacement' ? 'warning' : 
-          'directions-walk'
+          filter === 'retired'
+            ? 'history'
+            : filter === 'needsReplacement'
+              ? 'warning'
+              : 'directions-walk'
         }
         title={title}
         message={message}
-        action={showAction && {
-          label: actionLabel,
-          onPress: actionOnPress,
-        }}
+        action={
+          showAction && {
+            label: actionLabel,
+            onPress: actionOnPress,
+          }
+        }
       />
     );
   };
@@ -304,7 +303,7 @@ const ShoeListScreen = ({ navigation }) => {
         { value: 'purchaseDate', label: 'Purchase Date' },
         { value: 'status', label: 'Status' },
       ]}
-      onApplyFilters={(filters) => {
+      onApplyFilters={filters => {
         setFilter(filters.status);
         setSortBy(filters.sortBy);
         setShowFilterModal(false);
@@ -318,57 +317,46 @@ const ShoeListScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.title}>My Shoes</Text>
           <View style={styles.actions}>
-            <TouchableOpacity 
-              style={styles.filterButton}
-              onPress={() => setShowFilterModal(true)}
-            >
-              <MaterialIcons 
-                name="filter-list" 
-                size={24} 
-                color={theme.colors.primary} 
-              />
+            <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
+              <MaterialIcons name="filter-list" size={24} color={theme.colors.primary} />
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addButton}
               onPress={() => navigation.navigate('AddShoe')}
             >
-              <MaterialIcons 
-                name="add" 
-                size={20} 
-                color={theme.colors.text.light} 
-              />
+              <MaterialIcons name="add" size={20} color={theme.colors.text.light} />
               <Text style={styles.buttonText}>Add</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Stats Cards */}
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.statsContainer}
           contentContainerStyle={{ gap: theme.spacing.md }}
         >
-          <StatsCard 
+          <StatsCard
             title="Total Distance"
             value={`${stats.totalDistance.toFixed(1)} km`}
             icon="directions-run"
             color={theme.colors.primary}
           />
-          <StatsCard 
+          <StatsCard
             title="Total Runs"
             value={stats.totalRuns.toString()}
             icon="replay"
             color={theme.colors.secondary}
           />
-          <StatsCard 
+          <StatsCard
             title="Shoes Active"
             value={stats.totalShoes.toString()}
             icon="check-circle-outline"
             color={theme.colors.success}
           />
           {stats.shoesNeedingReplacement > 0 && (
-            <StatsCard 
+            <StatsCard
               title="Needs Replacement"
               value={stats.shoesNeedingReplacement.toString()}
               icon="warning-amber"
@@ -378,8 +366,8 @@ const ShoeListScreen = ({ navigation }) => {
         </ScrollView>
 
         {/* Filter Chips */}
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterChips}
           contentContainerStyle={{ paddingRight: theme.spacing.md }}
@@ -387,27 +375,22 @@ const ShoeListScreen = ({ navigation }) => {
           {['all', 'active', 'retired', 'needsReplacement'].map(option => (
             <TouchableOpacity
               key={option}
-              style={[
-                styles.filterChip,
-                filter === option && styles.filterChipActive
-              ]}
+              style={[styles.filterChip, filter === option && styles.filterChipActive]}
               onPress={() => setFilter(option)}
             >
-              <Text style={[
-                styles.filterChipText,
-                filter === option && styles.filterChipTextActive
-              ]}>
-                {option === 'all' ? 'All Shoes' : 
-                 option === 'active' ? 'Active' : 
-                 option === 'retired' ? 'Retired' : 
-                 'Needs Replacement'}
+              <Text
+                style={[styles.filterChipText, filter === option && styles.filterChipTextActive]}
+              >
+                {option === 'all'
+                  ? 'All Shoes'
+                  : option === 'active'
+                    ? 'Active'
+                    : option === 'retired'
+                      ? 'Retired'
+                      : 'Needs Replacement'}
               </Text>
               {filter === option && (
-                <MaterialIcons 
-                  name="close" 
-                  size={16} 
-                  color={theme.colors.primary} 
-                />
+                <MaterialIcons name="close" size={16} color={theme.colors.primary} />
               )}
             </TouchableOpacity>
           ))}

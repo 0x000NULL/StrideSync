@@ -4,18 +4,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import Card from './ui/Card';
 
-const RunListItem = ({ 
-  id,
-  date,
-  distance,
-  duration,
-  pace,
-  onPress,
-  showDivider = true
-}) => {
+const RunListItem = ({ id, date, distance, duration, pace, onPress, showDivider = true }) => {
   const theme = useTheme();
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     const dateObj = new Date(dateString);
     const today = new Date();
     const yesterday = new Date(today);
@@ -26,15 +18,15 @@ const RunListItem = ({
     } else if (dateObj.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     } else {
-      return dateObj.toLocaleDateString('en-US', { 
-        month: 'short', 
+      return dateObj.toLocaleDateString('en-US', {
+        month: 'short',
         day: 'numeric',
-        year: dateObj.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+        year: dateObj.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
       });
     }
   };
 
-  const formatDuration = (seconds) => {
+  const formatDuration = seconds => {
     if (!seconds) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -104,50 +96,28 @@ const RunListItem = ({
 
   return (
     <Card style={styles.container}>
-      <TouchableOpacity 
-        style={styles.touchable}
-        onPress={onPress}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity style={styles.touchable} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.content}>
           <View style={styles.leftSection}>
-            <Text style={styles.date}>
-              {formatDate(date)}
-            </Text>
-            <Text style={styles.distance}>
-              {distance ? `${distance} km` : '--'}
-            </Text>
+            <Text style={styles.date}>{formatDate(date)}</Text>
+            <Text style={styles.distance}>{distance ? `${distance} km` : '--'}</Text>
             <View style={styles.details}>
               <View style={styles.detailItem}>
-                <MaterialIcons 
-                  name="timer" 
-                  size={16} 
-                  color={theme.colors.text.secondary} 
-                />
+                <MaterialIcons name="timer" size={16} color={theme.colors.text.secondary} />
                 <Text style={styles.detailText}>
                   {duration ? formatDuration(duration) : '--:--'}
                 </Text>
               </View>
               {pace && (
                 <View style={styles.detailItem}>
-                  <MaterialIcons 
-                    name="speed" 
-                    size={16} 
-                    color={theme.colors.text.secondary} 
-                  />
-                  <Text style={styles.detailText}>
-                    {pace} /km
-                  </Text>
+                  <MaterialIcons name="speed" size={16} color={theme.colors.text.secondary} />
+                  <Text style={styles.detailText}>{pace} /km</Text>
                 </View>
               )}
             </View>
           </View>
           <View style={styles.rightSection}>
-            <MaterialIcons 
-              name="chevron-right" 
-              size={24} 
-              color={theme.colors.text.secondary} 
-            />
+            <MaterialIcons name="chevron-right" size={24} color={theme.colors.text.secondary} />
           </View>
         </View>
       </TouchableOpacity>

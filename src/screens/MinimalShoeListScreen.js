@@ -12,10 +12,10 @@ const MinimalShoeListScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Shoes</Text>
-      
+
       <FlatList
         data={shoes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <View style={styles.shoeItem}>
             <Text style={styles.shoeName}>{item.name}</Text>
@@ -24,11 +24,8 @@ const MinimalShoeListScreen = ({ navigation }) => {
         )}
         style={styles.list}
       />
-      
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => navigation.navigate('AddEditShoe')}
-      >
+
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddEditShoe')}>
         <MaterialIcons name="add" size={24} color="white" />
         <Text style={styles.addButtonText}>Add Shoe</Text>
       </TouchableOpacity>

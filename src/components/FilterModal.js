@@ -13,21 +13,24 @@ import { useTheme } from '../theme/ThemeProvider';
  * @param {string} props.selected - Currently selected option
  * @param {Function} props.onSelect - Function to call when an option is selected
  */
-const FilterModal = ({ 
-  visible, 
-  onClose, 
+const FilterModal = ({
+  visible,
+  onClose,
   title = 'Filter & Sort',
   options = [],
   selected,
-  onSelect 
+  onSelect,
 }) => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState('sort'); // 'sort' or 'filter'
 
-  const handleSelect = useCallback((option) => {
-    onSelect(option);
-    onClose();
-  }, [onSelect, onClose]);
+  const handleSelect = useCallback(
+    option => {
+      onSelect(option);
+      onClose();
+    },
+    [onSelect, onClose]
+  );
 
   const styles = StyleSheet.create({
     modalOverlay: {
@@ -105,12 +108,7 @@ const FilterModal = ({
   });
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
           <View style={styles.modalHeader}>
@@ -121,7 +119,7 @@ const FilterModal = ({
           </View>
 
           <View style={styles.tabs}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.tab, activeTab === 'sort' && styles.tabActive]}
               onPress={() => setActiveTab('sort')}
             >
@@ -129,7 +127,7 @@ const FilterModal = ({
                 Sort
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.tab, activeTab === 'filter' && styles.tabActive]}
               onPress={() => setActiveTab('filter')}
             >
@@ -140,28 +138,22 @@ const FilterModal = ({
           </View>
 
           <ScrollView>
-            {options.map((option) => (
+            {options.map(option => (
               <TouchableOpacity
                 key={option.id}
-                style={[
-                  styles.option,
-                  selected === option.id && styles.optionSelected,
-                ]}
+                style={[styles.option, selected === option.id && styles.optionSelected]}
                 onPress={() => handleSelect(option.id)}
               >
-                <Text 
-                  style={[
-                    styles.optionText,
-                    selected === option.id && styles.optionTextSelected,
-                  ]}
+                <Text
+                  style={[styles.optionText, selected === option.id && styles.optionTextSelected]}
                 >
                   {option.label}
                 </Text>
                 {selected === option.id && (
-                  <MaterialIcons 
-                    name="check" 
-                    size={20} 
-                    color={theme.colors.primary} 
+                  <MaterialIcons
+                    name="check"
+                    size={20}
+                    color={theme.colors.primary}
                     style={styles.checkIcon}
                   />
                 )}

@@ -47,10 +47,13 @@ export const loadStateFromStorage = createAsyncThunk(
   }
 );
 
-import { registerBackgroundLocationTaskAsync, unregisterBackgroundLocationTaskAsync } from '../services/backgroundLocationTask';
+import {
+  registerBackgroundLocationTaskAsync,
+  unregisterBackgroundLocationTaskAsync,
+} from '../services/backgroundLocationTask';
 
 // Helper function to save relevant parts of the state
-const saveRelevantState = async (state) => {
+const saveRelevantState = async state => {
   try {
     const stateToSave = {
       runs: state.runs,
@@ -81,7 +84,9 @@ export const beginRunTracking = createAsyncThunk(
         // We could potentially discard the run here if background tracking is essential.
         // dispatch(discardRun()); // Example: Rollback if task registration fails
         // return rejectWithValue('Failed to register background location task.');
-        console.warn('Background location task registration failed. Run started without background tracking.');
+        console.warn(
+          'Background location task registration failed. Run started without background tracking.'
+        );
       }
       return newRunData.id; // Or some other relevant data
     } catch (error) {
@@ -94,7 +99,8 @@ export const beginRunTracking = createAsyncThunk(
 
 export const completeRunTracking = createAsyncThunk(
   'run/completeTracking',
-  async (finalRunDetails, { dispatch, getState }) => { // finalRunDetails might be optional or contain things like endTime
+  async (finalRunDetails, { dispatch, getState }) => {
+    // finalRunDetails might be optional or contain things like endTime
     try {
       await unregisterBackgroundLocationTaskAsync(dispatch);
       // The stopRun action will update currentRun, set status to complete, etc.
@@ -112,19 +118,16 @@ export const completeRunTracking = createAsyncThunk(
   }
 );
 
-export const cancelActiveRun = createAsyncThunk(
-  'run/cancelTracking',
-  async (_, { dispatch }) => {
-    try {
-      await unregisterBackgroundLocationTaskAsync(dispatch);
-      dispatch(discardRun());
-    } catch (error) {
-      console.error('cancelActiveRun error:', error);
-      dispatch(setError({ message: 'Failed to cancel run.', details: error.message }));
-      return error.message; // Should be rejectWithValue
-    }
+export const cancelActiveRun = createAsyncThunk('run/cancelTracking', async (_, { dispatch }) => {
+  try {
+    await unregisterBackgroundLocationTaskAsync(dispatch);
+    dispatch(discardRun());
+  } catch (error) {
+    console.error('cancelActiveRun error:', error);
+    dispatch(setError({ message: 'Failed to cancel run.', details: error.message }));
+    return error.message; // Should be rejectWithValue
   }
-);
+});
 
 const runSlice = createSlice({
   name: 'run',
@@ -152,28 +155,31 @@ const runSlice = createSlice({
       // Save state after starting a new run
       saveRelevantState(state);
     },
-    pauseRun: (state) => {
+    pauseRun: state => {
       state.runStatus = 'paused';
       state.isTracking = false;
       // Save state when pausing
       saveRelevantState(state);
     },
-    resumeRun: (state) => {
+    resumeRun: state => {
       state.runStatus = 'active';
       state.isTracking = true;
       // Save state when resuming
       saveRelevantState(state);
     },
-    stopRun: (state, action) => { // Assuming action.payload might contain final run details
+    stopRun: (state, action) => {
+      // Assuming action.payload might contain final run details
       state.runStatus = 'complete';
       state.isTracking = false;
-      if (action.payload) { // Update currentRun with any final details from stop action
+      if (action.payload) {
+        // Update currentRun with any final details from stop action
         state.currentRun = { ...state.currentRun, ...action.payload };
       }
       // Save state after stopping a run
       saveRelevantState(state);
     },
-    saveRun: (state, action) => { // action.payload is the run to be saved
+    saveRun: (state, action) => {
+      // action.payload is the run to be saved
       state.isSaving = true;
       // Logic to add/update run in state.runs will be here or in an async thunk
       // For now, assuming action.payload is the complete run object to be added
@@ -189,7 +195,7 @@ const runSlice = createSlice({
       // Save state after saving a run
       saveRelevantState(state);
     },
-    discardRun: (state) => {
+    discardRun: state => {
       state.currentRun = null;
       state.runStatus = 'idle';
       // Save state after discarding a run
@@ -197,7 +203,8 @@ const runSlice = createSlice({
     },
     // loadRuns reducer is effectively replaced by loadStateFromStorage thunk and rehydrateState
     // deleteRun and updateRun should also call saveRelevantState
-    deleteRun: (state, action) => { // payload is runId
+    deleteRun: (state, action) => {
+      // payload is runId
       state.runs = state.runs.filter(run => run.id !== action.payload);
       if (state.currentRun && state.currentRun.id === action.payload) {
         state.currentRun = null; // Clear current run if it's the one being deleted
@@ -205,7 +212,8 @@ const runSlice = createSlice({
       }
       saveRelevantState(state);
     },
-    updateRun: (state, action) => { // payload: { runId, updates }
+    updateRun: (state, action) => {
+      // payload: { runId, updates }
       const index = state.runs.findIndex(run => run.id === action.payload.runId);
       if (index !== -1) {
         state.runs[index] = { ...state.runs[index], ...action.payload.updates };
@@ -218,7 +226,7 @@ const runSlice = createSlice({
     setError: (state, action) => {
       state.lastError = action.payload;
     },
-    clearError: (state) => {
+    clearError: state => {
       state.lastError = null;
     },
     setBackgroundTaskRegistered: (state, action) => {
@@ -237,7 +245,7 @@ const runSlice = createSlice({
       }
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       .addCase(loadStateFromStorage.fulfilled, (state, action) => {
         if (action.payload) {

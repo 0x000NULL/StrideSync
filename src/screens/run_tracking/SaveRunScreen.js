@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View, Text, Button, StyleSheet, ScrollView, Alert
-} from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { saveRun, cancelActiveRun, setSelectedRunId } from '../../stores/run_tracking/runSlice';
 
@@ -10,7 +8,6 @@ import RunDetailsForm from '../../components/run_tracking/save_run/RunDetailsFor
 import WeatherSelector from '../../components/run_tracking/save_run/WeatherSelector';
 import EffortMoodSelector from '../../components/run_tracking/save_run/EffortMoodSelector';
 import ShoeSelector from '../../components/run_tracking/ShoeSelector';
-
 
 const SaveRunScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -30,21 +27,23 @@ const SaveRunScreen = ({ navigation }) => {
       setNotes(currentRun.notes || '');
       setSelectedShoeId(currentRun.shoeId || null);
       if (!runName && currentRun.startTime) {
-        setRunName(`Run - ${new Date(currentRun.startTime).toLocaleDateString()} ${new Date(currentRun.startTime).toLocaleTimeString()}`);
+        setRunName(
+          `Run - ${new Date(currentRun.startTime).toLocaleDateString()} ${new Date(currentRun.startTime).toLocaleTimeString()}`
+        );
       }
-      if(currentRun.weather?.condition) setWeather(currentRun.weather.condition);
-      if(currentRun.effort) setEffort(currentRun.effort);
-      if(currentRun.mood) setMood(currentRun.mood);
-
+      if (currentRun.weather?.condition) setWeather(currentRun.weather.condition);
+      if (currentRun.effort) setEffort(currentRun.effort);
+      if (currentRun.mood) setMood(currentRun.mood);
     } else if (runStatus !== 'saving') {
-      Alert.alert("No Run Data", "There is no active run to save.", [{ text: "OK", onPress: () => navigation.navigate('Home') }]);
+      Alert.alert('No Run Data', 'There is no active run to save.', [
+        { text: 'OK', onPress: () => navigation.navigate('Home') },
+      ]);
     }
   }, [currentRun, runStatus, navigation, runName]);
 
-
   const handleSaveRun = () => {
     if (!currentRun) {
-      Alert.alert("Error", "No run data available to save.");
+      Alert.alert('Error', 'No run data available to save.');
       return;
     }
 
@@ -67,21 +66,18 @@ const SaveRunScreen = ({ navigation }) => {
 
     navigation.reset({
       index: 1,
-      routes: [
-        { name: 'Home' },
-        { name: 'RunSummary', params: { runId: finalRunData.id } }
-      ],
+      routes: [{ name: 'Home' }, { name: 'RunSummary', params: { runId: finalRunData.id } }],
     });
   };
 
   const handleDiscard = () => {
     Alert.alert(
-      "Discard Run",
-      "Are you sure you want to discard this run? All progress will be lost.",
+      'Discard Run',
+      'Are you sure you want to discard this run? All progress will be lost.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Discard",
+          text: 'Discard',
           onPress: () => {
             dispatch(cancelActiveRun());
             navigation.reset({
@@ -89,42 +85,50 @@ const SaveRunScreen = ({ navigation }) => {
               routes: [{ name: 'Home' }],
             });
           },
-          style: "destructive"
+          style: 'destructive',
         },
       ]
     );
   };
 
   useEffect(() => {
-        if (!currentRun && runStatus !== 'idle' && runStatus !== 'saving') {
-            Alert.alert("Run Ended", "The active run session has ended.", [
-                { text: "OK", onPress: () => navigation.navigate('Home') }
-            ]);
-        }
-    }, [currentRun, runStatus, navigation]);
-
+    if (!currentRun && runStatus !== 'idle' && runStatus !== 'saving') {
+      Alert.alert('Run Ended', 'The active run session has ended.', [
+        { text: 'OK', onPress: () => navigation.navigate('Home') },
+      ]);
+    }
+  }, [currentRun, runStatus, navigation]);
 
   if (!currentRun && runStatus !== 'saving') {
     return (
-        <View style={styles.containerCenter}>
-            <Text>Loading or no active run data...</Text>
-        </View>
+      <View style={styles.containerCenter}>
+        <Text>Loading or no active run data...</Text>
+      </View>
     );
   }
-
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Save Your Run</Text>
 
-      <RunDetailsForm name={runName} notes={notes} onNameChange={setRunName} onNotesChange={setNotes} />
-      
+      <RunDetailsForm
+        name={runName}
+        notes={notes}
+        onNameChange={setRunName}
+        onNotesChange={setNotes}
+      />
+
       <View style={styles.formSection}>
         <ShoeSelector selectedShoeId={selectedShoeId} onSelectShoe={setSelectedShoeId} />
       </View>
 
       <WeatherSelector weather={weather} onWeatherChange={setWeather} />
-      <EffortMoodSelector effort={effort} mood={mood} onEffortChange={setEffort} onMoodChange={setMood} />
+      <EffortMoodSelector
+        effort={effort}
+        mood={mood}
+        onEffortChange={setEffort}
+        onMoodChange={setMood}
+      />
 
       <View style={styles.actionButtons}>
         <Button title="Save Run" onPress={handleSaveRun} color="green" />
@@ -139,7 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f9f9f9',
   },
-   containerCenter: {
+  containerCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -161,7 +165,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     marginHorizontal: 15,
     marginTop: 10,
-  }
+  },
 });
 
 export default SaveRunScreen;

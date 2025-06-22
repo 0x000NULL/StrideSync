@@ -1,5 +1,5 @@
 import { useStore } from '../src/stores/useStore';
-import { act } from '@testing-library/react-hooks';
+import { act } from 'react-test-renderer';
 
 // Reset store before each test
 beforeEach(() => {
@@ -42,7 +42,7 @@ describe('shoeStore actions', () => {
       useStore.getState().updateShoe(shoe.id, updates);
     });
 
-    const updatedShoe = useStore.getState().shoes.find((s) => s.id === shoe.id);
+    const updatedShoe = useStore.getState().shoes.find(s => s.id === shoe.id);
     expect(updatedShoe.name).toBe('NewModel');
     expect(updatedShoe.maxDistance).toBe(500);
   });
@@ -58,7 +58,7 @@ describe('shoeStore actions', () => {
       useStore.getState().retireShoe(shoe.id, 'Reached mileage limit');
     });
 
-    let retiredShoe = useStore.getState().shoes.find((s) => s.id === shoe.id);
+    let retiredShoe = useStore.getState().shoes.find(s => s.id === shoe.id);
     expect(retiredShoe.isActive).toBe(false);
     expect(retiredShoe.retirementDate).toBeDefined();
     expect(retiredShoe.retirementReason).toBe('Reached mileage limit');
@@ -68,7 +68,7 @@ describe('shoeStore actions', () => {
       useStore.getState().unretireShoe(shoe.id);
     });
 
-    let unretiredShoe = useStore.getState().shoes.find((s) => s.id === shoe.id);
+    let unretiredShoe = useStore.getState().shoes.find(s => s.id === shoe.id);
     expect(unretiredShoe.isActive).toBe(true);
     expect(unretiredShoe.retirementDate).toBeNull();
     expect(unretiredShoe.retirementReason).toBeNull();
@@ -109,4 +109,4 @@ describe('shoeStore actions', () => {
     expect(shoeUsage.total).toBe(10);
     expect(shoeUsage.lastUsed).toBeDefined();
   });
-}); 
+});

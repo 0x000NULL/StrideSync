@@ -19,13 +19,13 @@ const RunTrackerScreen = () => {
         console.log('Location permission denied');
         return false;
       }
-      
+
       // Request background permission if needed
       const bgStatus = await Location.requestBackgroundPermissionsAsync();
       if (bgStatus.status !== 'granted') {
         console.log('Background location permission not granted');
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error requesting location permission:', error);
@@ -47,7 +47,7 @@ const RunTrackerScreen = () => {
       );
     }
   };
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -93,11 +93,8 @@ const RunTrackerScreen = () => {
         <Text style={styles.subtitle}>
           Track your runs in real-time and see your progress over time.
         </Text>
-        
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={handleStartRun}
-        >
+
+        <TouchableOpacity style={styles.button} onPress={handleStartRun}>
           <Text style={styles.buttonText}>Start New Run</Text>
         </TouchableOpacity>
       </View>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card } from '../ui/Card';
-import { LoadingIndicator } from '../ui/LoadingIndicator';
+import Card from '../ui/Card';
+import LoadingIndicator from '../ui/LoadingIndicator';
 
 const GPSStatusIndicator = ({ gpsStatus }) => {
   const getStatusStyle = () => {
@@ -17,15 +17,16 @@ const GPSStatusIndicator = ({ gpsStatus }) => {
   };
 
   const statusText = gpsStatus.charAt(0).toUpperCase() + gpsStatus.slice(1);
+  const displayText =
+    gpsStatus === 'searching' ? `GPS Status: Searching...` : `GPS Status: ${statusText}`;
 
   return (
     <Card style={styles.card}>
       <View style={styles.container}>
-        <Text style={styles.label}>GPS Status</Text>
-        <View style={styles.statusContainer}>
-          {gpsStatus === 'searching' && <LoadingIndicator size="small" />}
-          <Text style={[styles.statusText, getStatusStyle()]}>{statusText}</Text>
-        </View>
+        {gpsStatus === 'searching' && <LoadingIndicator size="small" />}
+        <Text style={[styles.statusText, getStatusStyle()]} accessibilityLabel="gps-status-text">
+          {displayText}
+        </Text>
       </View>
     </Card>
   );
@@ -66,4 +67,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GPSStatusIndicator; 
+export default GPSStatusIndicator;

@@ -14,7 +14,11 @@ const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
         {effortOptions.map(e => (
           <Pressable
             key={e}
-            style={[styles.button, styles.effortButton, effort === e && styles.selectedEffortButton]}
+            style={[
+              styles.button,
+              styles.effortButton,
+              effort === e && styles.selectedEffortButton,
+            ]}
             onPress={() => onEffortChange(e)}
           >
             <Text style={[styles.buttonText, effort === e && styles.selectedButtonText]}>{e}</Text>
@@ -25,7 +29,7 @@ const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
       <Text style={styles.label}>Mood</Text>
       <View style={styles.buttonGroup}>
         {moodOptions.map(m => (
-           <Pressable
+          <Pressable
             key={m}
             style={[styles.button, styles.moodButton, mood === m && styles.selectedMoodButton]}
             onPress={() => onMoodChange(m)}
@@ -37,7 +41,6 @@ const EffortMoodSelector = ({ effort, mood, onEffortChange, onMoodChange }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   formSection: {
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
     width: '18%', // 5 buttons
   },
   moodButton: {
-     width: '23%', // 4 buttons
+    width: '23%', // 4 buttons
   },
   selectedEffortButton: {
     backgroundColor: 'coral',
@@ -94,4 +97,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EffortMoodSelector; 
+export default EffortMoodSelector;

@@ -1,31 +1,36 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../stores/useStore';
 import { format, parseISO } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import StatsCard from '../components/StatsCard';
-import Button from "../components/ui/Button";
+import Button from '../components/ui/Button';
 
 const ShoeDetailScreen = ({ route, navigation }) => {
   const { shoeId } = route.params;
   const theme = useTheme();
   const [retirementReason, setRetirementReason] = useState('');
   const [showRetirementForm, setShowRetirementForm] = useState(false);
-  
+
   // Get shoe data and actions from store
   // CHANGED: Use getShoeById, which should include shoe data and stats
-  const shoeWithDetails = useStore(useCallback(
-    (state) => state.getShoeById(shoeId),
-    [shoeId]
-  ));
-  
+  const shoeWithDetails = useStore(useCallback(state => state.getShoeById(shoeId), [shoeId]));
+
   // REMOVED: stats are now part of shoeWithDetails
-  
-  const retireShoe = useStore((state) => state.retireShoe);
-  const reactivateShoe = useStore((state) => state.reactivateShoe);
-  const loadShoes = useStore((state) => state.loadShoes);
+
+  const retireShoe = useStore(state => state.retireShoe);
+  const reactivateShoe = useStore(state => state.reactivateShoe);
+  const loadShoes = useStore(state => state.loadShoes);
 
   // Load fresh data when screen comes into focus
   useFocusEffect(
@@ -69,11 +74,11 @@ const ShoeDetailScreen = ({ route, navigation }) => {
       <TextInput
         style={[
           styles.input,
-          { 
-            borderColor: theme.colors.border, 
+          {
+            borderColor: theme.colors.border,
             color: theme.colors.text,
-            backgroundColor: theme.colors.card
-          }
+            backgroundColor: theme.colors.card,
+          },
         ]}
         placeholder="E.g., Reached max mileage, worn out, etc."
         placeholderTextColor={theme.colors.textSecondary}
@@ -100,37 +105,38 @@ const ShoeDetailScreen = ({ route, navigation }) => {
   );
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
         {/* CHANGED: Use shoeWithDetails */}
         <Text style={[styles.name, { color: theme.colors.text }]}>{shoeWithDetails.name}</Text>
-        <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>{shoeWithDetails.brand}</Text>
-        
+        <Text style={[styles.brand, { color: theme.colors.textSecondary }]}>
+          {shoeWithDetails.brand}
+        </Text>
+
         <View style={styles.statusBadge}>
-          <View 
+          <View
             style={[
-              styles.statusDot, 
-              { 
+              styles.statusDot,
+              {
                 backgroundColor: shoeWithDetails.isActive
-                  ? theme.colors.success 
-                  : theme.colors.secondary 
-              }
-            ]} 
+                  ? theme.colors.success
+                  : theme.colors.secondary,
+              },
+            ]}
           />
           <Text style={[styles.statusText, { color: theme.colors.text }]}>
             {shoeWithDetails.isActive ? 'Active' : 'Retired'}
-            {shoeWithDetails.retirementDate && ` on ${format(parseISO(shoeWithDetails.retirementDate), 'MMM d, yyyy')}`}
+            {shoeWithDetails.retirementDate &&
+              ` on ${format(parseISO(shoeWithDetails.retirementDate), 'MMM d, yyyy')}`}
           </Text>
         </View>
-        
+
         {shoeWithDetails.retirementReason && (
           <View style={styles.retirementReason}>
-            <Text style={[styles.reasonLabel, { color: theme.colors.textSecondary }]}>
-              Reason:
-            </Text>
+            <Text style={[styles.reasonLabel, { color: theme.colors.textSecondary }]}>Reason:</Text>
             <Text style={[styles.reasonText, { color: theme.colors.text }]}>
               {shoeWithDetails.retirementReason}
             </Text>
@@ -140,21 +146,17 @@ const ShoeDetailScreen = ({ route, navigation }) => {
 
       <View style={styles.statsContainer}>
         {/* CHANGED: Access stats properties directly from shoeWithDetails */}
-        <StatsCard 
+        <StatsCard
           title="Total Distance"
           value={`${(shoeWithDetails.totalDistance || 0).toFixed(1)} km`}
           icon="directions-run"
         />
-        <StatsCard 
-          title="Runs"
-          value={shoeWithDetails.totalRuns || 0}
-          icon="repeat"
-        />
+        <StatsCard title="Runs" value={shoeWithDetails.totalRuns || 0} icon="repeat" />
         {/* Ensure maxDistance is on shoeWithDetails */}
         {shoeWithDetails.maxDistance > 0 && (
-          <StatsCard 
+          <StatsCard
             title="Remaining"
-            value={`${Math.max(0, (shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0))).toFixed(1)} km`}
+            value={`${Math.max(0, shoeWithDetails.maxDistance - (shoeWithDetails.totalDistance || 0)).toFixed(1)} km`}
             subtitle={`of ${shoeWithDetails.maxDistance} km`}
             icon="timeline"
           />
@@ -182,7 +184,7 @@ const ShoeDetailScreen = ({ route, navigation }) => {
           />
         </>
       )}
-      
+
       {/* This is the reactivate button, should be outside the isActive block */}
       {!showRetirementForm && !shoeWithDetails.isActive && (
         <Button
@@ -193,19 +195,19 @@ const ShoeDetailScreen = ({ route, navigation }) => {
           style={styles.actionButton}
         />
       )}
-      
+
       {showRetirementForm && renderRetirementForm()}
-      
+
       <View style={styles.detailsSection}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-          Shoe Details
-        </Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Shoe Details</Text>
         <View style={styles.detailRow}>
           <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
             Purchase Date:
           </Text>
           <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-            {shoeWithDetails.purchaseDate ? format(parseISO(shoeWithDetails.purchaseDate), 'MMM d, yyyy') : 'Not set'}
+            {shoeWithDetails.purchaseDate
+              ? format(parseISO(shoeWithDetails.purchaseDate), 'MMM d, yyyy')
+              : 'Not set'}
           </Text>
         </View>
         {shoeWithDetails.maxDistance > 0 && (
@@ -221,10 +223,8 @@ const ShoeDetailScreen = ({ route, navigation }) => {
         {/* You can add more details here if they are part of shoeWithDetails */}
         {/* For example, model if it's a separate field */}
         {shoeWithDetails.model && (
-           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-              Model:
-            </Text>
+          <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>Model:</Text>
             <Text style={[styles.detailValue, { color: theme.colors.text }]}>
               {shoeWithDetails.model}
             </Text>
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 12, // Fine-tuned padding
-    paddingVertical: 10,  // Fine-tuned padding
+    paddingVertical: 10, // Fine-tuned padding
     marginBottom: 16, // Increased margin
     fontSize: 16,
     textAlignVertical: 'top',

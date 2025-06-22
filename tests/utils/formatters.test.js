@@ -57,10 +57,10 @@ describe('formatters', () => {
   describe('formatDuration', () => {
     it('formats duration correctly into HH:MM:SS', () => {
       expect(formatDuration(0)).toBe('00:00:00');
-      expect(formatDuration(5)).toBe('00:00:05');      // 5 seconds
-      expect(formatDuration(65)).toBe('00:01:05');     // 1 minute 5 seconds
-      expect(formatDuration(3600)).toBe('01:00:00');   // 1 hour
-      expect(formatDuration(3665)).toBe('01:01:05');   // 1 hour 1 minute 5 seconds
+      expect(formatDuration(5)).toBe('00:00:05'); // 5 seconds
+      expect(formatDuration(65)).toBe('00:01:05'); // 1 minute 5 seconds
+      expect(formatDuration(3600)).toBe('01:00:00'); // 1 hour
+      expect(formatDuration(3665)).toBe('01:01:05'); // 1 hour 1 minute 5 seconds
       expect(formatDuration(86399)).toBe('23:59:59'); // 23 hours 59 minutes 59 seconds
     });
 
@@ -75,7 +75,7 @@ describe('formatters', () => {
   describe('formatRelativeTime', () => {
     const now = new Date();
     // Helper to create past dates
-    const pastDate = (secondsAgo) => new Date(now.getTime() - secondsAgo * 1000);
+    const pastDate = secondsAgo => new Date(now.getTime() - secondsAgo * 1000);
 
     it('formats "Just now" for times less than 60 seconds ago', () => {
       expect(formatRelativeTime(pastDate(30))).toBe('Just now');
@@ -108,7 +108,9 @@ describe('formatters', () => {
     it('formats older dates as absolute date string', () => {
       const fourWeeksAgo = pastDate(4 * 7 * 24 * 60 * 60);
       const expectedDateString = fourWeeksAgo.toLocaleDateString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric'
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       });
       expect(formatRelativeTime(fourWeeksAgo)).toBe(expectedDateString);
 
@@ -130,7 +132,7 @@ describe('formatters', () => {
     });
 
     it('handles different date string formats if parsable by Date constructor', () => {
-        expect(formatShortDate('01/05/2024')).toBe('Jan 5, 2024'); // Assuming US locale for parsing
+      expect(formatShortDate('01/05/2024')).toBe('Jan 5, 2024'); // Assuming US locale for parsing
     });
 
     it('returns "--" for null or undefined date', () => {
@@ -139,16 +141,16 @@ describe('formatters', () => {
     });
 
     it('returns "Invalid Date" for invalid date string if not handled by specific library', () => {
-        // Note: toLocaleDateString on an invalid date can return "Invalid Date" or throw
-        // Depending on JS engine. For consistency, perhaps the function should check validity.
-        // Current implementation relies on Date constructor and toLocaleDateString.
-        // Let's test with a clearly invalid string.
-        const invalidDate = new Date('not a date');
-        // The behavior of toLocaleDateString for invalid dates is implementation-defined.
-        // Some might return "Invalid Date", others might throw or return something else.
-        // For this test, we'll just ensure it doesn't crash and returns a string.
-        // A more robust test would mock Date or use a date library for consistent parsing.
-        expect(typeof formatShortDate('not a date')).toBe('string');
+      // Note: toLocaleDateString on an invalid date can return "Invalid Date" or throw
+      // Depending on JS engine. For consistency, perhaps the function should check validity.
+      // Current implementation relies on Date constructor and toLocaleDateString.
+      // Let's test with a clearly invalid string.
+      const invalidDate = new Date('not a date');
+      // The behavior of toLocaleDateString for invalid dates is implementation-defined.
+      // Some might return "Invalid Date", others might throw or return something else.
+      // For this test, we'll just ensure it doesn't crash and returns a string.
+      // A more robust test would mock Date or use a date library for consistent parsing.
+      expect(typeof formatShortDate('not a date')).toBe('string');
     });
   });
 

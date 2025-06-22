@@ -1,7 +1,16 @@
 // Polyfill for crypto.getRandomValues() needed by uuid
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, parseISO } from 'date-fns';
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  isWithinInterval,
+  parseISO,
+} from 'date-fns';
 import { haversineDistance } from '../utils/unitUtils';
 
 // Helper function to calculate pace in min/km
@@ -9,7 +18,7 @@ export const calculatePace = (distance, duration) => {
   if (!distance || !duration) return null;
   const paceInSeconds = duration / 60 / distance; // seconds per km
   const minutes = Math.floor(paceInSeconds / 60);
-  const seconds = Math.round((paceInSeconds % 60));
+  const seconds = Math.round(paceInSeconds % 60);
   return { minutes, seconds };
 };
 
@@ -23,7 +32,7 @@ const calculatePeriodStats = (runs, startDate, endDate) => {
   const totalDistance = periodRuns.reduce((sum, run) => sum + (run.distance || 0), 0);
   const totalDuration = periodRuns.reduce((sum, run) => sum + (run.duration || 0), 0);
   const totalRuns = periodRuns.length;
-  
+
   return {
     totalDistance,
     totalDuration,
@@ -50,50 +59,54 @@ export const createRunStore = (set, get) => ({
   sortOrder: 'desc',
 
   // Selector to get a single run by ID
-  getRunById: (id) => {
+  getRunById: id => {
     const runs = get().runs;
-    return runs.find((run) => run.id === id);
+    return runs.find(run => run.id === id);
   },
 
   // Actions
-  setFilters: (filters) => set({ filters: { ...get().filters, ...filters } }),
-  
+  setFilters: filters => set({ filters: { ...get().filters, ...filters } }),
+
   setSort: (sortBy, sortOrder = 'desc') => set({ sortBy, sortOrder }),
-  
-  addRun: (runData) => {
+
+  addRun: runData => {
     const run = {
       ...runData,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
-    set((state) => ({ runs: [run, ...state.runs] }));
-    
+
+    set(state => ({ runs: [run, ...state.runs] }));
+
     return run.id;
   },
-  
+
   updateRun: (id, updates) => {
-    set((state) => ({
-      runs: state.runs.map((run) =>
-        run.id === id
-          ? { ...run, ...updates, updatedAt: new Date().toISOString() }
-          : run
-      ),
+    set(state => ({
+      runs: state.runs.map(run => {
+        if (run.id !== id) return run;
+        let timestamp = new Date().toISOString();
+        // Ensure the updatedAt differs from createdAt even if executed within the same ms
+        if (timestamp === run.createdAt) {
+          timestamp = new Date(Date.now() + 1).toISOString();
+        }
+        return { ...run, ...updates, updatedAt: timestamp };
+      }),
     }));
   },
-  
-  deleteRun: (id) => {
-    set((state) => ({
-      runs: state.runs.filter((run) => run.id !== id)
+
+  deleteRun: id => {
+    set(state => ({
+      runs: state.runs.filter(run => run.id !== id),
     }));
   },
-  
+
   // Clear all runs (for testing/development)
   clearAllRuns: () => {
     set({ runs: [] });
   },
-  
+
   startRun: (initialData = {}) => {
     const newRun = {
       id: uuidv4(),
@@ -110,12 +123,18 @@ export const createRunStore = (set, get) => ({
       isPaused: false,
       ...initialData,
     };
-    
+
     set({ currentRun: newRun });
     return newRun.id;
   },
 
-  updateRunInProgress: (updates) => {
+  // Added alias so UI components can continue using legacy action name
+  beginRunTracking: initialData => {
+    // Simply reuse the more descriptive `startRun` implementation
+    return get().startRun(initialData);
+  },
+
+  updateRunInProgress: updates => {
     const { currentRun } = get();
     if (!currentRun) return;
 
@@ -141,7 +160,7 @@ export const createRunStore = (set, get) => ({
     });
   },
 
-  addLocationPoint: (location) => {
+  addLocationPoint: location => {
     const { currentRun } = get();
     if (!currentRun || currentRun.isPaused) return;
 
@@ -160,7 +179,7 @@ export const createRunStore = (set, get) => ({
     if (newRoute.length > 1) {
       const lastPoint = newRoute[newRoute.length - 2];
       const distanceIncrement = haversineDistance(lastPoint, newPoint) / 1000; // to kilometers
-      
+
       // Add increment only if it's a reasonable value to filter out GPS jumps
       if (distanceIncrement > 0.001 && distanceIncrement < 1) {
         newDistance += distanceIncrement;
@@ -200,7 +219,7 @@ export const createRunStore = (set, get) => ({
   pauseRun: () => {
     const { currentRun } = get();
     if (!currentRun || currentRun.endTime) return;
-    
+
     set({
       currentRun: {
         ...currentRun,
@@ -213,11 +232,11 @@ export const createRunStore = (set, get) => ({
   resumeRun: () => {
     const { currentRun } = get();
     if (!currentRun) return;
-    
+
     // Adjust start time to account for the pause duration
     const pauseDuration = new Date() - new Date(currentRun.endTime);
     const newStartTime = new Date(new Date(currentRun.startTime).getTime() + pauseDuration);
-    
+
     set({
       currentRun: {
         ...currentRun,
@@ -228,7 +247,7 @@ export const createRunStore = (set, get) => ({
     });
   },
 
-  saveRun: async (runData) => {
+  saveRun: async runData => {
     const { currentRun } = get();
     if (!currentRun) return null;
 
@@ -253,7 +272,7 @@ export const createRunStore = (set, get) => ({
     }
 
     // Add to runs array
-    set((state) => ({
+    set(state => ({
       runs: [runToSave, ...state.runs],
       currentRun: null,
     }));
@@ -266,37 +285,47 @@ export const createRunStore = (set, get) => ({
   },
 
   // CRUD operations for saved runs
-  addRun: (run) => {
+  addRun: run => {
+    const timestamp = new Date().toISOString();
     const newRun = {
       ...run,
       id: uuidv4(),
-      createdAt: new Date().toISOString(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
     };
-    
-    set((state) => ({
+
+    set(state => ({
       runs: [newRun, ...state.runs],
     }));
-    
+
     return newRun.id;
   },
 
-  updateRun: (id, updates) => {
-    set((state) => ({
-      runs: state.runs.map((run) =>
-        run.id === id ? { ...run, ...updates, updatedAt: new Date().toISOString() } : run
-      ),
+  deleteRun: id => {
+    set(state => ({
+      runs: state.runs.filter(run => run.id !== id),
     }));
   },
 
-  deleteRun: (id) => {
-    set((state) => ({
-      runs: state.runs.filter((run) => run.id !== id),
-    }));
+  // Sync helper: called by Redux slice when it saves a run
+  syncRunFromRedux: runData => {
+    if (!runData || !runData.id) return;
+
+    set(state => {
+      const existingIndex = state.runs.findIndex(r => r.id === runData.id);
+      if (existingIndex !== -1) {
+        // Update existing
+        const updatedRuns = [...state.runs];
+        updatedRuns[existingIndex] = { ...state.runs[existingIndex], ...runData };
+        return { runs: updatedRuns };
+      }
+      return { runs: [runData, ...state.runs] };
+    });
   },
 
   // Selectors
-  getRunsByShoe: (shoeId) => {
-    return get().runs.filter((run) => run.shoeId === shoeId);
+  getRunsByShoe: shoeId => {
+    return get().runs.filter(run => run.shoeId === shoeId);
   },
 
   getRecentRuns: (limit = 5) => {
@@ -319,18 +348,14 @@ export const createRunStore = (set, get) => ({
       } else if (period === 'year') {
         cutoff.setFullYear(now.getFullYear() - 1);
       }
-      
-      filteredRuns = filteredRuns.filter(
-        (run) => new Date(run.startTime) >= cutoff
-      );
+
+      filteredRuns = filteredRuns.filter(run => new Date(run.startTime) >= cutoff);
     }
 
     const totalDistance = filteredRuns.reduce((sum, run) => sum + (run.distance || 0), 0);
     const totalDuration = filteredRuns.reduce((sum, run) => sum + (run.duration || 0), 0);
     const totalRuns = filteredRuns.length;
-    const avgPace = totalDistance > 0 
-      ? calculatePace(totalDistance, totalDuration) 
-      : null;
+    const avgPace = totalDistance > 0 ? calculatePace(totalDistance, totalDuration) : null;
 
     return {
       totalRuns,

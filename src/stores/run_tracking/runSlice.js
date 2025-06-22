@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { haversineDistance } from '../../utils/unitUtils';
 
 const RUN_STORAGE_KEY = '@strideSync/runState';
 
@@ -47,10 +48,13 @@ export const loadStateFromStorage = createAsyncThunk(
   }
 );
 
-import { registerBackgroundLocationTaskAsync, unregisterBackgroundLocationTaskAsync } from '../../services/run_tracking/backgroundLocationTask';
+import {
+  registerBackgroundLocationTaskAsync,
+  unregisterBackgroundLocationTaskAsync,
+} from '../../services/run_tracking/backgroundLocationTask';
 
 // Helper function to save relevant parts of the state
-const saveRelevantState = async (state) => {
+const saveRelevantState = async state => {
   try {
     const stateToSave = {
       runs: state.runs,
@@ -67,12 +71,12 @@ const saveRelevantState = async (state) => {
 };
 
 // Utility function to sync run to Zustand store
-const syncRunToZustand = (runData) => {
+const syncRunToZustand = runData => {
   try {
     // Dynamically import the Zustand store to avoid circular dependencies
     const { useStore } = require('../useStore');
     const zustandStore = useStore.getState();
-    
+
     // Use the dedicated sync method
     if (zustandStore.syncRunFromRedux) {
       zustandStore.syncRunFromRedux(runData);
@@ -100,7 +104,9 @@ export const beginRunTracking = createAsyncThunk(
         // We could potentially discard the run here if background tracking is essential.
         // dispatch(discardRun()); // Example: Rollback if task registration fails
         // return rejectWithValue('Failed to register background location task.');
-        console.warn('Background location task registration failed. Run started without background tracking.');
+        console.warn(
+          'Background location task registration failed. Run started without background tracking.'
+        );
       }
       return newRunData.id; // Or some other relevant data
     } catch (error) {
@@ -113,7 +119,8 @@ export const beginRunTracking = createAsyncThunk(
 
 export const completeRunTracking = createAsyncThunk(
   'run/completeTracking',
-  async (finalRunDetails, { dispatch, getState }) => { // finalRunDetails might be optional or contain things like endTime
+  async (finalRunDetails, { dispatch, getState }) => {
+    // finalRunDetails might be optional or contain things like endTime
     try {
       await unregisterBackgroundLocationTaskAsync(dispatch);
       // The stopRun action will update currentRun, set status to complete, etc.
@@ -131,19 +138,16 @@ export const completeRunTracking = createAsyncThunk(
   }
 );
 
-export const cancelActiveRun = createAsyncThunk(
-  'run/cancelTracking',
-  async (_, { dispatch }) => {
-    try {
-      await unregisterBackgroundLocationTaskAsync(dispatch);
-      dispatch(discardRun());
-    } catch (error) {
-      console.error('cancelActiveRun error:', error);
-      dispatch(setError({ message: 'Failed to cancel run.', details: error.message }));
-      return error.message; // Should be rejectWithValue
-    }
+export const cancelActiveRun = createAsyncThunk('run/cancelTracking', async (_, { dispatch }) => {
+  try {
+    await unregisterBackgroundLocationTaskAsync(dispatch);
+    dispatch(discardRun());
+  } catch (error) {
+    console.error('cancelActiveRun error:', error);
+    dispatch(setError({ message: 'Failed to cancel run.', details: error.message }));
+    return error.message; // Should be rejectWithValue
   }
-);
+});
 
 const runSlice = createSlice({
   name: 'run',
@@ -157,7 +161,7 @@ const runSlice = createSlice({
         // e.g., only rehydrate currentRun if the app wasn't in an active/paused state.
         // For now, a simple rehydration. If app closed mid-run, this would restore it.
         state.currentRun = action.payload.currentRun || state.currentRun;
-        
+
         // Sync loaded runs to Zustand store
         if (action.payload.runs && action.payload.runs.length > 0) {
           try {
@@ -188,28 +192,37 @@ const runSlice = createSlice({
       // Save state after starting a new run
       saveRelevantState(state);
     },
-    pauseRun: (state) => {
+    pauseRun: state => {
       state.runStatus = 'paused';
       state.isTracking = false;
+      if (state.currentRun) {
+        state.currentRun.isPaused = true;
+      }
       // Save state when pausing
       saveRelevantState(state);
     },
-    resumeRun: (state) => {
+    resumeRun: state => {
       state.runStatus = 'active';
       state.isTracking = true;
+      if (state.currentRun) {
+        state.currentRun.isPaused = false;
+      }
       // Save state when resuming
       saveRelevantState(state);
     },
-    stopRun: (state, action) => { // Assuming action.payload might contain final run details
+    stopRun: (state, action) => {
+      // Assuming action.payload might contain final run details
       state.runStatus = 'complete';
       state.isTracking = false;
-      if (action.payload) { // Update currentRun with any final details from stop action
+      if (action.payload) {
+        // Update currentRun with any final details from stop action
         state.currentRun = { ...state.currentRun, ...action.payload };
       }
       // Save state after stopping a run
       saveRelevantState(state);
     },
-    saveRun: (state, action) => { // action.payload is the run to be saved
+    saveRun: (state, action) => {
+      // action.payload is the run to be saved
       state.isSaving = true;
       // Logic to add/update run in state.runs will be here or in an async thunk
       // For now, assuming action.payload is the complete run object to be added
@@ -222,14 +235,19 @@ const runSlice = createSlice({
       state.currentRun = null; // Clear current run after saving
       state.runStatus = 'idle';
       state.isSaving = false;
-      
-      console.log('Run saved to Redux store:', action.payload.name, '- Total runs:', state.runs.length);
-      
+
+      console.log(
+        'Run saved to Redux store:',
+        action.payload.name,
+        '- Total runs:',
+        state.runs.length
+      );
+
       // Save state after saving a run
       saveRelevantState(state);
       syncRunToZustand(action.payload);
     },
-    discardRun: (state) => {
+    discardRun: state => {
       state.currentRun = null;
       state.runStatus = 'idle';
       // Save state after discarding a run
@@ -237,7 +255,8 @@ const runSlice = createSlice({
     },
     // loadRuns reducer is effectively replaced by loadStateFromStorage thunk and rehydrateState
     // deleteRun and updateRun should also call saveRelevantState
-    deleteRun: (state, action) => { // payload is runId
+    deleteRun: (state, action) => {
+      // payload is runId
       state.runs = state.runs.filter(run => run.id !== action.payload);
       if (state.currentRun && state.currentRun.id === action.payload) {
         state.currentRun = null; // Clear current run if it's the one being deleted
@@ -256,7 +275,8 @@ const runSlice = createSlice({
         console.error('Failed to sync run deletion to Zustand store:', error);
       }
     },
-    updateRun: (state, action) => { // payload: { runId, updates }
+    updateRun: (state, action) => {
+      // payload: { runId, updates }
       const index = state.runs.findIndex(run => run.id === action.payload.runId);
       if (index !== -1) {
         state.runs[index] = { ...state.runs[index], ...action.payload.updates };
@@ -280,7 +300,7 @@ const runSlice = createSlice({
     setError: (state, action) => {
       state.lastError = action.payload;
     },
-    clearError: (state) => {
+    clearError: state => {
       state.lastError = null;
     },
     setBackgroundTaskRegistered: (state, action) => {
@@ -296,15 +316,52 @@ const runSlice = createSlice({
       console.log('addLocationToCurrentRun payload:', action.payload); // Temporary Log
       if (state.currentRun && state.isTracking) {
         const newLocations = action.payload; // Expecting an array of location points
-        state.currentRun.path = (state.currentRun.path || []).concat(newLocations);
-        console.log('Updated currentRun.path:', JSON.parse(JSON.stringify(state.currentRun.path))); // Temporary Log (deep copy for logging)
-        // Potentially update distance, duration, pace here or in a separate thunk
-        // For now, just appending to path and saving.
-        saveRelevantState(state); // Save state frequently with new locations
+
+        // ----- Distance Calculation -----
+        const existingPath = state.currentRun.path || [];
+        let addedDistanceKm = 0;
+        let prevPoint = existingPath.length > 0 ? existingPath[existingPath.length - 1] : null;
+
+        newLocations.forEach(loc => {
+          if (prevPoint) {
+            const increment = haversineDistance(prevPoint, loc) / 1000; // meters -> km
+            // Filter out unrealistic GPS jumps ( <0.0001 km or >1 km )
+            if (increment > 0.0001 && increment < 1) {
+              addedDistanceKm += increment;
+            }
+          }
+          prevPoint = loc;
+        });
+
+        // Update path and distance immutably (Immer handles the mutation under the hood)
+        state.currentRun.path = existingPath.concat(newLocations);
+        state.currentRun.distance = (state.currentRun.distance || 0) + addedDistanceKm;
+
+        console.log('Updated currentRun.path length:', state.currentRun.path.length);
+        console.log('Updated distance (km):', state.currentRun.distance);
+
+        // Save frequently so user progress is not lost
+        saveRelevantState(state);
+      }
+    },
+    addLapToCurrentRun: state => {
+      if (state.currentRun && state.isTracking && !state.currentRun.isPaused) {
+        const startTime = state.currentRun.startTime || Date.now();
+        const currentDurationSec = Math.floor((Date.now() - new Date(startTime)) / 1000);
+
+        const newLap = {
+          distance: state.currentRun.distance || 0,
+          duration: currentDurationSec,
+        };
+
+        state.currentRun.laps = [...(state.currentRun.laps || []), newLap];
+
+        // Save after adding lap
+        saveRelevantState(state);
       }
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       .addCase(loadStateFromStorage.fulfilled, (state, action) => {
         if (action.payload) {
@@ -348,6 +405,7 @@ export const {
   addLocationToCurrentRun,
   setError,
   clearError,
+  addLapToCurrentRun,
 } = runSlice.actions;
 
 export default runSlice.reducer;

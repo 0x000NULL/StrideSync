@@ -4,8 +4,20 @@ import { View, Text, TextInput, StyleSheet } from 'react-native';
 const RunDetailsForm = ({ name, notes, onNameChange, onNotesChange }) => (
   <View style={styles.formSection}>
     <Text style={styles.sectionTitle}>Run Details</Text>
-    <TextInput style={styles.input} placeholder="Run Name (e.g., Morning Jog)" value={name} onChangeText={onNameChange} />
-    <TextInput style={styles.input} placeholder="Notes" value={notes} onChangeText={onNotesChange} multiline numberOfLines={3} />
+    <TextInput
+      style={styles.input}
+      placeholder="Run Name (e.g., Morning Jog)"
+      value={name}
+      onChangeText={onNameChange}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Notes"
+      value={notes}
+      onChangeText={onNotesChange}
+      multiline
+      numberOfLines={3}
+    />
   </View>
 );
 
@@ -33,4 +45,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RunDetailsForm; 
+export default RunDetailsForm;

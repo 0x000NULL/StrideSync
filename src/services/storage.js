@@ -47,7 +47,7 @@ export const loadData = async (key, defaultValue = null) => {
  * Remove data from AsyncStorage
  * @param {string} key - Storage key to remove
  */
-export const removeData = async (key) => {
+export const removeData = async key => {
   try {
     await AsyncStorage.removeItem(key);
     return true;
@@ -63,7 +63,7 @@ export const removeData = async (key) => {
 const checkDataVersion = async () => {
   try {
     const currentVersion = await AsyncStorage.getItem(STORAGE_KEYS.VERSION);
-    
+
     if (currentVersion !== DATA_VERSION) {
       // Handle migrations here when version changes
       console.log(`Migrating data from version ${currentVersion} to ${DATA_VERSION}`);
@@ -107,7 +107,7 @@ export const backupData = async () => {
  * Restore app data from backup
  * @param {Object} backupData - Backup data to restore
  */
-export const restoreData = async (backupData) => {
+export const restoreData = async backupData => {
   try {
     if (!backupData || typeof backupData !== 'object') {
       throw new Error('Invalid backup data');

@@ -1,51 +1,33 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch, ScrollView, Button } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { useStore } from '../../stores/useStore';
+import { useStore } from '../stores/useStore';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 
-const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
-  const theme = useTheme();
-  return (
-    <SegmentedControl
-      values={options}
-      selectedIndex={options.indexOf(selectedValue)}
-      onChange={(event) => {
-        onValueChange(options[event.nativeEvent.selectedSegmentIndex]);
-      }}
-      appearance={theme.dark ? 'dark' : 'light'}
-      style={[styles.segmentedControl, style]}
-      tintColor={theme.colors.primary}
-      fontStyle={{ color: theme.colors.text.primary }}
-      activeFontStyle={{ color: '#fff' }}
-    />
-  );
-};
-
 const SettingsScreen = () => {
-  const { theme, setTheme } = useTheme();
-  const settings = useStore((state) => state.settings);
-  const updateSettings = useStore((state) => state.updateSettings);
-  const backupState = useStore((state) => state.backupState);
-  const restoreState = useStore((state) => state.restoreState);
-  
+  const theme = useTheme();
+  const settings = useStore(state => state.settings);
+  const updateSettings = useStore(state => state.updateSettings);
+  const backupState = useStore(state => state.backupState);
+  const restoreState = useStore(state => state.restoreState);
+
   // Destructure with defaults
-  const { 
-    theme: themePreference = 'system', 
-    notifyRunReminder = true, 
+  const {
+    theme: themePreference = 'system',
+    notifyRunReminder = true,
     useHighAccuracyGPS = false,
     temperatureUnit = 'celsius',
-    distanceUnit = 'km'
+    distanceUnit = 'km',
   } = settings || {};
-  
+
   // Map theme preference to switch state
   const darkMode = themePreference === 'dark';
-  
-  // Handle theme toggle
-  const handleThemeToggle = (value) => {
-    setTheme(value ? 'dark' : 'light');
+
+  // Handle theme toggle by updating the persisted settings.
+  const handleThemeToggle = value => {
+    updateSettings({ theme: value ? 'dark' : 'light' });
   };
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -111,30 +93,13 @@ const SettingsScreen = () => {
     },
   });
 
-  const UnitSelector = ({ options, selectedValue, onValueChange, style }) => {
-    return (
-      <SegmentedControl
-        values={options}
-        selectedIndex={options.indexOf(selectedValue)}
-        onChange={(event) => {
-          onValueChange(options[event.nativeEvent.selectedSegmentIndex]);
-        }}
-        appearance={theme.dark ? 'dark' : 'light'}
-        style={[styles.segmentedControl, style]}
-        tintColor={theme.colors.primary}
-        fontStyle={{ color: theme.colors.text.primary }}
-        activeFontStyle={{ color: '#fff' }}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Settings</Text>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
           <View style={styles.settingItem}>
@@ -149,55 +114,63 @@ const SettingsScreen = () => {
           <View style={styles.settingItem}>
             <View style={{ flex: 1 }}>
               <Text style={styles.unitLabel}>Distance Units</Text>
-              <UnitSelector
-                options={['Kilometers', 'Miles']}
-                selectedValue={distanceUnit === 'km' ? 'Kilometers' : 'Miles'}
-                onValueChange={(value) => {
-                  updateSettings({ 
-                    distanceUnit: value === 'Kilometers' ? 'km' : 'mi' 
+              <SegmentedControl
+                values={['Kilometers', 'Miles']}
+                selectedIndex={['Kilometers', 'Miles'].indexOf(distanceUnit === 'km' ? 'Kilometers' : 'Miles')}
+                onChange={event => {
+                  updateSettings({
+                    distanceUnit: event.nativeEvent.selectedSegmentIndex === 0 ? 'km' : 'mi',
                   });
                 }}
-                style={styles.unitContainer}
+                appearance={theme.dark ? 'dark' : 'light'}
+                style={[styles.segmentedControl, styles.unitContainer]}
+                tintColor={theme.colors.primary}
+                fontStyle={{ color: theme.colors.text.primary }}
+                activeFontStyle={{ color: '#fff' }}
               />
             </View>
           </View>
           <View style={styles.settingItem}>
             <View style={{ flex: 1 }}>
               <Text style={styles.unitLabel}>Temperature Units</Text>
-              <UnitSelector
-                options={['Celsius', 'Fahrenheit']}
-                selectedValue={temperatureUnit === 'celsius' ? 'Celsius' : 'Fahrenheit'}
-                onValueChange={(value) => {
-                  updateSettings({ 
-                    temperatureUnit: value === 'Celsius' ? 'celsius' : 'fahrenheit' 
+              <SegmentedControl
+                values={['Celsius', 'Fahrenheit']}
+                selectedIndex={['Celsius', 'Fahrenheit'].indexOf(temperatureUnit === 'celsius' ? 'Celsius' : 'Fahrenheit')}
+                onChange={event => {
+                  updateSettings({
+                    temperatureUnit: event.nativeEvent.selectedSegmentIndex === 0 ? 'celsius' : 'fahrenheit',
                   });
                 }}
-                style={styles.unitContainer}
+                appearance={theme.dark ? 'dark' : 'light'}
+                style={[styles.segmentedControl, styles.unitContainer]}
+                tintColor={theme.colors.primary}
+                fontStyle={{ color: theme.colors.text.primary }}
+                activeFontStyle={{ color: '#fff' }}
               />
             </View>
           </View>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
           <View style={styles.settingItem}>
             <Text style={styles.settingText}>Enable Notifications</Text>
             <Switch
               value={notifyRunReminder}
-              onValueChange={(value) => updateSettings({ notifyRunReminder: value })}
+              onValueChange={value => updateSettings({ notifyRunReminder: value })}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
               thumbColor={theme.colors.background}
             />
           </View>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tracking</Text>
           <View style={styles.settingItem}>
             <Text style={styles.settingText}>Background Location Tracking</Text>
             <Switch
               value={useHighAccuracyGPS}
-              onValueChange={(value) => updateSettings({ useHighAccuracyGPS: value })}
+              onValueChange={value => updateSettings({ useHighAccuracyGPS: value })}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
               thumbColor={theme.colors.background}
             />
@@ -206,13 +179,13 @@ const SettingsScreen = () => {
             <Text style={styles.settingText}>Use High Accuracy GPS</Text>
             <Switch
               value={useHighAccuracyGPS}
-              onValueChange={(value) => updateSettings({ useHighAccuracyGPS: value })}
+              onValueChange={value => updateSettings({ useHighAccuracyGPS: value })}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
               thumbColor={theme.colors.background}
             />
           </View>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data Management</Text>
           <View style={styles.settingItem}>
@@ -222,7 +195,7 @@ const SettingsScreen = () => {
             <Button title="Restore Data" onPress={restoreState} color={theme.colors.primary} />
           </View>
         </View>
-        
+
         <Text style={styles.versionText}>StrideSync v1.0.0</Text>
       </ScrollView>
     </View>

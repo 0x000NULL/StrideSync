@@ -16,7 +16,7 @@ const RunMapView = ({ path }) => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         setHasLocationPermission(status === 'granted');
-        
+
         if (status !== 'granted') {
           console.log('Permission to access location was denied');
           return;
@@ -26,6 +26,27 @@ const RunMapView = ({ path }) => {
       }
     })();
   }, []);
+
+  // Initialize region to the user's current location once permission is granted
+  useEffect(() => {
+    const setInitialRegionAsync = async () => {
+      if (hasLocationPermission && !region) {
+        try {
+          const location = await Location.getCurrentPositionAsync({});
+          setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.002,
+            longitudeDelta: 0.002,
+          });
+        } catch (err) {
+          console.warn('Error fetching current location:', err);
+        }
+      }
+    };
+
+    setInitialRegionAsync();
+  }, [hasLocationPermission, region]);
 
   // Update map region when path changes and user following is active
   useEffect(() => {
@@ -50,7 +71,9 @@ const RunMapView = ({ path }) => {
   if (!hasLocationPermission) {
     return (
       <View style={[styles.mapView, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: colors.text.secondary }}>Location permission is required to track your run</Text>
+        <Text style={{ color: colors.text.secondary }}>
+          Location permission is required to track your run
+        </Text>
       </View>
     );
   }
@@ -70,33 +93,19 @@ const RunMapView = ({ path }) => {
         loadingEnabled={true}
       >
         {path && path.length > 1 && (
-          <Polyline
-            coordinates={path}
-            strokeColor={colors.primary}
-            strokeWidth={4}
-          />
+          <Polyline coordinates={path} strokeColor={colors.primary} strokeWidth={4} />
         )}
-        {startPoint && (
-           <Marker
-            coordinate={startPoint}
-            title="Start"
-            pinColor="green"
-          />
-        )}
+        {startPoint && <Marker coordinate={startPoint} title="Start" pinColor="green" />}
         {currentPoint && (
-          <Marker
-            coordinate={currentPoint}
-            title="Current Location"
-            pinColor="blue"
-          />
+          <Marker coordinate={currentPoint} title="Current Location" pinColor="blue" />
         )}
       </MapView>
       {!isFollowingUser && (
-        <TouchableOpacity 
-            style={[styles.recenterButton, { backgroundColor: colors.surface }]}
-            onPress={() => setIsFollowingUser(true)}
+        <TouchableOpacity
+          style={[styles.recenterButton, { backgroundColor: colors.surface }]}
+          onPress={() => setIsFollowingUser(true)}
         >
-            <Text style={[styles.recenterText, { color: colors.primary }]}>Recenter</Text>
+          <Text style={[styles.recenterText, { color: colors.primary }]}>Recenter</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -104,31 +113,31 @@ const RunMapView = ({ path }) => {
 };
 
 const styles = StyleSheet.create({
-    mapView: {
-        height: 300,
-        width: '100%',
-        marginBottom: 10,
-        overflow: 'hidden',
-    },
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    recenterButton: {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 20,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    recenterText: {
-        fontWeight: 'bold',
-    },
+  mapView: {
+    height: 300,
+    width: '100%',
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  recenterButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  recenterText: {
+    fontWeight: 'bold',
+  },
 });
 
-export default RunMapView; 
+export default RunMapView;

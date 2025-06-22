@@ -5,14 +5,8 @@ const SimpleTest = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Simple Test Screen</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Type something..."
-      />
-      <Button 
-        title="Click me" 
-        onPress={() => console.log('Button pressed')} 
-      />
+      <TextInput style={styles.input} placeholder="Type something..." />
+      <Button title="Click me" onPress={() => console.log('Button pressed')} />
     </View>
   );
 };

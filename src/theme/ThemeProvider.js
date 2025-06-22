@@ -64,11 +64,7 @@ export const ThemeProvider = ({ children }) => {
     // You can add platform-specific theme updates here if needed
   }, [currentTheme]);
 
-  return (
-    <ThemeContext.Provider value={currentTheme}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={currentTheme}>{children}</ThemeContext.Provider>;
 };
 
 export default ThemeProvider;

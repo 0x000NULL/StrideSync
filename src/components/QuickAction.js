@@ -4,7 +4,7 @@ import { useTheme } from '../theme/ThemeProvider';
 
 const QuickAction = ({ icon, label, onPress, color }) => {
   const theme = useTheme();
-  
+
   const styles = StyleSheet.create({
     container: {
       alignItems: 'center',
@@ -28,15 +28,11 @@ const QuickAction = ({ icon, label, onPress, color }) => {
   });
 
   return (
-    <TouchableOpacity 
-      style={styles.container} 
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.button, { borderColor: color || theme.colors.primary }]}>
-        {React.cloneElement(icon, { 
-          size: 24, 
-          color: color || theme.colors.primary 
+        {React.cloneElement(icon, {
+          size: 24,
+          color: color || theme.colors.primary,
         })}
       </View>
       <Text style={styles.label}>{label}</Text>

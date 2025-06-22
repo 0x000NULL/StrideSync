@@ -1,18 +1,7 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  SafeAreaView 
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { 
-  MaterialCommunityIcons, 
-  MaterialIcons, 
-  FontAwesome5 
-} from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import StatsCard from '../components/StatsCard';
 import QuickAction from '../components/QuickAction';
@@ -23,16 +12,16 @@ import { useUnits } from '../hooks/useUnits';
 const HomeScreen = ({ navigation }) => {
   const theme = useTheme();
   const { formatDistance } = useUnits();
-  
+
   // Get data from Zustand store
   const { runs, shoes, getRunStats } = useStore();
-  
+
   // Calculate statistics
   const weeklyStats = getRunStats('week');
   const monthlyStats = getRunStats('month');
-  
+
   // Format duration (seconds) to MM:SS
-  const formatDuration = (seconds) => {
+  const formatDuration = seconds => {
     if (!seconds) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -46,7 +35,7 @@ const HomeScreen = ({ navigation }) => {
     .map(run => {
       const runDate = new Date(run.startTime);
       let dateText;
-      
+
       if (isToday(runDate)) {
         dateText = 'Today';
       } else if (isYesterday(runDate)) {
@@ -54,21 +43,22 @@ const HomeScreen = ({ navigation }) => {
       } else {
         dateText = format(runDate, 'MMM d');
       }
-      
+
       return {
         ...run,
         date: dateText,
         // We'll format these values in renderRunItem to ensure they're always up-to-date
       };
     });
-    
+
   // Get active shoes count
   const activeShoes = shoes.filter(shoe => shoe.isActive).length;
-  
+
   // Get last run time
-  const lastRunTime = runs.length > 0 
-    ? `Last run ${formatDistanceToNow(new Date(runs[0].startTime), { addSuffix: true })}`
-    : 'No runs yet';
+  const lastRunTime =
+    runs.length > 0
+      ? `Last run ${formatDistanceToNow(new Date(runs[0].startTime), { addSuffix: true })}`
+      : 'No runs yet';
 
   const styles = StyleSheet.create({
     container: {
@@ -194,15 +184,16 @@ const HomeScreen = ({ navigation }) => {
     },
   });
 
-  const renderRunItem = (run) => {
+  const renderRunItem = run => {
     const formattedDistance = formatDistance(run.distance || 0);
-    const formattedPace = run.pace && run.distance 
-      ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')}/${formattedDistance.unit}`
-      : '--:--';
-    
+    const formattedPace =
+      run.pace && run.distance
+        ? `${run.pace.minutes}:${run.pace.seconds.toString().padStart(2, '0')}/${formattedDistance.unit}`
+        : '--:--';
+
     return (
-      <TouchableOpacity 
-        key={run.id} 
+      <TouchableOpacity
+        key={run.id}
         style={styles.runItem}
         onPress={() => navigation.navigate('RunDetails', { runId: run.id })}
       >
@@ -231,17 +222,13 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.subtitle}>{lastRunTime}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-            <MaterialIcons 
-              name="settings" 
-              size={24} 
-              color={theme.colors.text.primary} 
-            />
+            <MaterialIcons name="settings" size={24} color={theme.colors.text.primary} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.statsRow}>
-          <StatsCard 
-            title="This Week" 
+          <StatsCard
+            title="This Week"
             value={formatDistance(weeklyStats.totalDistance).value.toFixed(1)}
             unit={formatDistance(weeklyStats.totalDistance).unit}
             icon="run"
@@ -249,8 +236,8 @@ const HomeScreen = ({ navigation }) => {
             color="#4CAF50"
             subtitle={`${weeklyStats.totalRuns} runs`}
           />
-          <StatsCard 
-            title="This Month" 
+          <StatsCard
+            title="This Month"
             value={formatDistance(monthlyStats.totalDistance).value.toFixed(1)}
             unit={formatDistance(monthlyStats.totalDistance).unit}
             icon="calendar-month"
@@ -260,39 +247,32 @@ const HomeScreen = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity 
-          style={styles.startButton}
-          onPress={() => navigation.navigate('PreRun')}
-        >
-          <MaterialCommunityIcons 
-            name="run-fast" 
-            size={32} 
-            color={theme.colors.text.light} 
-          />
+        <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('PreRun')}>
+          <MaterialCommunityIcons name="run-fast" size={32} color={theme.colors.text.light} />
           <Text style={styles.startButtonText}>Start Run</Text>
         </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.quickActions}>
-          <QuickAction 
+          <QuickAction
             icon={<MaterialCommunityIcons name="shoe-print" />}
             label={`Shoes (${activeShoes})`}
             onPress={() => navigation.navigate('ShoeList')}
             color="#FF5722"
           />
-          <QuickAction 
+          <QuickAction
             icon={<MaterialIcons name="show-chart" />}
             label="Stats"
             onPress={() => navigation.navigate('Stats')}
             color="#9C27B0"
           />
-          <QuickAction 
+          <QuickAction
             icon={<MaterialIcons name="history" />}
             label={`Runs (${runs.length})`}
             onPress={() => navigation.navigate('RunLog')}
             color="#FFC107"
           />
-          <QuickAction 
+          <QuickAction
             icon={<FontAwesome5 name="award" />}
             label="Goals"
             onPress={() => navigation.navigate('Goals')}
@@ -304,26 +284,24 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Recent Runs</Text>
           {runs.length > 0 && (
             <TouchableOpacity onPress={() => navigation.navigate('RunLog')}>
-              <Text style={[styles.seeAll, { color: theme.colors.primary }]}>
-                See All
-              </Text>
+              <Text style={[styles.seeAll, { color: theme.colors.primary }]}>See All</Text>
             </TouchableOpacity>
           )}
         </View>
-        
+
         <Card style={styles.runsCard}>
           {recentRuns.length > 0 ? (
             recentRuns.map(run => renderRunItem(run))
           ) : (
             <View style={styles.noRuns}>
-              <MaterialCommunityIcons 
-                name="run" 
-                size={48} 
-                color={theme.colors.text.secondary} 
+              <MaterialCommunityIcons
+                name="run"
+                size={48}
+                color={theme.colors.text.secondary}
                 style={styles.noRunsIcon}
               />
               <Text style={styles.noRunsText}>No runs recorded yet</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.startRunButton}
                 onPress={() => navigation.navigate('PreRun')}
               >

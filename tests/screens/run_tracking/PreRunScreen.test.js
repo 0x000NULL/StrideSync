@@ -40,7 +40,7 @@ describe('PreRunScreen', () => {
       beginRunTracking: mockBeginRunTracking,
       // shoes: initialShoes, etc. if needed by other components
     });
-    
+
     // Setup mock for expo-location
     Location.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted' });
     Location.getForegroundPermissionsAsync.mockResolvedValue({ status: 'granted' });
@@ -68,21 +68,21 @@ describe('PreRunScreen', () => {
     const { getByText } = renderScreen();
     expect(getByText(/GPS Status: Searching.../i)).toBeTruthy();
   });
-  
+
   it('shows good GPS signal after a short delay', async () => {
     const { findByText } = renderScreen();
     await waitFor(() => expect(Location.watchPositionAsync).toHaveBeenCalled());
     const goodSignal = await findByText(/GPS Status: Good/i);
     expect(goodSignal).toBeTruthy();
   });
-  
+
   it('disables start button until GPS is good for outdoor run', async () => {
     const { getByText, findByText } = renderScreen();
     const startButton = getByText('Start Run');
-    
+
     // Initially disabled
     expect(startButton.props.accessibilityState.disabled).toBe(true);
-    
+
     // Becomes enabled
     await findByText(/GPS Status: Good/i);
     expect(startButton.props.accessibilityState.disabled).toBe(false);
@@ -97,21 +97,23 @@ describe('PreRunScreen', () => {
 
   it('dispatches beginRunTracking and navigates on start press', async () => {
     const { getByText, findByText } = renderScreen();
-    
+
     // Wait for GPS
     await findByText(/GPS Status: Good/i);
-    
+
     // Select a shoe using the mock
     fireEvent.press(getByText('Select a Shoe'));
 
     // Press start
     fireEvent.press(getByText('Start Run'));
-    
-    expect(mockBeginRunTracking).toHaveBeenCalledWith(expect.objectContaining({
-      shoeId: 'shoe_123',
-      runType: 'outdoor',
-    }));
-    
+
+    expect(mockBeginRunTracking).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shoeId: 'shoe_123',
+        runType: 'outdoor',
+      })
+    );
+
     expect(mockNavigate).toHaveBeenCalledWith('ActiveRun');
   });
 });

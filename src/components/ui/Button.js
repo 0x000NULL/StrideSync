@@ -1,5 +1,12 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, View, Platform } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  Platform,
+} from 'react-native';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -29,7 +36,7 @@ const Button = ({
   if (title === undefined || title === null) {
     logError('Button is missing required prop: title');
   }
-  
+
   if (onPress === undefined || onPress === null) {
     logError('Button is missing required prop: onPress');
   }
@@ -175,16 +182,16 @@ const Button = ({
 
   const renderIcon = () => {
     if (!icon) return null;
-    
+
     const iconSize = size === 'large' ? 24 : size === 'small' ? 16 : 20;
     const iconColor = variantStyles.text?.color || theme.colors.text.light;
-    
+
     // If icon is a string, render MaterialIcons with that name
     if (typeof icon === 'string') {
       return (
-        <MaterialIcons 
-          name={icon} 
-          size={iconSize} 
+        <MaterialIcons
+          name={icon}
+          size={iconSize}
           color={iconColor}
           style={[
             iconPosition === 'left' && styles.iconLeft,
@@ -194,7 +201,7 @@ const Button = ({
         />
       );
     }
-    
+
     // If icon is a React element, clone it with the appropriate props
     return React.cloneElement(icon, {
       size: iconSize,
@@ -214,21 +221,24 @@ const Button = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
-      style={[
-        styles.button,
-        isIconOnly && styles.iconOnly,
-        style,
-      ]}
+      style={[styles.button, isIconOnly && styles.iconOnly, style]}
       {...rest}
     >
       {!loading && iconPosition === 'left' && renderIcon()}
-      {title && <Text style={[styles.text, textStyle]}>{title}</Text>}
+      {title && (
+        <Text
+          style={[styles.text, textStyle]}
+          accessibilityState={{ disabled: disabled || loading }}
+        >
+          {title}
+        </Text>
+      )}
       {!loading && iconPosition === 'right' && renderIcon()}
-      
+
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator 
-            size={size === 'small' ? 'small' : 'large'} 
+          <ActivityIndicator
+            size={size === 'small' ? 'small' : 'large'}
             color={variantStyles.text?.color || theme.colors.text.light}
           />
         </View>

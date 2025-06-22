@@ -22,7 +22,8 @@ jest.mock('../src/theme/ThemeProvider', () => {
   const actualThemeProvider = jest.requireActual('../src/theme/ThemeProvider');
   return {
     ...actualThemeProvider,
-    useTheme: () => ({ // Provide a default theme object
+    useTheme: () => ({
+      // Provide a default theme object
       colors: {
         primary: 'blue',
         background: '#fff',
@@ -46,7 +47,6 @@ jest.mock('../src/theme/ThemeProvider', () => {
   };
 });
 
-
 // AppNavigator might render a default screen that makes API calls or uses other services.
 // For a basic App.js test, we mainly want to ensure providers are set up and it doesn't crash.
 // Deeper testing of navigation flows will be in AppNavigator.test.js or individual screen tests.
@@ -54,9 +54,12 @@ jest.mock('../src/theme/ThemeProvider', () => {
 // Mock AppNavigator to prevent it from rendering complex screens for this basic App test
 jest.mock('../src/navigation/AppNavigator', () => {
   const { View, Text } = require('react-native');
-  return jest.fn(() => <View testID="mock-app-navigator"><Text>Mock AppNavigator</Text></View>);
+  return jest.fn(() => (
+    <View testID="mock-app-navigator">
+      <Text>Mock AppNavigator</Text>
+    </View>
+  ));
 });
-
 
 describe('App', () => {
   it('renders the App component without crashing', async () => {
