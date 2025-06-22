@@ -1,130 +1,96 @@
 import React, { useMemo } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
-import { useSelector } from 'react-redux';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useStore } from '../../stores/useStore';
+import { useUnits } from '../../hooks/useUnits';
+import { formatDuration } from '../../utils/formatters';
 
-// Helper to format duration (seconds to HH:MM:SS) - Consider moving to a utils file
-const formatDuration = (totalSeconds) => {
-  if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
-
-// Placeholder Components
-const MapWithRoutePlaceholder = ({ path }) => (
-  <View style={styles.placeholderComponent}>
-    <Text style={styles.placeholderTitle}>Map with Route</Text>
-    <Text>Path points: {path?.length || 0}</Text>
-  </View>
-);
+// Reusable Components
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import RunMapView from '../../components/run_tracking/RunMapView';
 
 const StatsGrid = ({ run }) => {
+  const { formatDistance } = useUnits();
+  
   const pace = useMemo(() => {
     if (run?.distance > 0 && run?.duration > 0) {
-      return (run.duration / 60) / (run.distance / 1000); // min/km, assuming distance in meters
+      // Pace is typically min/distance_unit
+      const distance = formatDistance(run.distance / 1000).value; // distance in preferred unit
+      const paceValue = (run.duration / 60) / distance;
+      return `${paceValue.toFixed(2)} min/${formatDistance(1).unit}`;
     }
-    return null; // Return null instead of 0 for zero distance
-  }, [run?.distance, run?.duration]);
+    return `--:-- min/${formatDistance(1).unit}`;
+  }, [run?.distance, run?.duration, formatDistance]);
+
+  const stats = [
+    { label: 'Total Distance', value: formatDistance(run?.distance / 1000).formatted },
+    { label: 'Total Duration', value: formatDuration(run?.duration) },
+    { label: 'Average Pace', value: pace },
+    { label: 'Elevation Gain', value: `${run?.elevationGain?.toFixed(0) || 'N/A'} m` },
+    { label: 'Elevation Loss', value: `${run?.elevationLoss?.toFixed(0) || 'N/A'} m` },
+    { label: 'Calories Burned', value: `${run?.caloriesBurned?.toFixed(0) || 'N/A'} kcal` },
+    { label: 'Notes', value: run?.notes || 'No notes' },
+  ];
 
   return (
-    <View style={styles.statsGrid}>
-      <Text style={styles.placeholderTitle}>Key Statistics</Text>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Total Distance:</Text>
-        <Text style={styles.statValue}>{(run?.distance / 1000)?.toFixed(2) || 'N/A'} km</Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Total Duration:</Text>
-        <Text style={styles.statValue}>{formatDuration(run?.duration) || 'N/A'}</Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Average Pace:</Text>
-        <Text style={styles.statValue}>{pace ? pace.toFixed(2) + ' min/km' : '--:-- min/km'}</Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Elevation Gain:</Text>
-        <Text style={styles.statValue}>{run?.elevationGain?.toFixed(0) || 'N/A'} m</Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Elevation Loss:</Text>
-        <Text style={styles.statValue}>{run?.elevationLoss?.toFixed(0) || 'N/A'} m</Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Calories Burned:</Text>
-        <Text style={styles.statValue}>{run?.caloriesBurned?.toFixed(0) || 'N/A'} kcal</Text>
-      </View>
-       <View style={styles.statItem}>
-        <Text style={styles.statLabel}>Notes:</Text>
-        <Text style={styles.statValue}>{run?.notes || 'No notes'}</Text>
-      </View>
-    </View>
+    <Card>
+      <Text style={styles.cardTitle}>Key Statistics</Text>
+      {stats.map((stat, index) => (
+        <View key={index} style={styles.statItem}>
+          <Text style={styles.statLabel}>{stat.label}</Text>
+          <Text style={styles.statValue}>{stat.value}</Text>
+        </View>
+      ))}
+    </Card>
   );
 };
 
-const PaceChartPlaceholder = () => (
-  <View style={styles.placeholderComponent}>
-    <Text style={styles.placeholderTitle}>Pace Chart</Text>
-    <Text>(Chart showing pace over time/distance)</Text>
-  </View>
+const PlaceholderCard = ({ title, text }) => (
+  <Card>
+    <Text style={styles.cardTitle}>{title}</Text>
+    <View style={styles.placeholderContent}>
+      <Text style={styles.placeholderText}>{text}</Text>
+    </View>
+  </Card>
 );
 
-const ElevationProfilePlaceholder = () => (
-  <View style={styles.placeholderComponent}>
-    <Text style={styles.placeholderTitle}>Elevation Profile</Text>
-    <Text>(Chart showing elevation over distance)</Text>
-  </View>
-);
+const RunSummaryScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
 
-const PersonalRecordsPlaceholder = ({ run }) => (
-  <View style={styles.placeholderComponent}>
-    <Text style={styles.placeholderTitle}>Personal Records</Text>
-    {/* Logic to determine if any PRs were achieved would go here */}
-    <Text>No new PRs this run (Placeholder)</Text>
-  </View>
-);
-
-const RunSummaryScreen = ({ navigation, route }) => {
-  // Allow passing runId via route params OR use selectedRunId from Redux store
-  // This provides flexibility, e.g., viewing summary immediately after a run (currentRun becomes selectedRun)
-  // or viewing any run from a list.
   const routeRunId = route.params?.runId;
-  const selectedRunIdFromStore = useSelector(state => state.run.selectedRunId);
-  const currentRun = useSelector(state => state.run.currentRun); // For immediate post-run summary
-  const runStatus = useSelector(state => state.run.runStatus);
-
-  let runToDisplayId = routeRunId || selectedRunIdFromStore;
-
-  // If coming from ActiveRunScreen (run just completed), currentRun might be the one to show
-  // if selectedRunId hasn't updated yet.
-  if (!runToDisplayId && runStatus === 'complete' && currentRun) {
-     runToDisplayId = currentRun.id;
-  }
-
-  const runs = useSelector(state => state.run.runs);
   
+  const { runs, currentRun, runStatus } = useStore(state => ({
+    runs: state.runs,
+    currentRun: state.currentRun,
+    runStatus: state.runStatus, // Assuming runStatus exists in your store
+  }));
+
+  const runToDisplayId = useMemo(() => {
+    if (routeRunId) {
+      return routeRunId;
+    }
+    // If coming from ActiveRunScreen, currentRun might be the one to show
+    if ((runStatus === 'complete' || runStatus === 'saving') && currentRun) {
+      return currentRun.id;
+    }
+    return null;
+  }, [routeRunId, runStatus, currentRun]);
+
   const runDetails = useMemo(() => {
     if (!runToDisplayId) {
-      console.log('No run ID to display');
+      // If we just finished a run, use currentRun data
+      if ((runStatus === 'complete' || runStatus === 'saving') && currentRun) {
+        return currentRun;
+      }
       return null;
     }
-    
-    // If the run was just completed and is in currentRun, use that.
-    if (currentRun && currentRun.id === runToDisplayId && (runStatus === 'complete' || runStatus === 'saving')) {
-        console.log('Using currentRun for display');
-        return currentRun;
-    }
-    
-    const foundRun = runs.find(r => r.id === runToDisplayId);
-    console.log('Looking for run ID:', runToDisplayId);
-    console.log('Available runs:', runs.map(r => ({ id: r.id, name: r.name })));
-    console.log('Found run:', foundRun ? { id: foundRun.id, name: foundRun.name } : 'NOT FOUND');
-    
-    return foundRun;
+    return runs.find(r => r.id === runToDisplayId);
   }, [runToDisplayId, runs, currentRun, runStatus]);
 
   const handleDone = () => {
-    // Navigate back to the Home screen
+    // Navigate back to the main stack, assuming it's 'App' or 'Main'
     navigation.navigate('Home');
   };
 
@@ -138,18 +104,33 @@ const RunSummaryScreen = ({ navigation, route }) => {
     );
   }
 
+  // Ensure path is in the correct format for RunMapView if it's stored differently
+  const routePath = runDetails.route || runDetails.path || [];
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Run Summary</Text>
 
-      <MapWithRoutePlaceholder path={runDetails.path} />
-      <StatsGrid run={runDetails} />
-      <PaceChartPlaceholder />
-      <ElevationProfilePlaceholder />
-      <PersonalRecordsPlaceholder run={runDetails} />
+      <RunMapView path={routePath} />
+      
+      <View style={styles.contentContainer}>
+        <StatsGrid run={runDetails} />
+        <PlaceholderCard 
+          title="Pace Chart"
+          text="A chart showing your pace over the duration of the run will be displayed here."
+        />
+        <PlaceholderCard
+          title="Elevation Profile"
+          text="A chart showing the elevation changes over the course of the run will be shown here."
+        />
+        <PlaceholderCard
+          title="Personal Records"
+          text="Any new personal records you achieved during this run will be celebrated here!"
+        />
+      </View>
 
       <View style={styles.doneButtonContainer}>
-        <Button title="Done" onPress={handleDone} />
+        <Button title="Done" onPress={handleDone} fullWidth />
       </View>
     </ScrollView>
   );
@@ -158,53 +139,49 @@ const RunSummaryScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f0f2f5', // A slightly lighter grey
   },
   containerCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f0f2f5',
+  },
+  contentContainer: {
+    paddingHorizontal: 15,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     paddingVertical: 20,
-    color: '#333',
+    color: '#1c1c1e',
   },
-  placeholderComponent: {
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    marginVertical: 10,
-    padding: 20,
-    borderRadius: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  placeholderTitle: {
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#555',
+    color: '#333',
   },
-  statsGrid: {
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    marginVertical: 10,
+  placeholderContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    borderRadius: 8,
-    elevation: 2,
+    minHeight: 100,
+  },
+  placeholderText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   statItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#e8e8e8',
   },
   statLabel: {
     fontSize: 16,
@@ -214,17 +191,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#222',
-    maxWidth: '70%', // For notes or long values
+    maxWidth: '60%', // For notes or long values
+    textAlign: 'right',
   },
   errorText: {
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
-    marginBottom:10,
+    marginBottom: 10,
   },
   doneButtonContainer: {
-    marginVertical: 30,
+    marginVertical: 20,
     paddingHorizontal: 15,
+    paddingBottom: 20, //SafeArea
   }
 });
 

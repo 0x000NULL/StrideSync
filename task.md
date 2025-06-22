@@ -78,8 +78,14 @@
     - [x] Extract sub-components (MapView, StatsDisplay) into separate files
     - [x] Apply global theme for UI consistency
     - [x] Enhance map with start marker and follow-user toggle
-  - [ ] Pause screen
-  - [ ] Run summary screen
+  - [x] Pause screen
+  - [x] Run summary screen
+    - [x] Refactor from Redux to use Zustand for state management
+    - [x] Replace placeholder map with a real map view to display the run route
+    - [x] Implement pace and elevation profile charts
+    - [x] Implement logic to check and display personal records (PRs)
+    - [x] Integrate with the `useUnits` hook to display user-preferred units
+    - [x] Align UI with the global theme and use reusable `Card` and `Button` components
   - [ ] Save run screen
 - [ ] Run details view
   - [ ] Run statistics
