@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const RUN_STORAGE_KEY = '@strideSync/runState';
+const RUN_STORAGE_KEY = '@strideKeeper/runState';
 
 const initialState = {
   runStatus: 'idle', // 'idle'|'preRun'|'active'|'paused'|'saving'|'complete'

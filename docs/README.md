@@ -1,6 +1,6 @@
-# StrideSync Documentation
+# Stride Keeper Documentation
 
-Welcome to the StrideSync documentation! This documentation is organized into two main sections:
+Welcome to the Stride Keeper documentation! This documentation is organized into two main sections:
 
 ## User Guides
 - [Getting Started](./user-guides/getting-started.md)
@@ -19,4 +19,4 @@ Welcome to the StrideSync documentation! This documentation is organized into tw
 
 ## Contributing
 
-We welcome contributions to StrideSync! Please see our [Contributing Guide](./CONTRIBUTING.md) for more information on how to get started.
+We welcome contributions to Stride Keeper! Please see our [Contributing Guide](./CONTRIBUTING.md) for more information on how to get started.

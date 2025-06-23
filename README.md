@@ -1,4 +1,4 @@
-# 🏃‍♂️ StrideSync – Run Tracking & Shoe Management
+# 🏃‍♂️ Stride Keeper – Run Tracking & Shoe Management
 
 A modern running tracker and shoe management app built with React Native (Expo). Track your runs, monitor shoe mileage, and analyze your running statistics with a clean, intuitive interface.
 
@@ -48,8 +48,8 @@ A modern running tracker and shoe management app built with React Native (Expo).
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/0x000NULL/StrideSync.git
-   cd StrideSync
+   git clone https://github.com/0x000NULL/StrideKeeper.git
+   cd StrideKeeper
    ```
 
 2. Install dependencies:

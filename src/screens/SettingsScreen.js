@@ -201,7 +201,7 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        <Text style={styles.versionText}>StrideSync v1.0.0</Text>
+        <Text style={styles.versionText}>Stride Keeper v1.0.4</Text>
       </ScrollView>
     </View>
   );

@@ -1,4 +1,4 @@
-# StrideSync - Project Task List
+# Stride Keeper - Project Task List
 
 ## ✅ Project Setup (Completed)
 - [x] Initialize Git repository

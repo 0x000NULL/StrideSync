@@ -1,6 +1,6 @@
-# Unit Handling in StrideSync
+# Unit Handling in Stride Keeper
 
-This document explains how unit handling works in the StrideSync app.
+This document explains how unit handling works in the Stride Keeper app.
 
 ## Available Units
 

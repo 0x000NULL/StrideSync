@@ -60,7 +60,7 @@ export const createBackupSlice = (set, get) => ({
     try {
       const state = get();
       const stateJson = JSON.stringify(state, null, 2);
-      const fileUri = FileSystem.documentDirectory + 'StrideSync_Backup.json';
+      const fileUri = FileSystem.documentDirectory + 'StrideKeeper_Backup.json';
       await FileSystem.writeAsStringAsync(fileUri, stateJson, {
         encoding: FileSystem.EncodingType.UTF8,
       });
@@ -68,7 +68,7 @@ export const createBackupSlice = (set, get) => ({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'application/json',
-          dialogTitle: 'Share or save your StrideSync backup',
+          dialogTitle: 'Share or save your Stride Keeper backup',
         });
       } else {
         Alert.alert('Backup Saved', `Your backup has been saved to: ${fileUri}`);

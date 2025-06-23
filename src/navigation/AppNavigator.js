@@ -38,7 +38,7 @@ const MainStack = () => {
         },
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'StrideSync' }} />
+      <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Stride Keeper' }} />
       <Stack.Screen
         name="RunTracker"
         component={RunTrackerScreen}

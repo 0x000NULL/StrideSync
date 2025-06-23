@@ -1,6 +1,6 @@
 # Development Setup
 
-This guide will help you set up the development environment for StrideSync.
+This guide will help you set up the development environment for Stride Keeper.
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ This guide will help you set up the development environment for StrideSync.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/stride-sync-app.git
-   cd stride-sync-app
+   git clone https://github.com/yourusername/stride-keeper-app.git
+   cd stride-keeper-app
    ```
 
 2. **Install dependencies**

@@ -1,4 +1,4 @@
-# 🏃‍♂️ StrideSync – Offline-Only Running Tracker App
+# 🏃‍♂️ Stride Keeper – Offline-Only Running Tracker App
 
 A standalone, fully offline mobile running tracker built with **React Native (Expo)**. All data is stored locally using **SQLite** (via ElectricSQL). Includes real-time run tracking, detailed stats, route maps, and shoe mileage tracking. No cloud, no web, no backend API.
 

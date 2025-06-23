@@ -2,11 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Storage keys
 export const STORAGE_KEYS = {
-  RUNS: '@StrideSync:runs',
-  SHOES: '@StrideSync:shoes',
-  SHOE_USAGE: '@StrideSync:shoeUsage',
-  SETTINGS: '@StrideSync:settings',
-  VERSION: '@StrideSync:version',
+  RUNS: '@StrideKeeper:runs',
+  SHOES: '@StrideKeeper:shoes',
+  SHOE_USAGE: '@StrideKeeper:shoeUsage',
+  SETTINGS: '@StrideKeeper:settings',
+  VERSION: '@StrideKeeper:version',
 };
 
 // Current data version for migrations

@@ -1,6 +1,6 @@
 # Commit & Release Process
 
-This document describes the recommended day-to-day workflow for contributing code and releasing updates to StrideSync using **Expo**, **EAS**, and over-the-air (OTA) updates provided by `expo-updates`.
+This document describes the recommended day-to-day workflow for contributing code and releasing updates to Stride Keeper using **Expo**, **EAS**, and over-the-air (OTA) updates provided by `expo-updates`.
 
 ---
 ## 1. Quality gate before every commit
@@ -16,9 +16,41 @@ npm run test     # jest (all unit tests must pass)
 > 💡  CI will reject the build if any of these steps fail, so running them locally saves round-trips.
 
 ---
-## 2. Shipping JavaScript-only changes (OTA)
+## 2. Bump version numbers
 
-StrideSync uses *two* release channels:
+Before shipping any changes, update the version numbers in the following files:
+
+### package.json
+```json
+{
+  "version": "1.0.5"
+}
+```
+
+### app.json
+```json
+{
+  "expo": {
+    "version": "1.0.5"
+  }
+}
+```
+
+### src/screens/SettingsScreen.js
+Update the hardcoded version string:
+```jsx
+<Text style={styles.versionText}>Stride Keeper v1.0.5</Text>
+```
+
+> 💡 **Tip:** Use semantic versioning (MAJOR.MINOR.PATCH) where:
+> - **PATCH** (1.0.4 → 1.0.5): Bug fixes and small improvements
+> - **MINOR** (1.0.5 → 1.1.0): New features that don't break existing functionality  
+> - **MAJOR** (1.1.0 → 2.0.0): Breaking changes
+
+---
+## 3. Shipping JavaScript-only changes (OTA)
+
+Stride Keeper uses *two* release channels:
 
 * **staging** – internal testers / QA
 * **production** – end users in the stores
@@ -42,7 +74,7 @@ eas channel:promote staging production
 Users will download the new bundle the next time they launch the app. No app-store review is required.
 
 ---
-## 3. When native code or build-time config changes
+## 4. When native code or build-time config changes
 
 Some changes still **require a new binary** (e.g. adding native modules, modifying permissions, upgrading the Expo SDK). In that case:
 
@@ -72,7 +104,7 @@ Some changes still **require a new binary** (e.g. adding native modules, modifyi
 3. **(Optional) OTA patch after approval** – Once the stores approve the binary you can still push future JS-only fixes to the same runtime version using the staging → production flow above.
 
 ---
-## 4. Quick reference
+## 5. Quick reference
 
 | Task                                | Command |
 | ----------------------------------- | -------- |

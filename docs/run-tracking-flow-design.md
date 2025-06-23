@@ -1,7 +1,7 @@
 # Run Tracking Flow - Technical Design
 
 ## 1. Overview
-This document outlines the technical design for the run tracking flow in StrideSync, covering the complete user journey from pre-run preparation to saving a completed run.
+This document outlines the technical design for the run tracking flow in Stride Keeper, covering the complete user journey from pre-run preparation to saving a completed run.
 
 ## 2. Architecture
 

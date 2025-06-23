@@ -1,6 +1,6 @@
 # Run Tracking Guide
 
-Learn how to track your runs and analyze your performance with StrideSync.
+Learn how to track your runs and analyze your performance with Stride Keeper.
 
 ## Starting a Run
 
@@ -26,7 +26,7 @@ Learn how to track your runs and analyze your performance with StrideSync.
 
 ## Run Metrics
 
-StrideSync tracks various metrics to help you analyze your performance:
+Stride Keeper tracks various metrics to help you analyze your performance:
 
 - **Distance**: How far you've run
 - **Pace**: Your current speed (min/mile or min/km)

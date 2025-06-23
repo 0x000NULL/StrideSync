@@ -1,6 +1,6 @@
 # Shoe Management
 
-Track your running shoes and monitor their mileage with StrideSync's shoe management features.
+Track your running shoes and monitor their mileage with Stride Keeper's shoe management features.
 
 ## Adding a New Pair of Shoes
 
@@ -19,7 +19,7 @@ Track your running shoes and monitor their mileage with StrideSync's shoe manage
 
 ## Tracking Shoe Usage
 
-StrideSync automatically tracks:
+Stride Keeper automatically tracks:
 - Total distance run in each pair
 - Number of runs per pair
 - Last used date
@@ -96,7 +96,7 @@ Sort by:
 
 ## Shoe Rotation and Replacement Planning
 
-StrideSync helps you manage multiple pairs and plan replacements:
+Stride Keeper helps you manage multiple pairs and plan replacements:
 
 1. **Rotation Suggestions**: The app suggests which shoes to use next based on:
    - Mileage balance across your collection

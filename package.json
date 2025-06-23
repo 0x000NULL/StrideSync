@@ -1,6 +1,6 @@
 {
-  "name": "StrideSync",
-  "version": "1.0.4",
+  "name": "Stride Keeper",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "start": "expo start",

@@ -1,12 +1,12 @@
 # State Management with Zustand
 
-StrideSync uses Zustand for state management, providing a simple and scalable solution for managing application state with minimal boilerplate.
+Stride Keeper uses Zustand for state management, providing a simple and scalable solution for managing application state with minimal boilerplate.
 
 ## Core Concepts
 
 ### Store Organization
 
-StrideSync's state is organized into three main stores, each with a specific responsibility:
+Stride Keeper's state is organized into three main stores, each with a specific responsibility:
 
 1. **Run Store** (`runStore.js`)
    - Tracks current run state
@@ -98,7 +98,7 @@ function RunList() {
 
 ### Pre-defined Selectors
 
-StrideSync provides pre-defined selectors for common use cases:
+Stride Keeper provides pre-defined selectors for common use cases:
 
 ```javascript
 import { useRunStats, useShoeStats } from '../stores';
@@ -122,7 +122,7 @@ create(
       // ... store definition
     }),
     {
-      name: 'stride-sync-storage',
+      name: 'stride-keeper-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         runs: state.runs,

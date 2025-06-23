@@ -1,6 +1,6 @@
-# Getting Started with StrideSync
+# Getting Started with Stride Keeper
 
-Welcome to StrideSync, your personal running companion! This guide will help you get started with tracking your runs and managing your running gear.
+Welcome to Stride Keeper, your personal running companion! This guide will help you get started with tracking your runs and managing your running gear.
 
 ## Installation
 
@@ -12,16 +12,16 @@ Welcome to StrideSync, your personal running companion! This guide will help you
 ### Download and Install
 1. **For iOS Users**
    - Open the App Store on your iPhone or iPad
-   - Search for "StrideSync"
+   - Search for "Stride Keeper"
    - Tap "Get" and authenticate if prompted
 
 2. **For Android Users**
    - Open the Google Play Store
-   - Search for "StrideSync"
+   - Search for "Stride Keeper"
    - Tap "Install"
 
 ### First Launch
-1. Open the StrideSync app
+1. Open the Stride Keeper app
 2. Grant necessary permissions when prompted:
    - Location (Required for GPS tracking)
    - Notifications (For run reminders and achievements)
@@ -76,7 +76,7 @@ Welcome to StrideSync, your personal running companion! This guide will help you
 ## Syncing and Backing Up Your Data
 
 ### Automatic Backups
-StrideSync automatically saves your data locally on your device. For added security:
+Stride Keeper automatically saves your data locally on your device. For added security:
 
 1. Go to Settings > Backup
 2. Enable "Auto Backup"
@@ -118,7 +118,7 @@ StrideSync automatically saves your data locally on your device. For added secur
 
 4. **Join the Community**
    - Share your runs on social media
-   - Connect with other StrideSync users
+   - Connect with other Stride Keeper users
    - Participate in virtual challenges
 
 ## Getting Help
@@ -131,8 +131,8 @@ Need assistance? Here's how to get help:
    - Contact our support team
 
 2. **Online Resources**
-   - Visit our [Help Center](https://help.stridesync.app)
-   - Join our [Community Forum](https://community.stridesync.app)
+   - Visit our [Help Center](https://help.stridekeeper.app)
+   - Join our [Community Forum](https://community.stridekeeper.app)
    - Follow us on social media for tips and updates
 
 3. **Troubleshooting**

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "StrideSync",
-    "slug": "stridesync",
-    "version": "1.0.4",
+    "name": "Stride Keeper",
+    "slug": "Stride Keeper",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,12 +14,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ethanaldrich.stridesync",
+      "bundleIdentifier": "com.ethanaldrich.stridekeeper",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "StrideSync needs access to your location to track your runs accurately.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "StrideSync needs access to your location to track your runs in the background.",
-        "NSLocationAlwaysUsageDescription": "StrideSync needs access to your location to track your runs in the background.",
+        "NSLocationWhenInUseUsageDescription": "Stride Keeper needs access to your location to track your runs accurately.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Stride Keeper needs access to your location to track your runs in the background.",
+        "NSLocationAlwaysUsageDescription": "Stride Keeper needs access to your location to track your runs in the background.",
         "UIBackgroundModes": ["location", "fetch"]
       }
     },
@@ -30,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ethanaldrich.stridesync",
+      "package": "com.ethanaldrich.stridekeeper",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
