@@ -40,6 +40,126 @@ export const createRunStore = (set, get) => ({
 
   setSort: (sortBy, sortOrder = 'desc') => set({ sortBy, sortOrder }),
 
+  // Expose an async no-op loader so screens can trigger a refresh spinner
+  loadRuns: async () => {
+    // Because this store is persisted via zustand/middleware persist, the in-memory
+    // state already contains the most up-to-date runs after hydration.  For now
+    // this function simply toggles the loading flag briefly so that UIs relying
+    // on it (e.g. RunLogScreen) do not crash.
+    try {
+      set({ isLoading: true, error: null });
+      // Simulate a short asynchronous delay
+      await new Promise(resolve => setTimeout(resolve, 50));
+    } catch (err) {
+      set({ error: err?.message || 'Failed to load runs' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // Helper that returns a filtered & (optionally) sorted copy of the runs array
+  // based on the filter object that RunLogScreen passes in.
+  getFilteredRuns: filters => {
+    const { runs } = get();
+    if (!filters) return runs;
+
+    let result = [...runs];
+
+    // 1. Date range filtering
+    const now = new Date();
+    switch (filters.dateRange) {
+      case 'today': {
+        result = result.filter(r => {
+          const d = new Date(r.startTime);
+          return (
+            d.getDate() === now.getDate() &&
+            d.getMonth() === now.getMonth() &&
+            d.getFullYear() === now.getFullYear()
+          );
+        });
+        break;
+      }
+      case 'week': {
+        const weekAgo = new Date(now);
+        weekAgo.setDate(now.getDate() - 7);
+        result = result.filter(r => new Date(r.startTime) >= weekAgo);
+        break;
+      }
+      case 'month': {
+        const monthAgo = new Date(now);
+        monthAgo.setMonth(now.getMonth() - 1);
+        result = result.filter(r => new Date(r.startTime) >= monthAgo);
+        break;
+      }
+      case 'year': {
+        const yearAgo = new Date(now);
+        yearAgo.setFullYear(now.getFullYear() - 1);
+        result = result.filter(r => new Date(r.startTime) >= yearAgo);
+        break;
+      }
+      case 'custom': {
+        if (filters.startDate) {
+          const start = new Date(filters.startDate);
+          result = result.filter(r => new Date(r.startTime) >= start);
+        }
+        if (filters.endDate) {
+          const end = new Date(filters.endDate);
+          result = result.filter(r => new Date(r.startTime) <= end);
+        }
+        break;
+      }
+      default:
+        // 'all' – no additional date filtering
+        break;
+    }
+
+    // 2. Distance
+    if (filters.minDistance !== undefined && filters.minDistance !== '') {
+      const min = parseFloat(filters.minDistance);
+      if (!isNaN(min)) {
+        result = result.filter(r => (r.distance || 0) >= min);
+      }
+    }
+    if (filters.maxDistance !== undefined && filters.maxDistance !== '') {
+      const max = parseFloat(filters.maxDistance);
+      if (!isNaN(max)) {
+        result = result.filter(r => (r.distance || 0) <= max);
+      }
+    }
+
+    // 3. Shoe
+    if (filters.shoeId) {
+      result = result.filter(r => r.shoeId === filters.shoeId);
+    }
+
+    // 4. Sorting (defaults to newest first)
+    const sortBy = filters.sortBy || 'date-desc';
+    switch (sortBy) {
+      case 'date-asc':
+        result.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+        break;
+      case 'date-desc':
+        result.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+        break;
+      case 'distance-asc':
+        result.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        break;
+      case 'distance-desc':
+        result.sort((a, b) => (b.distance || 0) - (a.distance || 0));
+        break;
+      case 'duration-asc':
+        result.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+        break;
+      case 'duration-desc':
+        result.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  },
+
   addRun: runData => {
     const run = {
       ...runData,

@@ -120,7 +120,25 @@ const RunDetailScreen = ({ route }) => {
   }
 
   // Derived formatted values
-  const runDate = run.startTime ? parseISO(run.startTime) : null;
+  // Safely convert run.startTime to a Date instance. Older saved runs might
+  // store this value as a JavaScript Date object (or even a UNIX timestamp),
+  // while newer ones use an ISO-8601 string.  We guard against calling
+  // `parseISO` with anything other than a string to avoid runtime errors like
+  // "dateString.split is not a function".
+  let runDate = null;
+  if (run.startTime) {
+    if (typeof run.startTime === 'string') {
+      try {
+        runDate = parseISO(run.startTime);
+      } catch (err) {
+        // Fallback: attempt Date constructor if parseISO fails
+        runDate = new Date(run.startTime);
+      }
+    } else if (run.startTime instanceof Date || typeof run.startTime === 'number') {
+      // Date instance or timestamp
+      runDate = new Date(run.startTime);
+    }
+  }
   const formattedDate = runDate ? format(runDate, 'MMMM d, yyyy') : 'Unknown date';
   const formattedTime = runDate ? format(runDate, 'h:mm a') : '';
 
@@ -128,6 +146,14 @@ const RunDetailScreen = ({ route }) => {
   const displayDistance = run.distance ? formatDistance(run.distance) : { formatted: '-- --' }; // run.distance is in km
 
   const formattedDuration = formatDuration(run.duration);
+
+  // Determine route array (support legacy `locations` key)
+  const routePath =
+    (run.route && run.route.length > 0
+      ? run.route
+      : run.path && run.path.length > 0
+        ? run.path
+        : run.locations) || [];
 
   // Adjust pace calculation and display
   let displayPace = '--:--';
@@ -160,10 +186,10 @@ const RunDetailScreen = ({ route }) => {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.header}>Run Details</Text>
 
-      {run.locations && run.locations.length > 0 && (
+      {routePath.length > 0 && (
         <Card>
           <Text style={styles.cardTitle}>Route</Text>
-          <RunMapView path={run.locations} />
+          <RunMapView path={routePath} showUserLocation={false} />
         </Card>
       )}
 
@@ -218,7 +244,7 @@ const RunDetailScreen = ({ route }) => {
       <View style={styles.buttonContainer}>
         <Button
           title="Edit"
-          onPress={() => Alert.alert('Edit', 'Edit functionality coming soon!')}
+          onPress={() => navigation.navigate('EditRun', { runId })}
           variant="outline"
           style={[styles.flex1, { marginRight: theme.spacing.sm }]}
         />

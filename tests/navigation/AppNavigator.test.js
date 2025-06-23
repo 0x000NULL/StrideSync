@@ -88,7 +88,11 @@ jest.mock('../../src/theme/ThemeProvider', () => {
   // Reuse the already-imported React to avoid shadowing
   const PropTypes = require('prop-types');
   const ActualThemeProvider = jest.requireActual('../../src/theme/ThemeProvider');
+  const { theme: baseTheme } = jest.requireActual('../../src/theme/theme');
 
+  // A very light wrapper that simply renders children. We still want the
+  // hook to return a complete theme object so components that rely on
+  // values like `borderRadius.md` do not explode during unit tests.
   const ThemeProvider = ({ children }) => <>{children}</>;
   ThemeProvider.propTypes = {
     children: PropTypes.node,
@@ -96,16 +100,8 @@ jest.mock('../../src/theme/ThemeProvider', () => {
 
   return {
     ...ActualThemeProvider,
-    useTheme: () => ({
-      colors: {
-        primary: 'blue',
-        background: '#fff',
-        text: { primary: '#000' },
-        card: '#f0f0f0',
-        border: '#ccc',
-      },
-      spacing: { md: 16 },
-    }),
+    // Return the real theme so that all expected nested keys are present
+    useTheme: () => baseTheme,
     ThemeProvider,
   };
 });

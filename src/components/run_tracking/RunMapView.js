@@ -10,49 +10,67 @@ const COLORS = {
   black: '#000',
 };
 
-const RunMapView = ({ path }) => {
+const RunMapView = ({ path, showUserLocation = true }) => {
   const { colors } = useTheme();
   const [region, setRegion] = useState(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [isFollowingUser, setIsFollowingUser] = useState(true);
 
-  // Request location permission when component mounts
+  // Request location permission when we intend to show user location
   useEffect(() => {
+    if (!showUserLocation) {
+      setHasLocationPermission(false);
+      return;
+    }
+
     (async () => {
       try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
         setHasLocationPermission(status === 'granted');
 
         if (status !== 'granted') {
           console.log('Permission to access location was denied');
-          return;
         }
       } catch (err) {
         console.warn('Error getting location permission:', err);
       }
     })();
-  }, []);
+  }, [showUserLocation]);
 
-  // Initialize region to the user's current location once permission is granted
+  // Initialize region based on user location OR route path
   useEffect(() => {
-    const setInitialRegionAsync = async () => {
-      if (hasLocationPermission && !region) {
+    const initRegion = async () => {
+      if (region) return;
+
+      if (showUserLocation && hasLocationPermission) {
         try {
-          const location = await Location.getCurrentPositionAsync({});
+          const loc = await Location.getCurrentPositionAsync({});
           setRegion({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
             latitudeDelta: 0.002,
             longitudeDelta: 0.002,
           });
+          return;
         } catch (err) {
           console.warn('Error fetching current location:', err);
         }
       }
+
+      // Fallback: center on start of path if available
+      if (path && path.length > 0) {
+        const first = path[0];
+        setRegion({
+          latitude: first.latitude,
+          longitude: first.longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        });
+      }
     };
 
-    setInitialRegionAsync();
-  }, [hasLocationPermission, region]);
+    initRegion();
+  }, [showUserLocation, hasLocationPermission, path, region]);
 
   // Update map region when path changes and user following is active
   useEffect(() => {
@@ -74,7 +92,7 @@ const RunMapView = ({ path }) => {
     }
   };
 
-  if (!hasLocationPermission) {
+  if (showUserLocation && !hasLocationPermission) {
     return (
       <View style={[styles.mapView, styles.mapViewNoPermission]}>
         <Text style={{ color: colors.text.secondary }}>
@@ -92,17 +110,17 @@ const RunMapView = ({ path }) => {
       <MapView
         style={styles.map}
         region={region}
-        showsUserLocation={true}
-        followsUserLocation={isFollowingUser}
+        showsUserLocation={showUserLocation}
+        followsUserLocation={showUserLocation && isFollowingUser}
         onPanDrag={handlePanDrag}
-        showsMyLocationButton={true}
+        showsMyLocationButton={showUserLocation}
         loadingEnabled={true}
       >
         {path && path.length > 1 && (
           <Polyline coordinates={path} strokeColor={colors.primary} strokeWidth={4} />
         )}
         {startPoint && <Marker coordinate={startPoint} title="Start" pinColor="green" />}
-        {currentPoint && (
+        {showUserLocation && currentPoint && (
           <Marker coordinate={currentPoint} title="Current Location" pinColor="blue" />
         )}
       </MapView>
@@ -157,10 +175,12 @@ RunMapView.propTypes = {
       longitude: PropTypes.number.isRequired,
     })
   ),
+  showUserLocation: PropTypes.bool,
 };
 
 RunMapView.defaultProps = {
   path: [],
+  showUserLocation: true,
 };
 
 export default RunMapView;

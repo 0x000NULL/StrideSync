@@ -204,8 +204,20 @@ const RunLogScreen = ({ navigation }) => {
 
   // Format run data for display
   const formatRunItem = run => {
-    // run.distance is in km, run.pace is in seconds per km
-    const runDate = parseISO(run.startTime);
+    // Convert startTime into a Date regardless of whether it's an ISO string, timestamp, or Date instance
+    let runDate;
+    if (typeof run.startTime === 'string') {
+      try {
+        runDate = parseISO(run.startTime);
+      } catch {
+        // Fallback if parseISO fails (e.g., string not in ISO format)
+        runDate = new Date(run.startTime);
+      }
+    } else {
+      // Assume it's a number (epoch) or Date object
+      runDate = new Date(run.startTime);
+    }
+
     const shoe = run.shoeId ? getShoeById(run.shoeId) : null;
 
     const displayDistance = formatDistance(run.distance); // Uses user's preference

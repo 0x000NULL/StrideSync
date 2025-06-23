@@ -12,6 +12,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import AddShoeScreen from '../screens/AddShoeScreen';
 import EditShoeScreen from '../screens/EditShoeScreen';
 import RunDetailScreen from '../screens/RunDetailScreen';
+import EditRunScreen from '../screens/EditRunScreen';
 
 // Run Flow Screens
 import PreRunScreen from '../screens/run_tracking/PreRunScreen';
@@ -49,6 +50,7 @@ const MainStack = () => {
         component={RunDetailScreen}
         options={{ title: 'Run Details' }}
       />
+      <Stack.Screen name="EditRun" component={EditRunScreen} options={{ title: 'Edit Run' }} />
       <Stack.Screen name="ShoeList" component={ShoeListScreen} options={{ title: 'My Shoes' }} />
       <Stack.Screen
         name="ShoeDetail"

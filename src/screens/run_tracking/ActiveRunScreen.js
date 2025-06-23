@@ -107,13 +107,18 @@ const ActiveRunScreen = ({ navigation }) => {
   // TIMER MANAGEMENT SUITABLE FOR JEST FAKE TIMERS
   const [elapsedSeconds, setElapsedSeconds] = useState(currentRun?.duration || 0);
 
+  // Reset the local timer only when we switch to a completely new run (i.e. the run id changes).
+  // Mutations to the currentRun object – such as adding GPS points – should NOT reset the timer.
   useEffect(() => {
-    // Reset elapsed when run changes
     setElapsedSeconds(currentRun?.duration || 0);
-  }, [currentRun]); // Added currentRun as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRun?.id]);
 
   useEffect(() => {
     let timer;
+
+    // We only want to restart the interval if fundamental tracking state changes –
+    // not every time the run object mutates (e.g., when a new GPS point is added).
     const shouldRunTimer =
       currentRun &&
       !currentRun.isPaused &&
@@ -140,14 +145,16 @@ const ActiveRunScreen = ({ navigation }) => {
       // On cleanup, clear both the timeout (if still pending) and the interval.
       return () => {
         clearTimeout(startTimeout);
-        // Always call clearInterval so that tests spying on it detect the cleanup
         clearInterval(timer);
       };
     }
 
     // If we shouldn't run, just return a no-op cleanup.
     return () => {};
-  }, [currentRun, runStatus, isTracking]);
+    // Dependencies: only re-run when the run's identity or pause state changes, or when
+    // tracking status toggles.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRun?.id, currentRun?.isPaused, runStatus, isTracking]);
 
   const distance = currentRun?.distance || 0;
 
