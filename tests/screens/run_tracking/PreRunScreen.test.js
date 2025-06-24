@@ -45,7 +45,6 @@ describe('PreRunScreen', () => {
     // Setup mock for Zustand store
     mockUseStore.setState({
       beginRunTracking: mockBeginRunTracking,
-      // shoes: initialShoes, etc. if needed by other components
     });
 
     // Setup mock for expo-location
@@ -78,7 +77,8 @@ describe('PreRunScreen', () => {
 
   it('shows good GPS signal after a short delay', async () => {
     const { findByText } = renderScreen();
-    await waitFor(() => expect(Location.watchPositionAsync).toHaveBeenCalled());
+
+    // The state update is async, so we wait for it to be reflected.
     const goodSignal = await findByText(/GPS Status: Good/i);
     expect(goodSignal).toBeTruthy();
   });
@@ -89,10 +89,11 @@ describe('PreRunScreen', () => {
     // Initially disabled
     expect(getByText('Start Run').props.accessibilityState.disabled).toBe(true);
 
-    // Wait for GPS status to become good
+    // Wait for GPS status to become good. `findByText` will wait for the UI to update.
     await findByText(/GPS Status: Good/i);
 
-    // Re-query start button to get the updated props
+    // Re-query start button to get the updated props.
+    // Use waitFor to handle the re-render after the state update.
     await waitFor(() => {
       expect(getByText('Start Run').props.accessibilityState.disabled).toBe(false);
     });

@@ -70,6 +70,37 @@ jest.mock('expo-task-manager', () => ({
   // Add other exports as needed
 }));
 
+// Mock react-native-health
+jest.mock('react-native-health', () => ({
+  __esModule: true,
+  default: {
+    initHealthKit: jest.fn((permissions, callback) => callback(null)),
+    getHeartRateSamples: jest.fn((options, callback) => callback(null, [])),
+    getSamples: jest.fn((options, callback) => callback(null, [])),
+    getAuthStatus: jest.fn((permissions, callback) => callback(null, {})),
+    getLatestHeight: jest.fn((options, callback) => callback(null, {})),
+    getLatestWeight: jest.fn((options, callback) => callback(null, {})),
+    getDateOfBirth: jest.fn((options, callback) => callback(null, {})),
+    getBiologicalSex: jest.fn((options, callback) => callback(null, {})),
+    saveWorkout: jest.fn((options, callback) => callback(null, {})),
+    Constants: {
+      Permissions: {
+        HeartRate: 'HeartRate',
+        RestingHeartRate: 'RestingHeartRate',
+        HeartRateVariability: 'HeartRateVariability',
+        Height: 'Height',
+        Weight: 'Weight',
+        DateOfBirth: 'DateOfBirth',
+        BiologicalSex: 'BiologicalSex',
+        Steps: 'Steps',
+        DistanceWalkingRunning: 'DistanceWalkingRunning',
+        ActiveEnergyBurned: 'ActiveEnergyBurned',
+        Workout: 'Workout',
+      },
+    },
+  },
+}));
+
 // Suppress specific console errors
 const originalConsoleError = console.error;
 console.error = (...args) => {

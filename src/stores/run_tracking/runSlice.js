@@ -250,8 +250,16 @@ const runSlice = createSlice({
     discardRun: state => {
       state.currentRun = null;
       state.runStatus = 'idle';
-      // Save state after discarding a run
+      state.isTracking = false;
+      // Save state after discarding a run to clear it from storage
       saveRelevantState(state);
+    },
+    updateCurrentRun: (state, action) => {
+      if (state.currentRun) {
+        state.currentRun = { ...state.currentRun, ...action.payload };
+        // Save state whenever current run is updated
+        saveRelevantState(state);
+      }
     },
     // loadRuns reducer is effectively replaced by loadStateFromStorage thunk and rehydrateState
     // deleteRun and updateRun should also call saveRelevantState
@@ -396,7 +404,7 @@ export const {
   stopRun,
   saveRun,
   discardRun,
-  // loadRuns is removed as its functionality is covered by loadStateFromStorage
+  // loadRuns is removed as its functionality is covered by loadStateFromStorage thunk and rehydrateState
   deleteRun,
   updateRun,
   setBackgroundTaskRegistered,
@@ -406,6 +414,7 @@ export const {
   setError,
   clearError,
   addLapToCurrentRun,
+  updateCurrentRun,
 } = runSlice.actions;
 
 export default runSlice.reducer;

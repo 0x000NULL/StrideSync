@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { saveRun, cancelActiveRun, setSelectedRunId } from '../../stores/run_tracking/runSlice';
 import PropTypes from 'prop-types';
+import { useStore } from '../../stores/useStore';
+import healthService from '../../services/healthService';
+import {
+  calculateEnhancedTRIMP,
+  calculateAccurateCalories,
+  analyzeHeartRateZones,
+  calculateTrainingZones,
+} from '../../utils/runningMetrics';
 
 // Import newly extracted components
 import RunDetailsForm from '../../components/run_tracking/save_run/RunDetailsForm';
@@ -13,8 +21,8 @@ import { theme } from '../../theme/theme';
 
 const SaveRunScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  // Changed to use useStore hook from Zustand
   const currentRun = useSelector(state => state.run.currentRun);
+  const settings = useStore(state => state.settings); // Get settings from Zustand
   const runStatus = useSelector(state => state.run.runStatus);
 
   const [runName, setRunName] = useState('');
@@ -49,6 +57,32 @@ const SaveRunScreen = ({ navigation }) => {
       return;
     }
 
+    let enhancedMetrics = {};
+    if (currentRun.heartRateSamples && currentRun.heartRateSamples.length > 0 && settings) {
+      const { heartRateSamples } = currentRun;
+      const durationMinutes = (currentRun.finalDuration || currentRun.duration || 0) / 60;
+      const avgHeartRate =
+        heartRateSamples.reduce((sum, s) => sum + s.value, 0) / heartRateSamples.length;
+
+      const userBiometrics = {
+        weight: settings.weight,
+        age: settings.age,
+        gender: settings.gender,
+        restingHR: settings.restingHR, // Assuming these are in settings
+        maxHR: settings.maxHR,
+      };
+
+      const heartRateZones = calculateTrainingZones(userBiometrics.maxHR, userBiometrics.restingHR);
+
+      enhancedMetrics = {
+        avgHeartRate: avgHeartRate,
+        maxHeartRate: Math.max(...heartRateSamples.map(s => s.value)),
+        accurateCalories: calculateAccurateCalories(durationMinutes, avgHeartRate, userBiometrics),
+        enhancedTRIMP: calculateEnhancedTRIMP(durationMinutes, avgHeartRate, userBiometrics),
+        heartRateZones: analyzeHeartRateZones(heartRateSamples, heartRateZones),
+      };
+    }
+
     const finalRunData = {
       ...currentRun,
       name: runName,
@@ -57,11 +91,25 @@ const SaveRunScreen = ({ navigation }) => {
       weather: { ...(currentRun.weather || {}), condition: weather },
       effort,
       mood,
+      ...enhancedMetrics, // Add enhanced metrics to the run data
       distance: currentRun.finalDistance ?? currentRun.distance ?? 0,
       duration: currentRun.finalDuration || currentRun.duration || 0,
       status: 'completed',
       endTime: currentRun.endTime || Date.now(),
     };
+
+    if (Platform.OS === 'ios' && healthService.isInitialized) {
+      const workout = {
+        activityType: 'Running',
+        startDate: new Date(finalRunData.startTime).toISOString(),
+        endDate: new Date(finalRunData.endTime).toISOString(),
+        distance: finalRunData.distance / 1000, // to km
+        energyBurned: finalRunData.accurateCalories,
+      };
+      healthService.saveWorkout(workout, (err, success) => {
+        if (err) console.log('Error saving workout to HealthKit');
+      });
+    }
 
     dispatch(saveRun(finalRunData));
     dispatch(setSelectedRunId(finalRunData.id));

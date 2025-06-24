@@ -6,6 +6,13 @@ export const createSettingsStore = (set, get) => ({
     weightUnit: 'kg', // 'kg' or 'lbs'
     temperatureUnit: 'celsius', // 'celsius' or 'fahrenheit'
 
+    // Biometrics (can be manually entered or synced from HealthKit)
+    gender: null, // 'male', 'female', 'other'
+    height: null, // in cm
+    weight: null, // in kg, matches weightUnit
+    birthDate: null, // ISO 8601 string (e.g., 'YYYY-MM-DD')
+    age: null, // calculated from birthDate
+
     // Run tracking
     autoPause: false,
     voiceFeedback: true,
@@ -51,6 +58,22 @@ export const createSettingsStore = (set, get) => ({
     }));
 
     // Apply any side effects
+    if (updates.birthDate) {
+      const birthDate = new Date(updates.birthDate);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      set(state => ({
+        settings: {
+          ...state.settings,
+          age: age,
+        },
+      }));
+    }
+
     // Example: If theme changes, you might want to update the app theme here
     if (updates.theme) {
       // Apply theme changes (implementation depends on your theming solution)

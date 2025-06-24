@@ -9,14 +9,13 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import RunMapView from '../components/run_tracking/RunMapView';
 import { useUnits } from '../hooks/useUnits'; // Import useUnits
-import { 
-  calculateVO2Max, 
-  calculateVDOT, 
+import {
+  calculateVO2Max,
+  calculateVDOT,
   calculateTRIMP,
   calculateRunningEconomy,
   calculateRunningPower,
   calculateStrideMetrics,
-  formatTime 
 } from '../utils/runningMetrics';
 import PropTypes from 'prop-types';
 
@@ -86,6 +85,14 @@ const getStyles = theme =>
     flex1: {
       // Added style for flex: 1
       flex: 1,
+    },
+    notesRow: {
+      alignItems: 'flex-start',
+    },
+    notesValue: {
+      flex: 1,
+      textAlign: 'right',
+      marginLeft: 8,
     },
   });
 
@@ -250,43 +257,83 @@ const RunDetailScreen = ({ route }) => {
         )}
       </Card>
 
+      {/* Health Metrics Card */}
+      {run.avgHeartRate && (
+        <Card>
+          <Text style={styles.cardTitle}>Health Metrics</Text>
+          <View style={styles.rowBetween}>
+            <Text style={styles.label}>Avg. Heart Rate</Text>
+            <Text style={styles.value}>{Math.round(run.avgHeartRate)} bpm</Text>
+          </View>
+          {run.maxHeartRate && (
+            <View style={styles.rowBetween}>
+              <Text style={styles.label}>Max Heart Rate</Text>
+              <Text style={styles.value}>{Math.round(run.maxHeartRate)} bpm</Text>
+            </View>
+          )}
+          {run.accurateCalories && (
+            <View style={styles.rowBetween}>
+              <Text style={styles.label}>Calories Burned (Est.)</Text>
+              <Text style={styles.value}>{Math.round(run.accurateCalories)}</Text>
+            </View>
+          )}
+          {run.enhancedTRIMP && (
+            <View style={styles.rowBetween}>
+              <Text style={styles.label}>Training Load (TRIMP)</Text>
+              <Text style={styles.value}>{Math.round(run.enhancedTRIMP)}</Text>
+            </View>
+          )}
+          {run.heartRateZones && (
+            <>
+              <Text style={styles.label}>Time in Zones:</Text>
+              {Object.entries(run.heartRateZones).map(([zone, time]) => (
+                <View style={styles.rowBetween} key={zone}>
+                  <Text style={styles.label}>{`Zone ${zone.charAt(zone.length - 1)}`}</Text>
+                  <Text style={styles.value}>{formatDuration(time)}</Text>
+                </View>
+              ))}
+            </>
+          )}
+        </Card>
+      )}
+
       {/* Performance Metrics Card */}
       <Card>
         <Text style={styles.cardTitle}>Performance Metrics</Text>
-        
+
         {/* VO2 Max and VDOT */}
         {(() => {
           const distanceKm = run.distance ? run.distance / 1000 : 0;
           const vo2Max = calculateVO2Max(distanceKm, run.duration);
           const vdot = calculateVDOT(distanceKm, run.duration);
-          
+
           return (
             <>
-              {vo2Max && (
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>Estimated VO₂ Max</Text>
-                  <Text style={styles.value}>{vo2Max.toFixed(1)} ml/kg/min</Text>
-                </View>
-              )}
-              {vdot && (
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>VDOT</Text>
-                  <Text style={styles.value}>{vdot.toFixed(1)}</Text>
-                </View>
-              )}
+              <View style={styles.rowBetween}>
+                <Text style={styles.label}>Estimated VO₂ Max</Text>
+                <Text style={styles.value}>
+                  {vo2Max ? `${vo2Max.toFixed(1)} ml/kg/min` : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.rowBetween}>
+                <Text style={styles.label}>VDOT</Text>
+                <Text style={styles.value}>{vdot ? vdot.toFixed(1) : 'N/A'}</Text>
+              </View>
             </>
           );
         })()}
 
         {/* Training Load (TRIMP) */}
-        {run.avgHeartRate && (() => {
-          const trimp = calculateTRIMP(run.duration / 60, run.avgHeartRate);
-          return trimp ? (
+        {(() => {
+          const trimp = run.avgHeartRate
+            ? calculateTRIMP(run.duration / 60, run.avgHeartRate)
+            : null;
+          return (
             <View style={styles.rowBetween}>
               <Text style={styles.label}>Training Load (TRIMP)</Text>
-              <Text style={styles.value}>{trimp.toFixed(0)}</Text>
+              <Text style={styles.value}>{trimp ? trimp.toFixed(0) : 'N/A'}</Text>
             </View>
-          ) : null;
+          );
         })()}
 
         {/* Running Economy */}
@@ -294,118 +341,128 @@ const RunDetailScreen = ({ route }) => {
           const distanceKm = run.distance ? run.distance / 1000 : 0;
           const vo2Max = calculateVO2Max(distanceKm, run.duration);
           const runningEconomy = calculateRunningEconomy(vo2Max, run.pace);
-          
-          return runningEconomy ? (
+
+          return (
             <View style={styles.rowBetween}>
               <Text style={styles.label}>Running Economy</Text>
-              <Text style={styles.value}>{runningEconomy.toFixed(1)} ml/kg/km</Text>
+              <Text style={styles.value}>
+                {runningEconomy ? `${runningEconomy.toFixed(1)} ml/kg/km` : 'N/A'}
+              </Text>
             </View>
-          ) : null;
+          );
         })()}
 
         {/* Estimated Power */}
         {(() => {
           const power = calculateRunningPower(run.pace, 70, run.elevationGain || 0);
-          return power ? (
+          return (
             <View style={styles.rowBetween}>
               <Text style={styles.label}>Estimated Power</Text>
-              <Text style={styles.value}>{power.toFixed(0)} W</Text>
+              <Text style={styles.value}>{power ? `${power.toFixed(0)} W` : 'N/A'}</Text>
             </View>
-          ) : null;
+          );
         })()}
 
         {/* Stride Metrics */}
-        {run.cadence && (() => {
+        {(() => {
           const velocityKmh = run.pace ? 3600 / run.pace : 0;
-          const strideMetrics = calculateStrideMetrics(run.cadence, velocityKmh);
-          
-          return strideMetrics ? (
+          const strideMetrics = run.cadence
+            ? calculateStrideMetrics(run.cadence, velocityKmh)
+            : null;
+
+          return (
             <>
               <View style={styles.rowBetween}>
                 <Text style={styles.label}>Stride Length</Text>
-                <Text style={styles.value}>{strideMetrics.strideLength.toFixed(2)} m</Text>
+                <Text style={styles.value}>
+                  {strideMetrics ? `${strideMetrics.strideLength.toFixed(2)} m` : 'N/A'}
+                </Text>
               </View>
               <View style={styles.rowBetween}>
                 <Text style={styles.label}>Stride Rate</Text>
-                <Text style={styles.value}>{strideMetrics.strideRate.toFixed(0)} spm</Text>
+                <Text style={styles.value}>
+                  {strideMetrics ? `${strideMetrics.strideRate.toFixed(0)} spm` : 'N/A'}
+                </Text>
               </View>
             </>
-          ) : null;
+          );
         })()}
 
         {/* Max Heart Rate */}
-        {run.maxHeartRate > 0 && (
-          <View style={styles.rowBetween}>
-            <Text style={styles.label}>Max Heart Rate</Text>
-            <Text style={styles.value}>{run.maxHeartRate.toFixed(0)} bpm</Text>
-          </View>
-        )}
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Max Heart Rate</Text>
+          <Text style={styles.value}>
+            {run.maxHeartRate > 0 ? `${run.maxHeartRate.toFixed(0)} bpm` : 'N/A'}
+          </Text>
+        </View>
 
         {/* Elevation Loss */}
-        {run.elevationLoss > 0 && (
-          <View style={styles.rowBetween}>
-            <Text style={styles.label}>Elevation Loss</Text>
-            <Text style={styles.value}>{run.elevationLoss.toFixed(0)} m</Text>
-          </View>
-        )}
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Elevation Loss</Text>
+          <Text style={styles.value}>
+            {run.elevationLoss > 0 ? `${run.elevationLoss.toFixed(0)} m` : 'N/A'}
+          </Text>
+        </View>
 
         {/* Workout Type and Effort */}
-        {run.workoutType && (
-          <View style={styles.rowBetween}>
-            <Text style={styles.label}>Workout Type</Text>
-            <Text style={styles.value}>{run.workoutType.charAt(0).toUpperCase() + run.workoutType.slice(1)}</Text>
-          </View>
-        )}
-        
-        {run.effort && (
-          <View style={styles.rowBetween}>
-            <Text style={styles.label}>Effort Level (RPE)</Text>
-            <Text style={styles.value}>{run.effort}/5</Text>
-          </View>
-        )}
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Workout Type</Text>
+          <Text style={styles.value}>
+            {run.workoutType
+              ? run.workoutType.charAt(0).toUpperCase() + run.workoutType.slice(1)
+              : 'N/A'}
+          </Text>
+        </View>
 
-        {run.mood && (
-          <View style={styles.rowBetween}>
-            <Text style={styles.label}>Mood</Text>
-            <Text style={styles.value}>{run.mood.charAt(0).toUpperCase() + run.mood.slice(1)}</Text>
-          </View>
-        )}
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Effort Level (RPE)</Text>
+          <Text style={styles.value}>{run.effort ? `${run.effort}/5` : 'N/A'}</Text>
+        </View>
+
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Mood</Text>
+          <Text style={styles.value}>
+            {run.mood ? run.mood.charAt(0).toUpperCase() + run.mood.slice(1) : 'N/A'}
+          </Text>
+        </View>
       </Card>
 
       {/* Weather and Additional Details */}
-      {(run.weather || run.notes || run.surfaceType) && (
-        <Card>
-          <Text style={styles.cardTitle}>Additional Details</Text>
-          
-          {run.weather && run.weather.temperature && (
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Temperature</Text>
-              <Text style={styles.value}>{run.weather.temperature.toFixed(0)}°C</Text>
-            </View>
-          )}
-          
-          {run.weather && run.weather.condition && (
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Weather</Text>
-              <Text style={styles.value}>{run.weather.condition.charAt(0).toUpperCase() + run.weather.condition.slice(1)}</Text>
-            </View>
-          )}
-          
-          {run.surfaceType && (
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Surface Type</Text>
-              <Text style={styles.value}>{run.surfaceType.charAt(0).toUpperCase() + run.surfaceType.slice(1)}</Text>
-            </View>
-          )}
-          
-          {run.notes && (
-            <View style={[styles.rowBetween, { alignItems: 'flex-start' }]}>
-              <Text style={styles.label}>Notes</Text>
-              <Text style={[styles.value, { flex: 1, textAlign: 'right', marginLeft: 8 }]}>{run.notes}</Text>
-            </View>
-          )}
-        </Card>
-      )}
+      <Card>
+        <Text style={styles.cardTitle}>Additional Details</Text>
+
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Temperature</Text>
+          <Text style={styles.value}>
+            {run.weather && run.weather.temperature
+              ? `${run.weather.temperature.toFixed(0)}°C`
+              : 'N/A'}
+          </Text>
+        </View>
+
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Weather</Text>
+          <Text style={styles.value}>
+            {run.weather && run.weather.condition
+              ? run.weather.condition.charAt(0).toUpperCase() + run.weather.condition.slice(1)
+              : 'N/A'}
+          </Text>
+        </View>
+
+        <View style={styles.rowBetween}>
+          <Text style={styles.label}>Surface Type</Text>
+          <Text style={styles.value}>
+            {run.surfaceType
+              ? run.surfaceType.charAt(0).toUpperCase() + run.surfaceType.slice(1)
+              : 'N/A'}
+          </Text>
+        </View>
+
+        <View style={[styles.rowBetween, styles.notesRow]}>
+          <Text style={styles.label}>Notes</Text>
+          <Text style={[styles.value, styles.notesValue]}>{run.notes || 'N/A'}</Text>
+        </View>
+      </Card>
 
       <View style={styles.buttonContainer}>
         <Button

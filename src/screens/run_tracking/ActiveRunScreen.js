@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Button, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useStore } from '../../stores/useStore';
 import { useTheme } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -7,6 +7,7 @@ import * as runSliceActions from '../../stores/run_tracking/runSlice';
 import * as Location from 'expo-location';
 import { useUnits } from '../../hooks/useUnits'; // Import useUnits
 import PropTypes from 'prop-types';
+import healthService from '../../services/healthService';
 
 // Import extracted components
 import RunMapView from '../../components/run_tracking/RunMapView';
@@ -102,10 +103,59 @@ const ActiveRunScreen = ({ navigation }) => {
 
   const zustandPauseRun = useStore(state => state.pauseRun);
   const zustandResumeRun = useStore(state => state.resumeRun);
-  const zustandSaveRun = useStore(state => state.saveRun);
 
   // TIMER MANAGEMENT SUITABLE FOR JEST FAKE TIMERS
   const [elapsedSeconds, setElapsedSeconds] = useState(currentRun?.duration || 0);
+  const [isHealthKitEnabled, setIsHealthKitEnabled] = useState(false);
+  const [realtimeHeartRate, setRealtimeHeartRate] = useState(null);
+  const heartRateIntervalRef = useRef(null);
+
+  // Initialize HealthKit
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    healthService.initialize((error, success) => {
+      if (success) {
+        setIsHealthKitEnabled(true);
+      }
+    });
+  }, []);
+
+  // Start/Stop Heart Rate Monitoring based on run status
+  useEffect(() => {
+    const shouldMonitor = isHealthKitEnabled && currentRun && !currentRun.isPaused;
+
+    if (shouldMonitor) {
+      startHeartRateMonitoring();
+    } else {
+      stopHeartRateMonitoring();
+    }
+
+    return () => stopHeartRateMonitoring();
+  }, [isHealthKitEnabled, currentRun]);
+
+  const startHeartRateMonitoring = () => {
+    if (heartRateIntervalRef.current) return; // Already running
+
+    heartRateIntervalRef.current = setInterval(() => {
+      const options = {
+        startDate: new Date(Date.now() - 30000).toISOString(), // last 30 seconds
+      };
+      healthService.getHeartRateSamples(options, (err, results) => {
+        if (!err && results && results.length > 0) {
+          const latestSample = results[results.length - 1];
+          setRealtimeHeartRate(latestSample.value);
+          // Optional: Dispatch to store to save HR samples with the run
+        }
+      });
+    }, 10000); // Poll every 10 seconds
+  };
+
+  const stopHeartRateMonitoring = () => {
+    if (heartRateIntervalRef.current) {
+      clearInterval(heartRateIntervalRef.current);
+      heartRateIntervalRef.current = null;
+    }
+  };
 
   // Reset the local timer only when we switch to a completely new run (i.e. the run id changes).
   // Mutations to the currentRun object – such as adding GPS points – should NOT reset the timer.
@@ -177,10 +227,27 @@ const ActiveRunScreen = ({ navigation }) => {
   };
 
   const handleStopRun = () => {
-    console.log('Stopping run...');
-    if (dispatch) dispatch(runSliceActions.completeRunTracking());
-    if (zustandSaveRun) zustandSaveRun();
-    navigation.navigate('SaveRun');
+    stopHeartRateMonitoring();
+    const finalizeRun = (heartRateSamples = []) => {
+      if (dispatch) {
+        dispatch(runSliceActions.updateCurrentRun({ heartRateSamples }));
+        dispatch(runSliceActions.completeRunTracking());
+      }
+      // Handle Zustand if necessary
+      navigation.navigate('SaveRun');
+    };
+
+    if (isHealthKitEnabled && currentRun) {
+      const options = {
+        startDate: new Date(currentRun.startTime).toISOString(),
+        endDate: new Date().toISOString(),
+      };
+      healthService.getHeartRateSamples(options, (err, heartRateSamples) => {
+        finalizeRun(err ? [] : heartRateSamples);
+      });
+    } else {
+      finalizeRun();
+    }
   };
 
   // If there's no active run, schedule navigation back to Home and render a placeholder screen.
@@ -278,16 +345,16 @@ const ActiveRunScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <BatteryOptimizationIndicator isActive={false} />
       <RunMapView path={currentRun?.path || currentRun?.route} />
-      <StatsDisplay distance={distance} duration={elapsedSeconds} />
+      <StatsDisplay distance={distance} duration={elapsedSeconds} heartRate={realtimeHeartRate} />
       <ControlButtons
         onPause={handlePauseResume}
         onLap={handleLap}
         onStop={handleStopRun}
-        isPaused={currentRun.isPaused || runStatus === 'paused'}
+        isPaused={currentRun?.isPaused}
       />
-      <LapsDisplay laps={currentRun.laps} unitUtils={unitUtils} />
-      <BatteryOptimizationIndicator isActive={true} />
+      {currentRun?.laps && <LapsDisplay laps={currentRun.laps} unitUtils={unitUtils} />}
       {__DEV__ && (
         <View style={[styles.debugInfo, { backgroundColor: colors.border }]}>
           <Text style={{ color: colors.text.secondary }}>
@@ -355,21 +422,8 @@ BatteryOptimizationIndicator.propTypes = {
 };
 
 LapsDisplay.propTypes = {
-  laps: PropTypes.arrayOf(
-    PropTypes.shape({
-      distance: PropTypes.number.isRequired,
-      duration: PropTypes.number.isRequired,
-    })
-  ),
-  unitUtils: PropTypes.shape({
-    formatDistance: PropTypes.func.isRequired,
-    distanceUnit: PropTypes.string.isRequired,
-    fromKilometers: PropTypes.func.isRequired,
-  }).isRequired,
-};
-
-LapsDisplay.defaultProps = {
-  laps: [],
+  laps: PropTypes.array,
+  unitUtils: PropTypes.object.isRequired,
 };
 
 ActiveRunScreen.propTypes = {

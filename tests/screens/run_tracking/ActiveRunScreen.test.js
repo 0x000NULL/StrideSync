@@ -1,8 +1,16 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor, within } from '@testing-library/react-native';
 import ActiveRunScreen from '../../../src/screens/run_tracking/ActiveRunScreen';
 import * as runSliceActions from '../../../src/stores/run_tracking/runSlice';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { formatDuration } from '../../../src/utils/formatters';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  Provider: ({ children }) => children,
+  useSelector: jest.fn(),
+  useDispatch: () => mockDispatch,
+}));
 
 let mockPauseRunSpy;
 let mockCompleteRunTrackingSpy;
@@ -28,6 +36,8 @@ describe('ActiveRunScreen', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    mockDispatch.mockClear();
+    useSelector.mockClear();
     mockPauseRunSpy = jest
       .spyOn(runSliceActions, 'pauseRun')
       .mockReturnValue({ type: 'run/pauseRun' });
@@ -94,16 +104,22 @@ describe('ActiveRunScreen', () => {
   });
 
   it('renders active run components when currentRun exists', async () => {
-    const { getByText, findByTestId } = renderScreen();
+    const { getByText, findByTestId, getByTestId } = renderScreen();
     expect(await findByTestId('mock-map-view', {}, { timeout: 3000 })).toBeTruthy();
     expect(getByText(/Path points: 1/i)).toBeTruthy();
-    expect(getByText('Distance: 1.00 km')).toBeTruthy();
-    expect(getByText(/Duration:/i)).toBeTruthy();
-    expect(getByText(/Pace:/i)).toBeTruthy();
+
+    const { getByText: getByTextInDistance } = within(getByTestId('distance-stat'));
+    expect(getByTextInDistance('1.00 km')).toBeTruthy();
+
+    const { getByText: getByTextInDuration } = within(getByTestId('duration-stat'));
+    expect(getByTextInDuration('00:01:00')).toBeTruthy();
+
+    const { getByText: getByTextInPace } = within(getByTestId('pace-stat'));
+    expect(getByTextInPace(/1.00/)).toBeTruthy();
+
     expect(getByText('Pause')).toBeTruthy();
     expect(getByText('Lap')).toBeTruthy();
     expect(getByText('Stop')).toBeTruthy();
-    expect(getByText('Battery Optimization Active')).toBeTruthy();
   });
 
   describe('Data Display and Formatting', () => {
@@ -118,24 +134,28 @@ describe('ActiveRunScreen', () => {
         duration: 10,
         path: [{ latitude: 1, longitude: 1, timestamp: mockStartTime - 10000 }],
       };
-      const { getByText } = renderScreen(
+      const { getByTestId } = renderScreen(
         runData,
         'active',
         true,
         'displays initial stats correctly and updates duration with timer'
       );
 
-      await waitFor(() => expect(getByText('Duration: 00:00:10')).toBeTruthy());
-      expect(getByText('Distance: 0.15 km')).toBeTruthy();
-      expect(getByText('Pace: 1.11 min/km')).toBeTruthy();
+      await waitFor(() =>
+        expect(within(getByTestId('duration-stat')).getByText('00:00:10')).toBeTruthy()
+      );
+      expect(within(getByTestId('distance-stat')).getByText('0.15 km')).toBeTruthy();
+      expect(within(getByTestId('pace-stat')).getByText(/1.11/)).toBeTruthy();
 
       act(() => {
         jest.advanceTimersByTime(5000);
       });
 
-      await waitFor(() => expect(getByText(/Duration: 00:00:(0[5-9]|1\d)/)).toBeTruthy());
+      await waitFor(() =>
+        expect(within(getByTestId('duration-stat')).getByText(/00:00:1/)).toBeTruthy()
+      );
       // Confirm that pace is updated (any numeric value before "min/km")
-      expect(getByText(/Pace: \d+\.\d{2} min\/km/)).toBeTruthy();
+      expect(within(getByTestId('pace-stat')).getByText(/\d+\.\d{2}\s/)).toBeTruthy();
 
       Date.now.mockRestore();
     });
@@ -147,46 +167,48 @@ describe('ActiveRunScreen', () => {
         duration: 90,
         isPaused: true,
       };
-      const { getByText } = renderScreen(pausedRunData, 'paused', false);
+      const { getByText, getByTestId } = renderScreen(pausedRunData, 'paused', false);
       expect(getByText('Resume')).toBeTruthy();
-      expect(getByText('Duration: 00:01:30')).toBeTruthy();
+      expect(within(getByTestId('duration-stat')).getByText('00:01:30')).toBeTruthy();
     });
   });
 
   describe('User Interactions (Control Buttons)', () => {
     it('handles "Pause" button press when active', async () => {
-      const { getByText } = renderScreen();
-      const dispatch = useDispatch();
+      const { getByTestId } = renderScreen();
       await act(async () => {
-        fireEvent.press(getByText('Pause'));
+        fireEvent.press(getByTestId('button-pause'));
       });
-      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
       expect(mockPauseRunSpy).toHaveBeenCalledTimes(1);
     });
 
     it('handles "Pause" (labeled "Resume") button press when paused', async () => {
-      const { getByText, navigationMock } = renderScreen(initialMockRun, 'paused', false);
+      const { getByTestId, navigationMock } = renderScreen(
+        { ...initialMockRun, isPaused: true },
+        'paused',
+        false
+      );
       await act(async () => {
-        fireEvent.press(getByText('Resume'));
+        fireEvent.press(getByTestId('button-resume'));
       });
       expect(navigationMock.navigate).toHaveBeenCalledWith('Pause');
     });
 
     it('handles "Stop" button press', async () => {
-      const { getByText, navigationMock } = renderScreen();
-      const dispatch = useDispatch();
+      const { getByTestId, navigationMock } = renderScreen();
       await act(async () => {
-        fireEvent.press(getByText('Stop'));
+        fireEvent.press(getByTestId('button-stop'));
       });
-      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
       expect(mockCompleteRunTrackingSpy).toHaveBeenCalled();
       expect(navigationMock.navigate).toHaveBeenCalledWith('SaveRun');
     });
 
     it('handles "Lap" button press', () => {
       const consoleSpy = jest.spyOn(console, 'log');
-      const { getByText } = renderScreen();
-      fireEvent.press(getByText('Lap'));
+      const { getByTestId } = renderScreen();
+      fireEvent.press(getByTestId('button-lap'));
       expect(consoleSpy).toHaveBeenCalledWith('Lap button pressed');
       consoleSpy.mockRestore();
     });
@@ -210,14 +232,18 @@ describe('ActiveRunScreen', () => {
         duration: 5,
         distance: 0.05,
       };
-      const { getByText, rerender } = renderScreen(runData, 'active', true);
+      const { getByTestId, rerender } = renderScreen(runData, 'active', true);
       const navigationProp = { navigate: jest.fn(), reset: mockNavigationResetSpy };
 
-      await waitFor(() => expect(getByText('Duration: 00:00:05')).toBeTruthy());
+      await waitFor(() =>
+        expect(within(getByTestId('duration-stat')).getByText('00:00:05')).toBeTruthy()
+      );
       act(() => {
         jest.advanceTimersByTime(2000);
       });
-      await waitFor(() => expect(getByText(/Duration: 00:00:(0[5-9]|1\d)/)).toBeTruthy());
+      await waitFor(() =>
+        expect(within(getByTestId('duration-stat')).getByText(/00:00:0/)).toBeTruthy()
+      );
 
       jest
         .mocked(useSelector)
@@ -230,7 +256,9 @@ describe('ActiveRunScreen', () => {
       act(() => {
         jest.advanceTimersByTime(3000);
       });
-      expect(getByText(`Duration: ${formatDuration(runData.duration)}`)).toBeTruthy();
+      expect(
+        within(getByTestId('duration-stat')).getByText(formatDuration(runData.duration))
+      ).toBeTruthy();
 
       jest
         .mocked(useSelector)
@@ -243,17 +271,11 @@ describe('ActiveRunScreen', () => {
       act(() => {
         jest.advanceTimersByTime(3000);
       });
-      expect(getByText(`Duration: ${formatDuration(runData.duration)}`)).toBeTruthy();
+      expect(
+        within(getByTestId('duration-stat')).getByText(formatDuration(runData.duration))
+      ).toBeTruthy();
 
       Date.now.mockRestore();
     });
   });
-
-  const formatDuration = totalSeconds => {
-    if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 });

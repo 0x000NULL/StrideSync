@@ -64,6 +64,20 @@ For each run, you can view:
 - **Map**: Your route with elevation profile
 - **Shoe Usage**: Mileage on your shoes
 
+## Connecting to Apple Health
+
+For a more integrated experience on iOS, StrideSync can connect to Apple Health. This allows for more accurate data and centralizes your health and fitness information.
+
+**Benefits:**
+- **Accurate Calorie Tracking:** By using your biometric data from Apple Health (like weight and age), StrideSync can provide a more precise estimate of calories burned.
+- **Real-time Heart Rate:** See your heart rate live on the run screen, pulled directly from your Apple Watch or other Health-compatible monitors.
+- **Automatic Workout Syncing:** Your completed runs are automatically saved to Apple Health as workout sessions, contributing to your daily activity rings and overall health picture.
+
+**How to Connect:**
+1. The first time you start a run, the app will ask for permission to connect to Apple Health.
+2. You will be prompted to choose which data you want to share. For the best experience, it is recommended to grant all requested permissions.
+3. You can manage these permissions at any time in the Settings app on your iPhone, under `Health > Data Access & Devices > StrideSync`.
+
 ## Tips for Better Tracking
 
 - Ensure GPS is enabled for outdoor runs

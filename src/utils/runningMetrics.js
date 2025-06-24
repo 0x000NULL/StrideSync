@@ -18,7 +18,7 @@ export const calculateVO2Max = (distanceKm, timeSeconds) => {
   // VO2 = -4.6 + 0.182258 * (m/min) + 0.000104 * (m/min)²
   const metersPerMinute = (distanceKm * 1000) / (timeSeconds / 60);
   const vo2Max = -4.6 + 0.182258 * metersPerMinute + 0.000104 * Math.pow(metersPerMinute, 2);
-  
+
   return Math.max(vo2Max, 0);
 };
 
@@ -36,15 +36,16 @@ export const calculateVDOT = (distanceKm, timeSeconds) => {
   // Jack Daniels' VDOT formula
   const velocity = distanceKm / (timeSeconds / 3600); // km/h
   const velocityMs = velocity / 3.6; // m/s
-  
-  // Oxygen demand calculation
-  const oxygenDemand = velocityMs <= 4.3 
-    ? 1.0 + 0.2 * velocityMs + 0.9 * Math.pow(velocityMs, 2) / 4.3
-    : 1.0 + 0.2 * velocityMs + 0.9 * velocityMs - 0.9 * 4.3;
 
-  const percentVO2Max = oxygenDemand / timeSeconds * 3600;
+  // Oxygen demand calculation
+  const oxygenDemand =
+    velocityMs <= 4.3
+      ? 1.0 + 0.2 * velocityMs + (0.9 * Math.pow(velocityMs, 2)) / 4.3
+      : 1.0 + 0.2 * velocityMs + 0.9 * velocityMs - 0.9 * 4.3;
+
+  const percentVO2Max = (oxygenDemand / timeSeconds) * 3600;
   const vdot = percentVO2Max * calculateVO2Max(distanceKm, timeSeconds);
-  
+
   return Math.max(vdot, 0);
 };
 
@@ -58,10 +59,10 @@ export const calculateVDOT = (distanceKm, timeSeconds) => {
  * @returns {number} TRIMP score
  */
 export const calculateTRIMP = (
-  durationMinutes, 
-  avgHeartRate, 
-  restingHR = 60, 
-  maxHR = 190, 
+  durationMinutes,
+  avgHeartRate,
+  restingHR = 60,
+  maxHR = 190,
   gender = 'male'
 ) => {
   if (!durationMinutes || !avgHeartRate || durationMinutes <= 0 || avgHeartRate <= 0) {
@@ -70,10 +71,58 @@ export const calculateTRIMP = (
 
   const hrReserve = (avgHeartRate - restingHR) / (maxHR - restingHR);
   const k = gender === 'female' ? 1.67 : 1.92;
-  
+
   const trimp = durationMinutes * hrReserve * 0.64 * Math.exp(k * hrReserve);
-  
+
   return Math.max(trimp, 0);
+};
+
+/**
+ * Calculate enhanced TRIMP using actual user biometrics
+ * @param {number} durationMinutes - Duration in minutes
+ * @param {number} avgHeartRate - Average heart rate
+ * @param {object} userBiometrics - User's biometric data { restingHR, maxHR, gender, age }
+ * @returns {number} Enhanced TRIMP score
+ */
+export const calculateEnhancedTRIMP = (durationMinutes, avgHeartRate, userBiometrics) => {
+  const { restingHR, maxHR, gender, age } = userBiometrics;
+  if (!durationMinutes || !avgHeartRate || durationMinutes <= 0 || avgHeartRate <= 0) {
+    return null;
+  }
+
+  // Use actual max HR or calculate from age
+  const actualMaxHR = maxHR || (age ? 220 - age : 190);
+  const actualRestingHR = restingHR || 60;
+  const userGender = gender || 'male';
+
+  return calculateTRIMP(durationMinutes, avgHeartRate, actualRestingHR, actualMaxHR, userGender);
+};
+
+/**
+ * Calculate more accurate calories burned using actual body weight and heart rate data
+ * @param {number} durationMinutes - Duration in minutes
+ * @param {number} avgHeartRate - Average heart rate during activity
+ * @param {object} userBiometrics - User's biometric data { weight, age, gender }
+ * @returns {number} Calories burned
+ */
+export const calculateAccurateCalories = (durationMinutes, avgHeartRate, userBiometrics) => {
+  const { weight, age, gender } = userBiometrics;
+  if (!durationMinutes || !avgHeartRate || !weight || !age || !gender) {
+    return null;
+  }
+
+  // Mifflin-St Jeor equation for BMR, adapted for calorie burn during exercise
+  let calories;
+  if (gender === 'female') {
+    calories =
+      (durationMinutes * (0.074 * age - 0.126 * weight + 0.4472 * avgHeartRate - 20.4022)) / 4.184;
+  } else {
+    calories =
+      (durationMinutes * (0.2017 * age - 0.09036 * weight + 0.6309 * avgHeartRate - 55.0969)) /
+      4.184;
+  }
+
+  return Math.max(calories, 0);
 };
 
 /**
@@ -90,7 +139,7 @@ export const calculateRunningEconomy = (vo2Max, paceSecondsPerKm) => {
   // Simplified running economy calculation
   const velocityKmh = 3600 / paceSecondsPerKm;
   const oxygenUptake = (velocityKmh / 3.6) * 3.5; // ml/kg/min approximation
-  
+
   return (oxygenUptake / velocityKmh) * 60; // ml/kg/km
 };
 
@@ -99,7 +148,7 @@ export const calculateRunningEconomy = (vo2Max, paceSecondsPerKm) => {
  * @param {number} vdot - VDOT value
  * @returns {Object} Equivalent race times for various distances
  */
-export const calculateEquivalentTimes = (vdot) => {
+export const calculateEquivalentTimes = vdot => {
   if (!vdot || vdot <= 0) {
     return null;
   }
@@ -114,7 +163,7 @@ export const calculateEquivalentTimes = (vdot) => {
     '5K': (5 / velocityAt5K) * 3600, // seconds
     '10K': (10 / velocityAt10K) * 3600,
     'Half Marathon': (21.1 / velocityAtHalfMarathon) * 3600,
-    'Marathon': (42.2 / velocityAtMarathon) * 3600,
+    Marathon: (42.2 / velocityAtMarathon) * 3600,
   };
 };
 
@@ -195,13 +244,14 @@ export const calculateRunningPower = (paceSecondsPerKm, bodyWeightKg = 70, eleva
   }
 
   const velocityMs = 1000 / paceSecondsPerKm; // m/s
-  
+  const bodyWeight = bodyWeightKg > 0 ? bodyWeightKg : 70;
+
   // Base metabolic power (simplified)
-  const basePower = 1.29 * bodyWeightKg * velocityMs;
-  
+  const basePower = 1.29 * bodyWeight * velocityMs;
+
   // Elevation adjustment (simplified)
-  const elevationPower = elevationGainM > 0 ? bodyWeightKg * 9.81 * 0.25 : 0;
-  
+  const elevationPower = elevationGainM > 0 ? bodyWeight * 9.81 * 0.25 : 0;
+
   return basePower + elevationPower;
 };
 
@@ -210,15 +260,46 @@ export const calculateRunningPower = (paceSecondsPerKm, bodyWeightKg = 70, eleva
  * @param {number} seconds - Time in seconds
  * @returns {string} Formatted time string
  */
-export const formatTime = (seconds) => {
+export const formatTime = seconds => {
   if (!seconds || seconds <= 0) return '--:--';
-  
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  
+
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
-}; 
+};
+
+/**
+ * Analyze time spent in heart rate zones
+ * @param {Array} heartRateData - Array of heart rate samples with timestamps
+ * @param {Object} hrZones - Heart rate zones object
+ * @returns {Object} Time spent in each zone in seconds
+ */
+export const analyzeHeartRateZones = (heartRateData, hrZones) => {
+  if (!heartRateData || !hrZones || heartRateData.length === 0) {
+    return null;
+  }
+
+  const zoneTime = { zone1: 0, zone2: 0, zone3: 0, zone4: 0, zone5: 0 };
+
+  for (let i = 0; i < heartRateData.length - 1; i++) {
+    const sample = heartRateData[i];
+    const nextSample = heartRateData[i + 1];
+    const duration = (new Date(nextSample.startDate) - new Date(sample.startDate)) / 1000;
+
+    if (duration < 0) continue;
+
+    const hr = sample.value;
+    if (hr >= hrZones.zone5.min) zoneTime.zone5 += duration;
+    else if (hr >= hrZones.zone4.min) zoneTime.zone4 += duration;
+    else if (hr >= hrZones.zone3.min) zoneTime.zone3 += duration;
+    else if (hr >= hrZones.zone2.min) zoneTime.zone2 += duration;
+    else if (hr >= hrZones.zone1.min) zoneTime.zone1 += duration;
+  }
+
+  return zoneTime;
+};

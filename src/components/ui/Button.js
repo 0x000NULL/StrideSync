@@ -26,8 +26,8 @@ const Button = ({
   ...rest
 }) => {
   // Validate required props
-  if (title === undefined || title === null) {
-    logError('Button is missing required prop: title');
+  if ((title === undefined || title === null) && !icon) {
+    logError('Button is missing required prop: title (or icon)');
   }
 
   if (onPress === undefined || onPress === null) {

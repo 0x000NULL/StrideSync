@@ -2,7 +2,7 @@
   "expo": {
     "name": "Stride Keeper",
     "slug": "Stride Keeper",
-    "version": "2.0.0",
+    "version": "2.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +20,9 @@
         "NSLocationWhenInUseUsageDescription": "Stride Keeper needs access to your location to track your runs accurately.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Stride Keeper needs access to your location to track your runs in the background.",
         "NSLocationAlwaysUsageDescription": "Stride Keeper needs access to your location to track your runs in the background.",
-        "UIBackgroundModes": ["location", "fetch"]
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSHealthShareUsageDescription": "This app needs access to your health data to provide accurate running metrics and track your fitness progress.",
+        "NSHealthUpdateUsageDescription": "This app will save your workout data to Apple Health to keep your fitness data synchronized across all your health apps."
       }
     },
 
@@ -45,7 +47,15 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-sqlite"],
+    "plugins": [
+      "expo-sqlite",
+      [
+        "react-native-health",
+        {
+          "isStillNeeded": true
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "6d7712bc-b43e-4733-a19e-937701ff98d3"
