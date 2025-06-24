@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ethanaldrich.stridekeeper",
+      "bundleIdentifier": "com.ethanaldrich.stridesync",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Stride Keeper needs access to your location to track your runs accurately.",
