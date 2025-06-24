@@ -14,9 +14,11 @@ import GoalInput from '../../components/run_tracking/GoalInput';
 import AudioCuesToggle from '../../components/run_tracking/AudioCuesToggle';
 import Button from '../../components/ui/Button';
 import { useTheme } from '../../theme/ThemeProvider';
+import { useUnits } from '../../hooks/useUnits';
 
 const PreRunScreen = () => {
   const { colors } = useTheme();
+  const { toKilometers } = useUnits();
   const navigation = useNavigation();
   const beginRunTracking = useStore(state => state.beginRunTracking);
   const dispatch = useDispatch?.();
@@ -75,11 +77,18 @@ const PreRunScreen = () => {
       return;
     }
 
+    // Convert goal distance from user's preferred unit to kilometers for internal storage
+    let processedGoal = { ...goal };
+    if (goal.type === 'distance' && goal.value) {
+      processedGoal.value = toKilometers(parseFloat(goal.value));
+    }
+
     const runData = {
       id: uuidv4(),
       shoeId: selectedShoeId,
       runType,
-      goal,
+      goal: processedGoal,
+      originalGoal: goal,
       audioCuesEnabled,
       startTime: Date.now(),
       path: [],

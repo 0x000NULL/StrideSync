@@ -37,6 +37,85 @@ const ShoeListScreen = ({ navigation }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
 
   // Load shoes on focus
+  // Define styles first
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    content: {
+      flex: 1,
+      padding: theme.spacing.md,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.md,
+    },
+    title: {
+      ...theme.typography.h2,
+      color: theme.colors.text.primary,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: theme.spacing.sm,
+    },
+    filterButton: {
+      padding: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+      backgroundColor: theme.colors.surfaceVariant,
+    },
+    addButton: {
+      backgroundColor: theme.colors.primary,
+      padding: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.xs,
+    },
+    buttonText: {
+      ...theme.typography.button,
+      color: theme.colors.text.light,
+    },
+    statsContainer: {
+      marginBottom: theme.spacing.md,
+    },
+    filterChips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacing.xs,
+      marginBottom: theme.spacing.md,
+    },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.surfaceVariant,
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: 16,
+    },
+    filterChipText: {
+      ...theme.typography.caption,
+      color: theme.colors.text.secondary,
+      marginRight: theme.spacing.xs,
+    },
+    filterChipActive: {
+      backgroundColor: theme.colors.primaryContainer,
+    },
+    filterChipTextActive: {
+      color: theme.colors.primary,
+    },
+    headerRightButton: {
+      // Added for header button
+      marginRight: theme.spacing.md,
+    },
+    flexGrow1: {
+      // Added for FlatList contentContainerStyle
+      flexGrow: 1,
+    },
+  });
+
   // Set up header right button
   const headerRightCallback = React.useCallback(
     () => (
@@ -221,84 +300,6 @@ const ShoeListScreen = ({ navigation }) => {
       />
     );
   };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      flex: 1,
-      padding: theme.spacing.md,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing.md,
-    },
-    title: {
-      ...theme.typography.h2,
-      color: theme.colors.text.primary,
-    },
-    actions: {
-      flexDirection: 'row',
-      gap: theme.spacing.sm,
-    },
-    filterButton: {
-      padding: theme.spacing.sm,
-      borderRadius: theme.borderRadius.md,
-      backgroundColor: theme.colors.surfaceVariant,
-    },
-    addButton: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.spacing.sm,
-      borderRadius: theme.borderRadius.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.spacing.xs,
-    },
-    buttonText: {
-      ...theme.typography.button,
-      color: theme.colors.text.light,
-    },
-    statsContainer: {
-      marginBottom: theme.spacing.md,
-    },
-    filterChips: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: theme.spacing.xs,
-      marginBottom: theme.spacing.md,
-    },
-    filterChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.surfaceVariant,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: theme.spacing.xs,
-      borderRadius: 16,
-    },
-    filterChipText: {
-      ...theme.typography.caption,
-      color: theme.colors.text.secondary,
-      marginRight: theme.spacing.xs,
-    },
-    filterChipActive: {
-      backgroundColor: theme.colors.primaryContainer,
-    },
-    filterChipTextActive: {
-      color: theme.colors.primary,
-    },
-    headerRightButton: {
-      // Added for header button
-      marginRight: theme.spacing.md,
-    },
-    flexGrow1: {
-      // Added for FlatList contentContainerStyle
-      flexGrow: 1,
-    },
-  });
 
   const renderFilterModal = () => (
     <FilterModal

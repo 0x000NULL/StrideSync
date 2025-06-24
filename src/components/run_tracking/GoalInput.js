@@ -5,9 +5,11 @@ import Input from '../ui/Input';
 import Button from '../ui/Button'; // Assuming a segmented control or button group for type
 import PropTypes from 'prop-types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { useUnits } from '../../hooks/useUnits';
 
 const GoalInput = ({ goal, onGoalChange }) => {
   const theme = useTheme();
+  const { distanceUnit } = useUnits();
   const goalTypes = ['open', 'distance', 'time'];
 
   const styles = StyleSheet.create({
@@ -52,14 +54,14 @@ const GoalInput = ({ goal, onGoalChange }) => {
       <Input
         label={
           goal.type === 'distance'
-            ? 'Distance (km)' // Consider using distanceUnit from useUnits
+            ? `Distance (${distanceUnit})`
             : goal.type === 'time'
               ? 'Time (minutes)'
               : 'Goal Value'
         }
         placeholder={
           goal.type === 'distance'
-            ? `Distance (${theme.distanceUnit || 'km'})` // Using theme or default unit
+            ? `Distance (${distanceUnit})`
             : goal.type === 'time'
               ? 'Time (minutes)'
               : 'Type (e.g., distance, time)'
